@@ -22,7 +22,7 @@ export default function ReviewsCarousel() {
   const visible = testimonials.slice(start, start + ITEMS_PER_VIEW);
 
   return (
-    <section id="musteri-yorumlari" className="py-16 border-t border-[#edeef0]" style={{ background: "linear-gradient(135deg, #f3f4f6 0%, #ffffff 100%)" }}>
+    <section id="musteri-yorumlari" className="py-25 border-t border-[#edeef0]" style={{ background: "linear-gradient(135deg, #f3f4f6 0%, #ffffff 100%)" }}>
       <div className="max-w-[1280px] mx-auto px-8">
         {/* Başlık */}
         <div className="flex justify-between items-center mb-10">

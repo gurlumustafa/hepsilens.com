@@ -1,13 +1,17 @@
 "use client";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 import { lenses, reviews, brands, accessories, Lens, Accessory } from "@/lib/data";
 import PrescriptionGuideModal from "@/components/PrescriptionGuideModal";
+import PrescriptionMapModal from "@/components/PrescriptionMapModal";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
+import FavoriteButton from "@/components/FavoriteButton";
 
 const sphOptions = ["-1.25", "-1.50", "-1.75", "-2.00", "-2.50", "-3.00", "-3.50", "-4.00"];
 
-type TabId = "details" | "about" | "specs" | "reviews" | "installments";
+type TabId = "details" | "about" | "specs" | "reviews" | "installments" | "faq";
 type EyeMode = "same" | "different";
 
 function SphGrid({
@@ -50,28 +54,33 @@ function SphGrid({
 
 export default function ProductDetail() {
   const { id } = useParams();
+  const router = useRouter();
+  const { user } = useAuth();
+  const { addItem } = useCart();
   const lens = lenses.find((l) => l.id === Number(id)) || accessories.find((a) => a.id === Number(id));
   const isAccessory = lens && !("dia" in lens);
   const brand = lens ? brands.find((b) => "brandId" in lens ? b.id === lens.brandId : b.name === lens.brand) : null;
   const lensReviews = lens ? reviews.filter((r) => r.lensId === lens.id) : [];
 
   const [eyeMode, setEyeMode] = useState<EyeMode>("same");
-  const [sphSame, setSphSame]   = useState(0);
-  const [sphOD, setSphOD]       = useState(0);
-  const [sphOS, setSphOS]       = useState(0);
-  const [cylSame, setCylSame]   = useState(0);
-  const [cylOD, setCylOD]       = useState(0);
-  const [cylOS, setCylOS]       = useState(0);
+  const [sphSame, setSphSame] = useState(0);
+  const [sphOD, setSphOD] = useState(0);
+  const [sphOS, setSphOS] = useState(0);
+  const [cylSame, setCylSame] = useState(0);
+  const [cylOD, setCylOD] = useState(0);
+  const [cylOS, setCylOS] = useState(0);
   const [axisSame, setAxisSame] = useState(0);
-  const [axisOD, setAxisOD]     = useState(0);
-  const [axisOS, setAxisOS]     = useState(0);
-  const [selectedBc]  = useState(`${"bc"  in (lens || {}) ? (lens as Lens).bc  : 8.5} mm`);
+  const [axisOD, setAxisOD] = useState(0);
+  const [axisOS, setAxisOS] = useState(0);
+  const [selectedBc] = useState(`${"bc" in (lens || {}) ? (lens as Lens).bc : 8.5} mm`);
   const [selectedDia] = useState(`${"dia" in (lens || {}) ? (lens as Lens).dia : 14.2} mm`);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<TabId>("details");
   const [prescriptionFile, setPrescriptionFile] = useState<string | null>(null);
   const [added, setAdded] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  const [showMapModal, setShowMapModal] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   if (!lens) {
     return (
@@ -95,6 +104,7 @@ export default function ProductDetail() {
 
   const handleAddToCart = () => {
     if (needsPrescription && !prescriptionFile) return;
+    addItem({ id: lens.id, name: lens.name, brand: lens.brand, price: lens.price, imageUrl: lens.imageUrl });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
@@ -106,11 +116,12 @@ export default function ProductDetail() {
   const bannerBg = !isAccessory ? (brandBgMap[(lens as Lens).brandId] ?? "#003d9b") : "#003d9b";
 
   const tabs: { id: TabId; label: string }[] = [
-    { id: "details",      label: "Ürün Detayları" },
-    { id: "about",        label: "Ürün Hakkında" },
-    { id: "specs",        label: "Teknik Özellikler" },
-    { id: "reviews",      label: `Değerlendirmeler (${lensReviews.length})` },
+    { id: "details", label: "Ürün Detayları" },
+    { id: "about", label: "Ürün Hakkında" },
+    { id: "specs", label: "Teknik Özellikler" },
+    { id: "reviews", label: `Değerlendirmeler (${lensReviews.length})` },
     { id: "installments", label: "Taksit Seçenekleri" },
+    { id: "faq", label: "Sıkça Sorulan Sorular" },
   ];
 
   return (
@@ -121,85 +132,242 @@ export default function ProductDetail() {
 
         {/* Left: image + prescription */}
         <div className="lg:col-span-7 flex flex-col gap-6 h-full">
-          <div className="bg-white rounded-[0.5rem] p-8 border border-[#c3c6d6] shadow-sm flex items-center justify-center min-h-[300px]">
+          <div className="bg-white rounded-[0.5rem] p-10 border border-[#c3c6d6] shadow-sm flex items-center justify-center" style={{ minHeight: "480px" }}>
             {lens.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={lens.imageUrl} alt={lens.name} className="max-w-full h-auto object-contain max-h-96" />
+              <img src={lens.imageUrl} alt={lens.name} className="max-w-full h-auto object-contain" style={{ maxHeight: "420px" }} />
             ) : (
               <div className="text-[120px] opacity-30">👁️</div>
             )}
           </div>
 
+          {/* Kısa ürün özeti — reçete gerektirmeyen lensler */}
+          {!needsPrescription && !isAccessory && (
+            <div className="rounded-xl border border-[#edeef3] bg-white p-6 flex flex-col gap-4">
+              <p className="text-[#434654] leading-relaxed line-clamp-3" style={{ fontSize: "14px", lineHeight: "22px" }}>
+                {lens.description}
+              </p>
+              <ul className="flex flex-col gap-2.5">
+                {[
+                  (lens as Lens).color === "colored"
+                    ? "Reçete gerektirmez — numarasız kullanıma uygundur"
+                    : `%${(lens as Lens).waterContent} su içeriği ile gün boyu konfor`,
+                  (lens as Lens).usagePeriod === "daily"
+                    ? `${(lens as Lens).packSizes[0]} adetlik paket — her gün temiz ve hijyenik`
+                    : `Aylık kullanım — ${(lens as Lens).packSizes[0]} adetlik ekonomik paket`,
+                  (lens as Lens).uvProtection
+                    ? "UV Koruma Sınıf 2 — güneş ışınlarına karşı ekstra koruma"
+                    : `${(lens as Lens).oxygenPermeability} Dk/t oksijen geçirgenliği — gözler nefes alır`,
+                  (lens as Lens).color === "colored" && (lens as Lens).colorName
+                    ? `${(lens as Lens).colorName} renk seçeneği — doğal ve etkileyici görünüm`
+                    : `${(lens as Lens).dia} mm çap, ${(lens as Lens).bc} mm taban eğrilik`,
+                ].map((point) => (
+                  <li key={point} className="flex items-start gap-2.5">
+                    <span
+                      className="material-symbols-outlined shrink-0 mt-0.5"
+                      style={{ fontSize: "16px", color: "#16a34a", fontVariationSettings: "'FILL' 1" }}
+                    >
+                      check_circle
+                    </span>
+                    <span className="text-[#434654]" style={{ fontSize: "13px", lineHeight: "20px" }}>
+                      {point}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* Prescription upload — clear lenses only */}
           {needsPrescription && (
-            <div className="flex-1 flex flex-col border border-[#8c4a00]/30 rounded-[0.5rem] overflow-hidden">
-              {/* Header */}
-              <div className="bg-[#ffdcc3] px-5 py-4 flex items-start gap-3">
-                <span
-                  className="material-symbols-outlined shrink-0 mt-0.5"
-                  style={{ fontSize: "20px", color: "#6a3600", fontVariationSettings: "'FILL' 1" }}
+            <div
+              className="flex-1 flex flex-col rounded-xl overflow-hidden"
+              style={{ border: "1.5px solid #c3c6d6", background: "#f8f9fb" }}
+            >
+              {/* ── Başlık ── */}
+              <div
+                className="flex items-center gap-3 px-5 py-4"
+                style={{
+                  background: prescriptionFile ? "#eaf2e8" : "#f0f4ff",
+                  borderBottom: prescriptionFile ? "1.5px solid #b8ddb5" : "1.5px solid #c8d6f7",
+                }}
+              >
+                {/* İkon yuvası */}
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                  style={{
+                    background: prescriptionFile ? "#c6e8c2" : "#dae2ff",
+                  }}
                 >
-                  {prescriptionFile ? "check_circle" : "error"}
-                </span>
-                <div>
-                  <p style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "16px", lineHeight: "24px", fontWeight: 700, color: "#2f1500" }}>
-                    {prescriptionFile ? "Reçete Yüklendi" : "Reçete Gereklidir"}
+                  <span
+                    className="material-symbols-outlined"
+                    style={{
+                      fontSize: "20px",
+                      color: prescriptionFile ? "#2e7d32" : "#003d9b",
+                      fontVariationSettings: "'FILL' 1",
+                    }}
+                  >
+                    {prescriptionFile ? "verified" : "receipt_long"}
+                  </span>
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <p
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: 700,
+                      color: "#191c1e",
+                      fontFamily: "'Plus Jakarta Sans'",
+                    }}
+                  >
+                    {prescriptionFile ? "Reçete Yüklendi" : "Reçete Yükleme"}
                   </p>
-                  <p style={{ fontSize: "13px", lineHeight: "20px", color: "#4a2000", opacity: 0.85 }}>
+                  <p style={{ fontSize: "12px", color: "#737685", lineHeight: "16px", marginTop: "1px" }}>
                     {prescriptionFile
-                      ? "Siparişinizi tamamlamak için reçeteniz hazır."
-                      : "Bu lens tıbbi sınıf ürün olduğundan geçerli bir optometri reçetesi gerekmektedir."}
+                      ? "Siparişinizi tamamlamaya hazırsınız."
+                      : "Bu ürün için geçerli bir reçete gereklidir."}
                   </p>
                 </div>
+
+                {prescriptionFile && (
+                  <span
+                    className="px-2.5 py-1 rounded-full shrink-0"
+                    style={{
+                      fontSize: "9px",
+                      fontWeight: 800,
+                      background: "#003d9b",
+                      color: "#fff",
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    HAZIR
+                  </span>
+                )}
               </div>
 
-              {/* Body */}
-              <div className="flex-1 flex flex-col bg-[#fff9f5] px-5 py-4">
+              {/* ── İçerik ── */}
+              <div className="flex-1 flex flex-col p-5 bg-white">
                 {prescriptionFile ? (
-                  /* Uploaded state */
-                  <div className="flex items-center gap-3 bg-white border border-[#8c4a00]/20 rounded-lg px-4 py-3">
-                    <span className="material-symbols-outlined text-[#6a3600] shrink-0" style={{ fontSize: "20px", fontVariationSettings: "'FILL' 1" }}>
-                      description
-                    </span>
-                    <span className="flex-1 truncate text-[#191c1e] font-medium" style={{ fontSize: "13px" }}>
-                      {prescriptionFile}
-                    </span>
-                    <label
-                      className="cursor-pointer text-[#003d9b] hover:underline shrink-0 font-semibold"
-                      style={{ fontSize: "12px", fontFamily: "'Inter'" }}
+                  /* ── Yüklendi Durumu ── */
+                  <div className="flex-1 flex flex-col gap-3">
+                    {/* Dosya kartı */}
+                    <div
+                      className="flex items-center gap-3 rounded-xl px-4 py-3"
+                      style={{ background: "#f8f9fb", border: "1.5px solid #c3c6d6" }}
                     >
-                      Değiştir
-                      <input
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        className="hidden"
-                        onChange={(e) => setPrescriptionFile(e.target.files?.[0]?.name ?? null)}
-                      />
-                    </label>
-                    <button
-                      onClick={() => setPrescriptionFile(null)}
-                      className="text-[#737685] hover:text-[#c0392b] transition-colors shrink-0 ml-1"
-                      title="Reçeteyi kaldır"
-                    >
-                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>close</span>
-                    </button>
+                      <div
+                        className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+                        style={{ background: "#dae2ff" }}
+                      >
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "20px", color: "#003d9b", fontVariationSettings: "'FILL' 1" }}
+                        >
+                          description
+                        </span>
+                      </div>
+                      <span
+                        className="flex-1 truncate font-semibold"
+                        style={{ fontSize: "13px", color: "#191c1e" }}
+                      >
+                        {prescriptionFile}
+                      </span>
+                      <span
+                        className="material-symbols-outlined shrink-0"
+                        style={{ fontSize: "18px", color: "#003d9b", fontVariationSettings: "'FILL' 1" }}
+                      >
+                        check_circle
+                      </span>
+                    </div>
+
+                    {/* Eylemler */}
+                    <div className="flex gap-2 mt-auto">
+                      <label
+                        className="flex-1 cursor-pointer flex items-center justify-center gap-1.5 py-2.5 rounded-lg font-semibold transition-all hover:bg-[#dae2ff] hover:border-[#003d9b]"
+                        style={{
+                          fontSize: "12px",
+                          color: "#003d9b",
+                          border: "1.5px solid #c3c6d6",
+                          background: "#f8f9fb",
+                          fontFamily: "'Inter'",
+                        }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>swap_horiz</span>
+                        Değiştir
+                        <input
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          className="hidden"
+                          onChange={(e) => setPrescriptionFile(e.target.files?.[0]?.name ?? null)}
+                        />
+                      </label>
+                      <button
+                        onClick={() => setPrescriptionFile(null)}
+                        className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg font-semibold transition-all hover:bg-red-50 hover:border-red-200 hover:text-red-600"
+                        style={{
+                          fontSize: "12px",
+                          color: "#737685",
+                          border: "1.5px solid #c3c6d6",
+                          background: "#fff",
+                          fontFamily: "'Inter'",
+                        }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>delete</span>
+                        Kaldır
+                      </button>
+                    </div>
                   </div>
                 ) : (
-                  /* Empty state */
-                  <label className="cursor-pointer group flex-1 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-[#8c4a00]/30 rounded-lg py-6 hover:border-[#6a3600] hover:bg-[#fff4ec] transition-all">
-                    <span className="material-symbols-outlined text-[#8c4a00] group-hover:scale-110 transition-transform" style={{ fontSize: "32px" }}>
-                      upload_file
-                    </span>
-                    <div className="text-center">
-                      <p className="font-bold text-[#2f1500]" style={{ fontSize: "13px" }}>Reçete yüklemek için tıklayın</p>
-                      <p className="text-[#6a3600]/70 mt-0.5" style={{ fontSize: "11px" }}>PDF, JPG veya PNG — maks. 5 MB</p>
+                  /* ── Boş Durum ── */
+                  <label
+                    className="cursor-pointer group flex-1 flex flex-col items-center justify-center gap-4 rounded-xl transition-all duration-200 py-6"
+                    style={{ border: "2px dashed #c3c6d6", background: "#f8f9fb" }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.borderColor = "#003d9b";
+                      e.currentTarget.style.background = "#f0f4ff";
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.borderColor = "#c3c6d6";
+                      e.currentTarget.style.background = "#f8f9fb";
+                    }}
+                  >
+                    {/* İkon */}
+                    <div
+                      className="w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-200 group-hover:scale-110 group-hover:shadow-lg"
+                      style={{ background: "#dae2ff" }}
+                    >
+                      <span
+                        className="material-symbols-outlined text-[#003d9b] transition-transform duration-200 group-hover:scale-110"
+                        style={{ fontSize: "28px" }}
+                      >
+                        cloud_upload
+                      </span>
                     </div>
+
+                    {/* Metin */}
+                    <div className="text-center px-4">
+                      <p style={{ fontSize: "14px", fontWeight: 700, color: "#191c1e", fontFamily: "'Plus Jakarta Sans'" }}>
+                        Reçetenizi yükleyin
+                      </p>
+                      <p style={{ fontSize: "12px", color: "#737685", marginTop: "3px" }}>
+                        PDF, JPG veya PNG &middot; maks. 5 MB
+                      </p>
+                    </div>
+
+                    {/* CTA Butonu */}
                     <span
-                      className="mt-1 bg-[#6a3600] text-white px-5 py-2 rounded-full font-bold hover:bg-[#8c4a00] transition-colors"
-                      style={{ fontSize: "12px", letterSpacing: "0.04em" }}
+                      className="px-6 py-2.5 rounded-full font-bold transition-all duration-200 group-hover:shadow-md group-hover:bg-[#0052cc]"
+                      style={{
+                        fontSize: "12px",
+                        background: "#003d9b",
+                        color: "#fff",
+                        letterSpacing: "0.04em",
+                      }}
                     >
                       Dosya Seç
                     </span>
+
                     <input
                       type="file"
                       accept=".pdf,.jpg,.jpeg,.png"
@@ -225,15 +393,18 @@ export default function ProductDetail() {
                 </span>
               )}
               <div className="flex text-[#6a3600]">
-                {[1,2,3,4,5].map((s) => (
+                {[1, 2, 3, 4, 5].map((s) => (
                   <span key={s} style={{ fontSize: s <= Math.round(lens.rating) ? "16px" : "14px", fontVariationSettings: s <= Math.round(lens.rating) ? "'FILL' 1" : "'FILL' 0" }}>★</span>
                 ))}
               </div>
               <span className="text-[#434654]" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>({lens.rating})</span>
             </div>
-            <h1 className="text-[#003d9b]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "32px", lineHeight: "40px", fontWeight: 600 }}>
-              {lens.name}
-            </h1>
+            <div className="flex items-start justify-between gap-3">
+              <h1 className="text-[#003d9b]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "32px", lineHeight: "40px", fontWeight: 600 }}>
+                {lens.name}
+              </h1>
+              <FavoriteButton productId={lens.id} size="lg" className="shrink-0 mt-1" />
+            </div>
             <div className="flex items-baseline gap-2">
               <span className="text-[#191c1e]" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "24px", lineHeight: "32px", fontWeight: 600 }}>
                 {lens.price.toLocaleString("tr-TR")} ₺
@@ -244,6 +415,16 @@ export default function ProductDetail() {
                 </span>
               )}
             </div>
+
+            {/* Taksit bilgisi */}
+            <p
+              className="flex items-center gap-1.5 self-start hover:opacity-80 transition-opacity"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "14px", color: "#00687b" }}>credit_card</span>
+              <span style={{ fontSize: "12px", color: "#00687b", fontWeight: 600, fontFamily: "'Inter'" }}>
+                12 aya kadar taksit imkanlarıyla
+              </span>
+            </p>
           </div>
 
           {/* Parameters */}
@@ -273,6 +454,14 @@ export default function ProductDetail() {
                       </button>
                     ))}
                   </div>
+                  <button
+                    onClick={() => setShowMapModal(true)}
+                    className="flex items-center gap-1 mt-1 text-[#003d9b] hover:underline self-start transition-opacity hover:opacity-80"
+                  >
+                    <span style={{ fontSize: "12.5px", letterSpacing: "0.02em", fontWeight: 600, fontFamily: "'Inter'" }}>
+                      Reçetemdeki numaraları nasıl seçebilirim?
+                    </span>
+                  </button>
                 </div>
 
                 {/* SPH selection */}
@@ -457,8 +646,8 @@ export default function ProductDetail() {
             {added
               ? "Sepete Eklendi!"
               : (needsPrescription && !prescriptionFile)
-              ? "Önce Reçete Yükleyin"
-              : "Sepete Ekle"}
+                ? "Önce Reçete Yükleyin"
+                : "Sepete Ekle"}
           </button>
 
           {/* Shipping note */}
@@ -575,18 +764,18 @@ export default function ProductDetail() {
           {activeTab === "specs" && !isAccessory && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16">
               {[
-                { label: "Materyal / Malzeme",        value: (lens as Lens).material },
-                { label: "Su İçeriği",                value: `%${(lens as Lens).waterContent}` },
-                { label: "Oksijen Geçirgenliği",      value: `${(lens as Lens).oxygenPermeability} Dk/t` },
-                { label: "Çap (DIA)",                 value: `${(lens as Lens).dia} mm` },
-                { label: "Taban Eğrilik (BC)",        value: `${(lens as Lens).bc} mm` },
-                { label: "Sferik Güç Aralığı",        value: (lens as Lens).sphRange },
-                { label: "Kullanım Süresi",           value: usagePeriodLabel },
-                { label: "UV Koruma",                 value: (lens as Lens).uvProtection ? "Var — Sınıf 2" : "Yok" },
-                { label: "Renk",                      value: (lens as Lens).color === "colored" ? `Renkli${(lens as Lens).colorName ? ` — ${(lens as Lens).colorName}` : ""}` : "Şeffaf" },
-                { label: "Paket Boyutları",           value: (lens as Lens).packSizes.map((s) => `${s} adet`).join(" / ") },
-                { label: "Reçete Gereksinimi",        value: (lens as Lens).color === "clear" ? "Gerekli" : "Gerekmiyor" },
-                { label: "Stok Durumu",               value: (lens as Lens).stock > 0 ? `Mevcut (${(lens as Lens).stock} adet)` : "Tükendi" },
+                { label: "Materyal / Malzeme", value: (lens as Lens).material },
+                { label: "Su İçeriği", value: `%${(lens as Lens).waterContent}` },
+                { label: "Oksijen Geçirgenliği", value: `${(lens as Lens).oxygenPermeability} Dk/t` },
+                { label: "Çap (DIA)", value: `${(lens as Lens).dia} mm` },
+                { label: "Taban Eğrilik (BC)", value: `${(lens as Lens).bc} mm` },
+                { label: "Sferik Güç Aralığı", value: (lens as Lens).sphRange },
+                { label: "Kullanım Süresi", value: usagePeriodLabel },
+                { label: "UV Koruma", value: (lens as Lens).uvProtection ? "Var — Sınıf 2" : "Yok" },
+                { label: "Renk", value: (lens as Lens).color === "colored" ? `Renkli${(lens as Lens).colorName ? ` — ${(lens as Lens).colorName}` : ""}` : "Şeffaf" },
+                { label: "Paket Boyutları", value: (lens as Lens).packSizes.map((s) => `${s} adet`).join(" / ") },
+                { label: "Reçete Gereksinimi", value: (lens as Lens).color === "clear" ? "Gerekli" : "Gerekmiyor" },
+                { label: "Stok Durumu", value: (lens as Lens).stock > 0 ? `Mevcut (${(lens as Lens).stock} adet)` : "Tükendi" },
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-center justify-between py-3 border-b border-[#edeef3] last:border-0">
                   <span className="text-[#737685]" style={{ fontSize: "13px", fontWeight: 600, fontFamily: "'Inter'" }}>{label}</span>
@@ -625,7 +814,7 @@ export default function ProductDetail() {
                         <span className="text-[#737685] ml-auto" style={{ fontSize: "12px" }}>{rev.date}</span>
                       </div>
                       <div className="flex mb-3">
-                        {[1,2,3,4,5].map((s) => (
+                        {[1, 2, 3, 4, 5].map((s) => (
                           <span key={s} className={s <= rev.rating ? "text-[#6a3600]" : "text-[#c3c6d6]"}>★</span>
                         ))}
                       </div>
@@ -635,12 +824,35 @@ export default function ProductDetail() {
                   ))}
                 </div>
               )}
-              <div className="mt-6 bg-[#f3f4f6] rounded-[0.5rem] p-6 text-center border border-[#c3c6d6]">
-                <p className="font-bold text-[#191c1e] mb-1">Bu ürünü kullandınız mı?</p>
-                <p className="text-[#434654] mb-4" style={{ fontSize: "14px" }}>Deneyiminizi paylaşın ve diğerlerine yardımcı olun.</p>
-                <button className="bg-[#003d9b] text-white px-6 py-2.5 rounded-[0.75rem] font-semibold" style={{ fontSize: "12px", letterSpacing: "0.05em" }}>
-                  Yorum Yaz
-                </button>
+              <div className="mt-6 rounded-xl border border-[#edeef3] p-6 text-center bg-white">
+                {user ? (
+                  <>
+                    <p className="font-bold text-[#191c1e] mb-1" style={{ fontFamily: "'Plus Jakarta Sans'" }}>Bu ürünü kullandınız mı?</p>
+                    <p className="text-[#737685] mb-4" style={{ fontSize: "14px" }}>Deneyiminizi paylaşın ve diğerlerine yardımcı olun.</p>
+                    <button
+                      className="bg-[#003d9b] text-white px-6 py-2.5 rounded-xl font-semibold hover:opacity-90 transition-opacity"
+                      style={{ fontSize: "13px", letterSpacing: "0.04em" }}
+                    >
+                      Yorum Yaz
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-12 h-12 rounded-full bg-[#f0f4ff] flex items-center justify-center mx-auto mb-3">
+                      <span className="material-symbols-outlined text-[#003d9b]" style={{ fontSize: "24px" }}>lock</span>
+                    </div>
+                    <p className="font-bold text-[#191c1e] mb-1" style={{ fontFamily: "'Plus Jakarta Sans'" }}>Yorum yapmak için giriş yapın</p>
+                    <p className="text-[#737685] mb-4" style={{ fontSize: "14px" }}>Deneyiminizi paylaşmak için hesabınıza giriş yapmanız gerekmektedir.</p>
+                    <button
+                      onClick={() => router.push(`/hesap/giris`)}
+                      className="bg-[#003d9b] text-white px-6 py-2.5 rounded-xl font-semibold hover:opacity-90 transition-opacity flex items-center gap-2 mx-auto"
+                      style={{ fontSize: "13px", letterSpacing: "0.04em" }}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>login</span>
+                      Giriş Yap
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -692,6 +904,87 @@ export default function ProductDetail() {
               ))}
             </div>
           )}
+          {/* Sıkça Sorulan Sorular */}
+          {activeTab === "faq" && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
+              {[
+                {
+                  q: "BC Nedir?",
+                  a: "Base Curve teriminin kısaltmasıdır. Temel eğri değerini gösterir. Bir diğer ifadeyle korneanın bombelik değeridir. Doktor tarafından yapılan ölçümle belli olur ve bu değerlerin lens reçetesinde yazması gerekmektedir.",
+                },
+                {
+                  q: "Dia Nedir?",
+                  a: "Kontakt lensin mm olarak çapını ifade eder. Lensin iki kenarının birbirine olan uzaklığını anlatmaktadır.",
+                },
+                {
+                  q: "Gözlük Reçetesi ile Lens Alabilir Miyim?",
+                  a: "Gözlük reçetesi ile lens reçetesinde olması gereken değerler farklıdır. Bu nedenle göz doktorunuzun lens kullanımına özel bir reçete oluşturması gerekmektedir.",
+                },
+                {
+                  q: "Ücretsiz Kargonun Koşulu Var Mı?",
+                  a: "Alt limit ve hiçbir koşul olmadan tüm siparişlerinizi ücretsiz kargo avantajı ile oluşturabilirsiniz.",
+                },
+                {
+                  q: "Hangi Ödeme Yöntemleri Var?",
+                  a: "Kapıda ödeme, havale/EFT veya kredi kartı ödeme seçeneklerinden birini kullanarak sipariş oluşturabilirsiniz.",
+                },
+                {
+                  q: "Lens Nasıl Takılır?",
+                  a: "Kontakt lens nasıl takılır? Öğrenmek için blog sayfamızı ziyaret ederek size özel oluşturduğumuz yazımızı okuyabilir ve uygulamalı olarak anlattığımız videomuzu izleyebilirsiniz.",
+                },
+                {
+                  q: "Kontakt Lens Reçetemi Nasıl Okuyabilirim?",
+                  a: "Kontakt lens reçetelerinin hepsi aynı formatta olmasa bile kullanılan temel değerler ve terimler aynıdır. Dioptri (miyopi veya hipermetropi değeri), BC (temel eğri), Çap (Dia), Cyl (silindir veya toric astigmat değeri), Aks (Ax — astigmatın açısı). Bu değerlerden reçetenizde bulunanları lens sepete ekleme esnasında seçerek siparişinizi kolaylıkla verebilirsiniz.",
+                },
+                {
+                  q: "Gözlük Reçetesiyle Kontakt Lens Alınır Mı?",
+                  a: "Maalesef gözlük reçetesi ile kontakt lens almak mümkün olmamaktadır. Gözlük camı gözden 12-14 mm arasında bir mesafede konumlanır; kontakt lens ise göz yüzeyinde (kornea) bulunduğundan numaralar birbirinden farklı olabilir. Ayrıca BC (temel eğri) ve Dia (çap) gibi değerlerin ölçümü yapılarak kontakt lens reçetesine yazılır; gözlük reçetesinde bu değerler bulunmaz. Bundan dolayı kontakt lens kullanımı için göz hekiminize giderek lens muayenesi olmanız gereklidir.",
+                },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className="rounded-xl overflow-hidden border transition-colors"
+                  style={{ borderColor: openFaq === i ? "#003d9b" : "#edeef3" }}
+                >
+                  <button
+                    className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left transition-colors"
+                    style={{ background: openFaq === i ? "#f0f4ff" : "#ffffff" }}
+                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  >
+                    <span
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        fontFamily: "'Plus Jakarta Sans'",
+                        color: openFaq === i ? "#003d9b" : "#191c1e",
+                      }}
+                    >
+                      {item.q}
+                    </span>
+                    <span
+                      className="material-symbols-outlined shrink-0 transition-transform duration-200"
+                      style={{
+                        fontSize: "20px",
+                        color: openFaq === i ? "#003d9b" : "#737685",
+                        transform: openFaq === i ? "rotate(180deg)" : "rotate(0deg)",
+                      }}
+                    >
+                      expand_more
+                    </span>
+                  </button>
+
+                  {openFaq === i && (
+                    <div className="px-5 pb-5 border-t" style={{ borderColor: "#dae2ff" }}>
+                      <p className="text-[#434654] pt-4" style={{ fontSize: "14px", lineHeight: "22px" }}>
+                        {item.a}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
         </div>
       </div>
 
@@ -740,6 +1033,7 @@ export default function ProductDetail() {
         </div>
       </section>
       {showGuide && <PrescriptionGuideModal onClose={() => setShowGuide(false)} />}
+      {showMapModal && <PrescriptionMapModal onClose={() => setShowMapModal(false)} />}
     </div>
   );
 }

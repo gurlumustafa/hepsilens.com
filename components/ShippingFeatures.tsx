@@ -24,7 +24,7 @@ export default function ShippingFeatures() {
   ];
 
   return (
-    <section id="guven-seridi" className="max-w-[1280px] mx-auto px-10 pt-14 pb-12 mt-4 border-t border-[#e5e7eb]">
+    <section id="guven-seridi" className="max-w-[1280px] mx-auto px-10 pt-25 pb-12 mt-4 border-t border-[#e5e7eb]">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
         {features.map((f, i) => (
           <div

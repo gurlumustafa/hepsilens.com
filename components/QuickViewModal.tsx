@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Lens, Accessory } from "@/lib/data";
+import { useCart } from "@/contexts/CartContext";
 
 type Props = {
   product: Lens | Accessory;
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export default function QuickViewModal({ product, onClose }: Props) {
+  const { addItem } = useCart();
   const isLens = "color" in product;
   const needsPrescription = isLens && (product as Lens).requiresPrescription;
   const discount = product.originalPrice
@@ -172,6 +174,7 @@ export default function QuickViewModal({ product, onClose }: Props) {
               </div>
             ) : (
               <button
+                onClick={() => { addItem({ id: product.id, name: product.name, brand: product.brand, price: product.price, imageUrl: product.imageUrl }); onClose(); }}
                 className="flex-1 bg-[#6a3600] text-white font-bold py-3 rounded-xl hover:bg-[#8c4a00] active:scale-95 transition-all flex items-center justify-center gap-2"
                 style={{ fontSize: "13px", fontFamily: "'Inter'", letterSpacing: "0.04em" }}
               >

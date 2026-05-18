@@ -3,6 +3,9 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { lenses, accessories, Lens, Accessory } from "@/lib/data";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
+import LogoutModal from "@/components/LogoutModal";
 
 const navLinks = [
   { href: "/urunler", label: "Tüm Ürünler" },
@@ -13,7 +16,7 @@ const navLinks = [
 
 const blogDropdown = [
   { href: "/blog/lens-bakimi", label: "Lens Bakımı", icon: "water_drop" },
-  { href: "/blog/goz-sagligi", label: "Göz Sağlığı", icon: "favorite" },
+  { href: "/blog/goz-sagligi", label: "Göz Sağlığı", icon: "visibility" },
   { href: "/blog/urun-incelemeleri", label: "Ürün İncelemeleri", icon: "star" },
   { href: "/blog/ipuclari", label: "İpuçları & Rehber", icon: "lightbulb" },
 ];
@@ -35,14 +38,18 @@ function highlight(text: string, query: string) {
 
 export default function Navbar() {
   const router = useRouter();
+  const { user } = useAuth();
+  const { count: cartCount, openSidebar } = useCart();
   const [blogOpen, setBlogOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [cartCount] = useState(3);
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
 
-  const blogRef = useRef<HTMLDivElement>(null);
+  const blogRef   = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+  const accountRef = useRef<HTMLDivElement>(null);
+  const [accountOpen, setAccountOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // En yakın 3 sonuç
@@ -58,11 +65,17 @@ export default function Navbar() {
       .slice(0, 3);
   }, [query])();
 
+  // Boş arama için en popüler 3 ürün (reviewCount'a göre)
+  const popularProducts = [...allProducts]
+    .sort((a, b) => b.reviewCount - a.reviewCount)
+    .slice(0, 3);
+
   // Dışarı tıklanınca kapat
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (blogRef.current && !blogRef.current.contains(e.target as Node)) setBlogOpen(false);
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) setSearchOpen(false);
+      if (accountRef.current && !accountRef.current.contains(e.target as Node)) setAccountOpen(false);
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
@@ -91,6 +104,7 @@ export default function Navbar() {
   }
 
   return (
+    <>
     <header className="fixed top-0 w-full z-50 bg-white border-b border-[#c3c6d6] shadow-sm" style={{ height: "72px" }}>
       <div className="flex justify-between items-center px-6 h-full max-w-[1280px] mx-auto gap-4">
 
@@ -199,12 +213,42 @@ export default function Navbar() {
             </form>
 
             {/* Sonuçlar */}
-            {searchOpen && query.trim().length > 0 && (
+            {searchOpen && (
               <div
                 className="absolute top-full mt-2 right-0 bg-white border border-[#c3c6d6] rounded-xl shadow-2xl overflow-hidden z-50 animate-fade-slide"
                 style={{ width: "340px" }}
               >
-                {results.length === 0 ? (
+                {query.trim().length === 0 ? (
+                  /* Boş arama → Popüler ürünler */
+                  <>
+                    <p className="px-4 pt-3 pb-1.5 text-[#737685] uppercase" style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em" }}>
+                      En Popüler
+                    </p>
+                    {popularProducts.map((product) => (
+                      <button
+                        key={product.id}
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#f5f6fc] transition-colors text-left group/item border-t border-[#f0f1f5] first:border-0"
+                        onClick={() => handleSelect(product.id)}
+                      >
+                        <div className="w-12 h-12 rounded-lg bg-[#f4f5f9] flex items-center justify-center shrink-0 overflow-hidden border border-[#edeef3]">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={product.imageUrl || "/placeholder-lens.jpg"} alt={product.name} className="w-10 h-10 object-contain mix-blend-multiply" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[#737685] uppercase truncate" style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.06em" }}>{product.brand}</p>
+                          <p className="text-[#191c1e] font-semibold truncate group-hover/item:text-[#003d9b] transition-colors" style={{ fontSize: "13px" }}>{product.name}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-[#003d9b] font-bold" style={{ fontSize: "13px", fontFamily: "'Plus Jakarta Sans'" }}>
+                            {product.price.toLocaleString("tr-TR")} ₺
+                          </p>
+                          <p className="text-[#737685]" style={{ fontSize: "10px" }}>{product.reviewCount} değerlendirme</p>
+                        </div>
+                      </button>
+                    ))}
+                  </>
+                ) : results.length === 0 ? (
+                  /* Sonuç yok */
                   <div className="flex items-center gap-3 px-4 py-5 text-[#737685]">
                     <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>search_off</span>
                     <p style={{ fontSize: "13px" }}>
@@ -212,6 +256,7 @@ export default function Navbar() {
                     </p>
                   </div>
                 ) : (
+                  /* Eşleşmeler */
                   <>
                     <p className="px-4 pt-3 pb-1.5 text-[#737685] uppercase" style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em" }}>
                       En İyi Eşleşmeler
@@ -226,25 +271,16 @@ export default function Navbar() {
                           className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#f5f6fc] transition-colors text-left group/item border-t border-[#f0f1f5] first:border-0"
                           onClick={() => handleSelect(product.id)}
                         >
-                          {/* Küçük ürün görseli */}
                           <div className="w-12 h-12 rounded-lg bg-[#f4f5f9] flex items-center justify-center shrink-0 overflow-hidden border border-[#edeef3]">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={product.imageUrl || "/placeholder-lens.jpg"}
-                              alt={product.name}
-                              className="w-10 h-10 object-contain mix-blend-multiply"
-                            />
+                            <img src={product.imageUrl || "/placeholder-lens.jpg"} alt={product.name} className="w-10 h-10 object-contain mix-blend-multiply" />
                           </div>
-                          {/* Bilgiler */}
                           <div className="flex-1 min-w-0">
-                            <p className="text-[#737685] uppercase truncate" style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.06em" }}>
-                              {product.brand}
-                            </p>
+                            <p className="text-[#737685] uppercase truncate" style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.06em" }}>{product.brand}</p>
                             <p className="text-[#191c1e] font-semibold truncate group-hover/item:text-[#003d9b] transition-colors" style={{ fontSize: "13px" }}>
                               {highlight(product.name, query)}
                             </p>
                           </div>
-                          {/* Fiyat */}
                           <div className="text-right shrink-0">
                             <p className="text-[#003d9b] font-bold" style={{ fontSize: "13px", fontFamily: "'Plus Jakarta Sans'" }}>
                               {product.price.toLocaleString("tr-TR")} ₺
@@ -256,39 +292,121 @@ export default function Navbar() {
                         </button>
                       );
                     })}
-
-                    {/* Tümünü gör */}
-                    <button
-                      className="w-full flex items-center justify-center gap-1.5 py-3 text-[#003d9b] hover:bg-[#f0f4ff] transition-colors border-t border-[#edeef3] font-semibold"
-                      style={{ fontSize: "12px", letterSpacing: "0.04em" }}
-                      onClick={() => {
-                        setSearchOpen(false);
-                        router.push(`/urunler?q=${encodeURIComponent(query.trim())}`);
-                      }}
-                    >
-                      <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>search</span>
-                      &ldquo;{query}&rdquo; için tüm sonuçları gör
-                    </button>
                   </>
                 )}
               </div>
             )}
           </div>
 
-          {/* Hesap */}
-          <button className="p-4 rounded-[0.5rem] text-[#434654] hover:text-[#003d9b] hover:bg-[#f3f4f6] transition-all duration-200 hover:scale-110 group">
-            <span className="material-symbols-outlined group-hover:scale-110 transition-transform duration-200 block" style={{ fontSize: "22px" }}>
-              person
-            </span>
-          </button>
+          {/* Hesap Dropdown */}
+          <div
+            className="relative"
+            ref={accountRef}
+            onMouseEnter={() => setAccountOpen(true)}
+            onMouseLeave={() => setAccountOpen(false)}
+          >
+            <button
+              onClick={() => setAccountOpen((o) => !o)}
+              className="relative p-2 rounded-[0.5rem] text-[#434654] hover:text-[#003d9b] hover:bg-[#f3f4f6] transition-all duration-200 flex items-center justify-center"
+              title={user ? user.name : "Hesap"}
+            >
+              {user ? (
+                <div className="w-8 h-8 rounded-full bg-[#dae2ff] flex items-center justify-center ring-2 ring-[#003d9b]/20">
+                  <span className="material-symbols-outlined text-[#003d9b]" style={{ fontSize: "18px", fontVariationSettings: "'FILL' 1" }}>person</span>
+                </div>
+              ) : (
+                <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>person</span>
+              )}
+            </button>
+
+            {accountOpen && (
+              <div className="absolute top-full right-0 mt-1 bg-white border border-[#c3c6d6] rounded-xl shadow-2xl py-2 z-50 animate-fade-slide" style={{ minWidth: "210px" }}>
+                {user ? (
+                  <>
+                    {/* Kullanıcı özeti */}
+                    <div className="px-4 py-3 border-b border-[#f0f1f5]">
+                      <p className="font-bold text-[#191c1e] truncate" style={{ fontSize: "13px", fontFamily: "'Plus Jakarta Sans'" }}>{user.name}</p>
+                      {user.email
+                        ? <p className="text-[#737685] truncate" style={{ fontSize: "11px" }}>{user.email}</p>
+                        : <p className="text-[#737685]" style={{ fontSize: "11px" }}>Misafir Hesap</p>
+                      }
+                    </div>
+
+                    {/* Menü öğeleri */}
+                    {[
+                      { href: "/hesap",                  icon: "favorite",        label: "Favorilerim" },
+                      { href: "/hesap?s=prescriptions", icon: "receipt_long",    label: "Reçetelerim" },
+                      { href: "/hesap?s=orders",         icon: "shopping_bag",    label: "Siparişlerim" },
+                      { href: "/hesap?s=addresses",      icon: "location_on",     label: "Adreslerim" },
+                      { href: "/hesap?s=settings",       icon: "manage_accounts", label: "Ayarlar" },
+                    ].map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setAccountOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-[#434654] hover:bg-[#f3f4f6] hover:text-[#003d9b] transition-all duration-150 group/item"
+                        style={{ fontSize: "13px", fontWeight: 500 }}
+                      >
+                        <span className="material-symbols-outlined text-[#737685] group-hover/item:text-[#003d9b] transition-colors" style={{ fontSize: "18px" }}>
+                          {item.icon}
+                        </span>
+                        {item.label}
+                      </Link>
+                    ))}
+
+                    <div className="border-t border-[#f0f1f5] mt-1 pt-1">
+                      <button
+                        onClick={() => { setAccountOpen(false); setLogoutOpen(true); }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-red-500 hover:bg-red-50 transition-all duration-150"
+                        style={{ fontSize: "13px", fontWeight: 500 }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>logout</span>
+                        Çıkış Yap
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="px-4 py-3 border-b border-[#f0f1f5]">
+                      <p className="text-[#737685]" style={{ fontSize: "12px" }}>Hesabınıza giriş yapın veya kayıt olun.</p>
+                    </div>
+                    <Link
+                      href="/hesap/giris"
+                      onClick={() => setAccountOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-[#f3f4f6] transition-colors group/item"
+                      style={{ fontSize: "13px", fontWeight: 600, color: "#003d9b" }}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>login</span>
+                      Giriş Yap
+                    </Link>
+                    <Link
+                      href="/hesap/giris"
+                      onClick={() => setAccountOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-[#f3f4f6] transition-colors group/item"
+                      style={{ fontSize: "13px", fontWeight: 600, color: "#434654" }}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>person_add</span>
+                      Kayıt Ol
+                    </Link>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Sepet */}
-          <button className="relative p-4 rounded-[0.5rem] text-[#434654] hover:text-[#003d9b] hover:bg-[#f3f4f6] transition-all duration-200 hover:scale-110 group">
+          <button
+            onClick={openSidebar}
+            className="relative p-4 rounded-[0.5rem] text-[#434654] hover:text-[#003d9b] hover:bg-[#f3f4f6] transition-all duration-200 hover:scale-110 group"
+          >
             <span className="material-symbols-outlined group-hover:scale-110 transition-transform duration-200 block" style={{ fontSize: "22px" }}>
               shopping_cart
             </span>
             {cartCount > 0 && (
-              <span className="absolute top-0.5 right-0.5 bg-[#6a3600] text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-bold leading-none">
+              <span
+                className="absolute top-0.5 right-0.5 bg-[#6a3600] text-white flex items-center justify-center rounded-full font-bold leading-none"
+                style={{ fontSize: "9px", minWidth: "16px", height: "16px", padding: "0 3px" }}
+              >
                 {cartCount}
               </span>
             )}
@@ -364,5 +482,7 @@ export default function Navbar() {
         </div>
       )}
     </header>
+    <LogoutModal isOpen={logoutOpen} onClose={() => setLogoutOpen(false)} />
+    </>
   );
 }

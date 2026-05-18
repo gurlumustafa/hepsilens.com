@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { CartProvider } from "@/contexts/CartContext";
+import CartSidebar from "@/components/CartSidebar";
 
 export const metadata: Metadata = {
   title: "Hepsilens | Premium Kontakt Lensler",
@@ -22,9 +25,14 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
       </head>
       <body className="min-h-full flex flex-col" style={{ background: "#f8f9fb", color: "#191c1e", fontFamily: "'Inter', sans-serif" }}>
-        <Navbar />
-        <div className="flex-1">{children}</div>
-        <Footer />
+        <AuthProvider>
+          <CartProvider>
+            <Navbar />
+            <CartSidebar />
+            <div className="flex-1">{children}</div>
+            <Footer />
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

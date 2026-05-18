@@ -3,6 +3,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { Lens, Accessory } from "@/lib/data";
 import QuickViewModal from "@/components/QuickViewModal";
+import { useCart } from "@/contexts/CartContext";
+import FavoriteButton from "@/components/FavoriteButton";
 
 type Props = {
   lens: Lens | Accessory;
@@ -10,7 +12,14 @@ type Props = {
 };
 
 export default function ProductCard({ lens, variant = "grid" }: Props) {
+  const { addItem } = useCart();
   const [showModal, setShowModal] = useState(false);
+
+  function handleAddToCart(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem({ id: lens.id, name: lens.name, brand: lens.brand, price: lens.price, imageUrl: lens.imageUrl });
+  }
   const discount = lens.originalPrice
     ? Math.round(((lens.originalPrice - lens.price) / lens.originalPrice) * 100)
     : 0;
@@ -35,6 +44,7 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
         <Link href={`/urun/${lens.id}`} className="group bg-white rounded-[0.75rem] overflow-hidden shadow-sm border border-[#c3c6d6] hover:shadow-2xl hover:-translate-y-2 hover:border-[#003d9b]/30 transition-all duration-250 flex flex-col">
           {/* Image */}
           <div className="relative aspect-square bg-[#ffffff] p-4 flex items-center justify-center overflow-hidden">
+            <FavoriteButton productId={lens.id} size="sm" className="absolute top-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
             {lens.badge && (
               <span
                 className="absolute top-3 right-3 text-[#005f71] px-2 py-1 rounded-[0.125rem] whitespace-nowrap z-10"
@@ -80,7 +90,7 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
               </span>
               <button
                 className="bg-[#6a3600] text-white font-bold px-4 py-2 rounded-[0.5rem] hover:bg-[#8c4a00] hover:scale-105 active:scale-95 transition-all duration-200 whitespace-nowrap shadow-sm hover:shadow-md"
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                onClick={handleAddToCart}
                 style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600, fontFamily: "'Inter'" }}
               >
                 Sepete Ekle
@@ -108,6 +118,7 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
             alt={lens.name}
             className="object-contain w-full h-full group-hover:scale-105 transition-transform duration-500"
           />
+          <FavoriteButton productId={lens.id} size="sm" className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
           <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
             {lens.badge && (
               <span
@@ -163,7 +174,7 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
             </div>
             <button
               className="bg-[#6a3600] text-white font-bold px-4 py-2 rounded-[0.5rem] hover:bg-[#8c4a00] hover:scale-105 active:scale-95 transition-all duration-200 whitespace-nowrap shadow-sm hover:shadow-md"
-              onClick={(e) => e.preventDefault()}
+              onClick={handleAddToCart}
               style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600, fontFamily: "'Inter'" }}
             >
               Sepete Ekle
