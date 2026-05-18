@@ -10,7 +10,7 @@ export default function ReviewsCarousel() {
   const [animKey, setAnimKey] = useState(0);
   const total = testimonials.length;
 
-  const canGoLeft  = start > 0;
+  const canGoLeft = start > 0;
   const canGoRight = start + ITEMS_PER_VIEW < total;
 
   const go = (dir: "left" | "right") => {
@@ -28,19 +28,17 @@ export default function ReviewsCarousel() {
         <div className="flex justify-between items-center mb-10">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              {[1,2,3,4,5].map((s) => (
+              {[1, 2, 3, 4, 5].map((s) => (
                 <span key={s} className="text-[#6a3600]" style={{ fontSize: "20px" }}>★</span>
               ))}
             </div>
             <h2
               className="text-[#191c1e]"
-              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "32px", lineHeight: "40px", fontWeight: 700 }}
+              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "32px", lineHeight: "40px", fontWeight: 800, letterSpacing: "-0.02em" }}
             >
               Müşteri Yorumları
             </h2>
-            <p className="text-[#737685] mt-1" style={{ fontSize: "15px" }}>
-              Binlerce memnun müşterimizden gerçek yorumlar
-            </p>
+
           </div>
 
           <div className="flex gap-2">
@@ -82,7 +80,7 @@ export default function ReviewsCarousel() {
             >
               {/* Yıldızlar */}
               <div className="flex gap-0.5">
-                {[1,2,3,4,5].map((s) => (
+                {[1, 2, 3, 4, 5].map((s) => (
                   <span key={s} style={{ fontSize: "18px", color: s <= t.rating ? "#6a3600" : "#c3c6d6" }}>★</span>
                 ))}
               </div>

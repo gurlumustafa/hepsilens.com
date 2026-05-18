@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { lenses } from "@/lib/data";
+import { lenses, accessories, Lens, Accessory } from "@/lib/data";
 import ProductCard from "@/components/ProductCard";
 import FilterSidebar, { Filters } from "@/components/FilterSidebar";
 
@@ -11,8 +11,9 @@ const ITEMS_PER_PAGE = 9;
 
 const defaultFilters: Filters = {
   brands: [],
+  lensTypes: [],
   color: "all",
-  usage: "all",
+  usage: [],
   priceMin: 0,
   priceMax: 500,
   sortBy: "popular",
@@ -29,8 +30,9 @@ function UrunlerContent() {
     const tur    = searchParams.get("tur");
     const recete = searchParams.get("recete");
     const renk   = searchParams.get("renk");
-    if (tur === "gunluk")        base.usage = "daily";
-    else if (tur === "aylik")    base.usage = "monthly";
+    if (tur === "gunluk")        base.usage = ["daily"];
+    else if (tur === "aylik")    base.usage = ["monthly"];
+    if (tur === "toric")         base.lensTypes = ["toric"];
     if (renk === "renkli")       base.color = "colored";
     else if (renk === "seffaf")  base.color = "clear";
     if (recete === "gerekli")    { /* requiresPrescription filter handled below */ }
@@ -45,18 +47,55 @@ function UrunlerContent() {
     : null;
 
   const filtered = useMemo(() => {
-    let list = [...lenses];
-    if (filters.brands.length) list = list.filter((l) => filters.brands.includes(l.brandId));
-    if (filters.color !== "all") list = list.filter((l) => l.color === filters.color);
-    if (filters.usage !== "all") list = list.filter((l) => l.usagePeriod === filters.usage);
-    if (requiresPrescription !== null) list = list.filter((l) => l.requiresPrescription === requiresPrescription);
+    const isAllLenses = searchParams.get("tip") === "tum";
+    let list: (Lens | Accessory)[] = isAllLenses ? [...lenses] : [...lenses, ...accessories];
+
+    if (filters.brands.length) {
+      list = list.filter((l) => {
+        if (!("brandId" in l)) return false;
+        const bId = l.brandId as string;
+        if (!bId) return false;
+        if (filters.brands.includes(bId)) return true;
+        if (filters.brands.includes("johnson") && bId === "acuvue") return true;
+        if (filters.brands.includes("alcon") && ["dailies", "freshlook", "airoptix"].includes(bId)) return true;
+        if (filters.brands.includes("cooper") && bId === "biofinity") return true;
+        return false;
+      });
+    }
+    
+    if (filters.lensTypes.length > 0) {
+      list = list.filter((l) => {
+        if (!("color" in l)) return false; // Filter out accessories
+        if (filters.lensTypes.includes("saydam") && l.color === "clear") return true;
+        if (filters.lensTypes.includes("renkli") && l.color === "colored") return true;
+        if (filters.lensTypes.includes("toric") && (l.name.toLowerCase().includes("toric") || l.name.toLowerCase().includes("astigmat") || l.tags.includes("astigmat uyumlu"))) return true;
+        if (filters.lensTypes.includes("multifocal") && (l.name.toLowerCase().includes("multifocal") || l.name.toLowerCase().includes("presbyopia"))) return true;
+        if (filters.lensTypes.includes("indirimli") && l.originalPrice) return true;
+        return false;
+      });
+    }
+    
+    if (filters.color !== "all") {
+      list = list.filter((l) => "color" in l && l.color === filters.color);
+    }
+    
+    if (filters.usage.length > 0) {
+      list = list.filter((l) => "usagePeriod" in l && filters.usage.includes(l.usagePeriod));
+    }
+    
+    if (requiresPrescription !== null) {
+      list = list.filter((l) => "requiresPrescription" in l && l.requiresPrescription === requiresPrescription);
+    }
+    
     list = list.filter((l) => l.price >= filters.priceMin && l.price <= filters.priceMax);
+    
     if (filters.sortBy === "price-asc")  list.sort((a, b) => a.price - b.price);
     else if (filters.sortBy === "price-desc") list.sort((a, b) => b.price - a.price);
     else if (filters.sortBy === "rating")     list.sort((a, b) => b.rating - a.rating);
     else list.sort((a, b) => b.reviewCount - a.reviewCount);
+    
     return list;
-  }, [filters, requiresPrescription]);
+  }, [filters, requiresPrescription, searchParams]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated  = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -64,11 +103,12 @@ function UrunlerContent() {
   const handleFilterChange = (f: Filters) => { setFilters(f); setPage(1); };
 
   const pageTitle =
-    filters.usage === "daily"    ? "Günlük Kontakt Lensler" :
-    filters.usage === "monthly"  ? "Aylık Kontakt Lensler"  :
+    searchParams.get("tip") === "tum" ? "Tüm Lensler" :
+    filters.usage.includes("daily") && filters.usage.length === 1 ? "Günlük Kontakt Lensler" :
+    filters.usage.includes("monthly") && filters.usage.length === 1 ? "Aylık Kontakt Lensler"  :
     filters.color === "colored"  ? "Renkli Kontakt Lensler" :
     filters.color === "clear"    ? "Saydam Kontakt Lensler"  :
-    "Tüm Kontakt Lensler";
+    "Tüm Ürünler";
 
   return (
     <main className="pt-[72px] pb-12">

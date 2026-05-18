@@ -8,7 +8,6 @@ const slides = [
     title: "Acuvue Oasys ile hassas görüş.",
     desc: "Tüm gün konfor ve nem deneyimi yaşayın. Bu ay Air Optix ve Acuvue markalarında toplu siparişlerde %30'a varan indirim.",
     btn1: "Fırsatları Gör",
-    btn2: "Markaları İncele",
     img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDocRANQ75YmANj8xXoCkLsfS-Da0nQvivQRHPuPVbmq91P61w7cPKOjGSgFjhHSr7YMzatlEJpbgCgIcdCaCazK9MEmkc3RTXvwzSBIDJ-I08rmXmV9AHw_78DEa6vY6HW-pK8AVpG2STXsxRhV6_IKNG_kvPUaGziJT2K7cXIBURrkCh0wrF8ei2QBc58k-ju8_6B7--0GG_1dZgY27FOMycDw2f60IWFmZodu_MPPnGoQChMOtjCGdzcHzbXCfPDpwuBRF2azngA",
   },
   {
@@ -17,7 +16,6 @@ const slides = [
     title: "Dailies Total1. Farkı hissedin.",
     desc: "Su gradyanı teknolojisi — yüzeyde %80 su içeriği. Şimdiye kadar üretilen en konforlu günlük lens.",
     btn1: "Hemen Al",
-    btn2: "Daha Fazla Bilgi",
     img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBQYJ88f4Vm-kGwXqb6w9gnE6rUM5THU2-EhEDRsyyzq45g76LwHK_M7sI_Xa1_TjTJKamyx-NRUpGuHQ1XGIKWW7iyVepYTyqVOepgA06TNLT0qDqQXVNCCG6f0-CU7U7EOEdCMRnY4Okiu5KboSu4pyADNoxuQodJsy3GOsSlA058XZNksL9U_GFE71EPhnVUWFICjN-6gxdj9dNc9ZSCcq26Ri-2CaoYq2KeSnYVbdjM_tCEzp3QelohxcQStPmbVG6fuWSRtwj9",
   },
   {
@@ -26,7 +24,6 @@ const slides = [
     title: "Bausch + Lomb ULTRA®. Tüm gün nem.",
     desc: "MoistureSeal® teknolojisi lensleri günde 16 saat nemli tutar. Dijital çağ için tasarlandı.",
     btn1: "Ürünü Gör",
-    btn2: "Karşılaştır",
     img: "https://lh3.googleusercontent.com/aida-public/AB6AXuCoh2vwobD5TfxBMrtI3zg4V1Uep16DgKOeDtu90GMrAQEIZdiULlDJi_2o13wQu-DoWycLE3F3-wiQ_kVuueLj9wxsYsViW8m2jnha32iU-7336TdUclU9Tn6wjNdYWQM-dT8O0UhxXxW7-9Dww5vgInHAgkY8AOkhyEjQ00wjh25WFW81WuvvlEjmt5C_cd09jb25g792AZlRGDlUR028mZTiRVT6lKuTeptC1b7vQ4jCTQu_gMMO-_4k46NLl7x60g734HpsO-55",
   },
 ];
@@ -90,12 +87,6 @@ export default function CampaignBanner() {
               style={{ fontFamily: "'Inter', sans-serif", fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}
             >
               {slide.btn1}
-            </button>
-            <button
-              className="border-2 border-[#00687b] text-[#00687b] px-8 py-4 rounded-[0.5rem] hover:bg-[#50dcff] hover:border-transparent transition-all"
-              style={{ fontFamily: "'Inter', sans-serif", fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}
-            >
-              {slide.btn2}
             </button>
           </div>
         </div>

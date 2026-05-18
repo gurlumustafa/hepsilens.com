@@ -32,7 +32,7 @@ export default function NewsletterSection() {
             className="bg-white text-[#003d9b] px-6 py-3.5 rounded-[0.75rem] font-bold hover:bg-[#dae2ff] hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200 whitespace-nowrap"
             style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "14px", fontWeight: 700 }}
           >
-            Abone Ol
+            Kayıt Ol
           </button>
         </div>
       </div>

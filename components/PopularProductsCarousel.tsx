@@ -31,7 +31,7 @@ export default function PopularProductsCarousel() {
         <div>
           <h2
             className="text-[#191c1e]"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "32px", lineHeight: "40px", fontWeight: 700 }}
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "32px", lineHeight: "40px", fontWeight: 800, letterSpacing: "-0.02em" }}
           >
             Popüler Ürünler
           </h2>

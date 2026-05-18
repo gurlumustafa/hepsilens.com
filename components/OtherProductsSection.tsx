@@ -52,7 +52,7 @@ function AccessoryCard({ item }: { item: Accessory }) {
         </div>
         {/* Yıldız + yorum */}
         <div className="flex items-center gap-1 mt-1">
-          {[1,2,3,4,5].map((s) => (
+          {[1, 2, 3, 4, 5].map((s) => (
             <span key={s} style={{ fontSize: "11px", color: s <= Math.round(item.rating) ? "#6a3600" : "#c3c6d6" }}>★</span>
           ))}
           <span style={{ fontSize: "11px", color: "#737685" }}>({item.reviewCount})</span>
@@ -61,7 +61,7 @@ function AccessoryCard({ item }: { item: Accessory }) {
 
       {/* Sepet butonu */}
       <button
-        className="flex-shrink-0 self-center bg-[#003d9b] text-white p-2.5 rounded-[0.5rem] hover:bg-[#0052cc] hover:scale-110 active:scale-95 transition-all duration-200 shadow-sm hover:shadow-md"
+        className="flex-shrink-0 self-center bg-[#6a3600] text-white p-2.5 rounded-[0.5rem] hover:bg-[#8c4a00] hover:scale-110 active:scale-95 transition-all duration-200 shadow-sm hover:shadow-md"
         onClick={(e) => e.preventDefault()}
       >
         <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>add_shopping_cart</span>
@@ -73,14 +73,14 @@ function AccessoryCard({ item }: { item: Accessory }) {
 /* ── section: diger-urunler ── */
 export default function OtherProductsSection() {
   const solutions = accessories.filter((a) => a.category === "solution");
-  const eyedrops  = accessories.filter((a) => a.category === "eyedrop");
+  const eyedrops = accessories.filter((a) => a.category === "eyedrop");
 
   return (
     <section id="diger-urunler" className="max-w-[1280px] mx-auto px-8 py-12 border-t border-[#edeef0]">
       <div className="mb-8">
         <h2
           className="text-[#191c1e]"
-          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "32px", lineHeight: "40px", fontWeight: 700 }}
+          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "32px", lineHeight: "40px", fontWeight: 800, letterSpacing: "-0.02em" }}
         >
           Diğer Ürünler
         </h2>

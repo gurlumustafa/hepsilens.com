@@ -3,8 +3,9 @@ import { brands } from "@/lib/data";
 
 export type Filters = {
   brands: string[];
+  lensTypes: string[];
   color: "all" | "clear" | "colored";
-  usage: "all" | "daily" | "monthly" | "yearly";
+  usage: string[];
   priceMin: number;
   priceMax: number;
   sortBy: "popular" | "price-asc" | "price-desc" | "rating";
@@ -16,15 +17,17 @@ type Props = {
 };
 
 const LENS_TYPES = [
-  { value: "Spherical", label: "Sferik" },
-  { value: "Toric", label: "Torik (Astigmat)" },
-  { value: "Multifocal", label: "Multifokal" },
+  { value: "saydam", label: "Saydam Lens" },
+  { value: "renkli", label: "Renkli Lens" },
+  { value: "toric", label: "Toric (Astigmat) Lens" },
+  { value: "multifocal", label: "Multifocal (Uzak-Yakın) Lens" },
+  { value: "indirimli", label: "İndirimli Lens Setleri" },
 ];
 
 const DURATIONS = [
-  { value: "daily", label: "Günlük" },
-  { value: "monthly", label: "Aylık" },
-  { value: "yearly", label: "Yıllık" },
+  { value: "daily", label: "Günlük Kullan-At Lensler" },
+  { value: "biweekly", label: "2 Haftalık Lensler" },
+  { value: "monthly", label: "Aylık Lensler" },
 ];
 
 export default function FilterSidebar({ filters, onChange }: Props) {
@@ -33,6 +36,22 @@ export default function FilterSidebar({ filters, onChange }: Props) {
     onChange({
       ...filters,
       brands: arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id],
+    });
+  };
+
+  const toggleLensType = (id: string) => {
+    const arr = filters.lensTypes;
+    onChange({
+      ...filters,
+      lensTypes: arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id],
+    });
+  };
+
+  const toggleUsage = (id: string) => {
+    const arr = filters.usage;
+    onChange({
+      ...filters,
+      usage: arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id],
     });
   };
 
@@ -80,58 +99,47 @@ export default function FilterSidebar({ filters, onChange }: Props) {
         <div>
           <div className="flex items-center gap-2 mb-2 px-2">
             <span className="material-symbols-outlined text-[18px]">visibility</span>
-            <span style={{ fontSize: "12px", lineHeight: "16px", letterSpacing: "0.05em", fontWeight: 600, fontFamily: "'Inter'" }}>Lens Tipi</span>
+            <span style={{ fontSize: "12px", lineHeight: "16px", letterSpacing: "0.05em", fontWeight: 600, fontFamily: "'Inter'" }}>Lens Tipleri</span>
           </div>
-          {LENS_TYPES.map((t, i) => (
-            i === 0 ? (
-              <div
+          <div className="flex flex-col gap-1">
+            {LENS_TYPES.map((t) => (
+              <label
                 key={t.value}
-                className="bg-[#50dcff] text-[#005f71] font-bold rounded-[0.5rem] px-3 py-2 mb-1 flex items-center justify-between"
-                style={{ fontSize: "14px", fontFamily: "'Inter'" }}
+                className="flex items-center gap-3 px-3 py-2 hover:bg-[#e7e8ea] rounded-[0.5rem] cursor-pointer"
               >
-                <span>{t.label}</span>
-                <span className="material-symbols-outlined text-[16px]">check</span>
-              </div>
-            ) : (
-              <div
-                key={t.value}
-                className="text-[#434654] hover:bg-[#e7e8ea] rounded-[0.5rem] px-3 py-2 cursor-pointer"
-                style={{ fontSize: "14px", fontFamily: "'Inter'" }}
-              >
-                {t.label}
-              </div>
-            )
-          ))}
+                <input
+                  type="checkbox"
+                  checked={filters.lensTypes.includes(t.value)}
+                  onChange={() => toggleLensType(t.value)}
+                  className="rounded border-[#c3c6d6] text-[#003d9b] focus:ring-[#003d9b]"
+                />
+                <span style={{ fontSize: "14px", lineHeight: "20px", fontFamily: "'Inter'" }}>{t.label}</span>
+              </label>
+            ))}
+          </div>
         </div>
 
         {/* Duration */}
         <div>
           <div className="flex items-center gap-2 mb-2 px-2">
             <span className="material-symbols-outlined text-[18px]">schedule</span>
-            <span style={{ fontSize: "12px", lineHeight: "16px", letterSpacing: "0.05em", fontWeight: 600, fontFamily: "'Inter'" }}>Kullanım Süresi</span>
+            <span style={{ fontSize: "12px", lineHeight: "16px", letterSpacing: "0.05em", fontWeight: 600, fontFamily: "'Inter'" }}>Değişim Sıklığı</span>
           </div>
-          <div className="flex flex-wrap gap-2 px-2">
-            {DURATIONS.map((d) => {
-              const isActive = filters.usage === d.value;
-              return (
-                <button
-                  key={d.value}
-                  onClick={() => onChange({ ...filters, usage: isActive ? "all" : d.value as Filters["usage"] })}
-                  className="px-3 py-1 rounded-full transition-colors"
-                  style={{
-                    border: `1px solid ${isActive ? "#003d9b" : "#c3c6d6"}`,
-                    background: isActive ? "#003d9b" : "transparent",
-                    color: isActive ? "#ffffff" : "inherit",
-                    fontSize: "11px",
-                    fontWeight: 600,
-                    fontFamily: "'Inter'",
-                    letterSpacing: "0.05em",
-                  }}
-                >
-                  {d.label}
-                </button>
-              );
-            })}
+          <div className="flex flex-col gap-1">
+            {DURATIONS.map((d) => (
+              <label
+                key={d.value}
+                className="flex items-center gap-3 px-3 py-2 hover:bg-[#e7e8ea] rounded-[0.5rem] cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={filters.usage.includes(d.value)}
+                  onChange={() => toggleUsage(d.value)}
+                  className="rounded border-[#c3c6d6] text-[#003d9b] focus:ring-[#003d9b]"
+                />
+                <span style={{ fontSize: "14px", lineHeight: "20px", fontFamily: "'Inter'" }}>{d.label}</span>
+              </label>
+            ))}
           </div>
         </div>
 
@@ -157,7 +165,7 @@ export default function FilterSidebar({ filters, onChange }: Props) {
 
       {/* Clear All */}
       <button
-        onClick={() => onChange({ brands: [], color: "all", usage: "all", priceMin: 0, priceMax: 500, sortBy: "popular" })}
+        onClick={() => onChange({ brands: [], lensTypes: [], color: "all", usage: [], priceMin: 0, priceMax: 500, sortBy: "popular" })}
         className="mt-8 w-full py-3 border border-[#003d9b] text-[#003d9b] rounded-[0.5rem] hover:bg-[#003d9b]/5 transition-all duration-300"
         style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600, fontFamily: "'Inter'" }}
       >

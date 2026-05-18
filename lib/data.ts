@@ -25,6 +25,9 @@ export type Lens = {
   oxygenPermeability: number;
   uvProtection: boolean;
   tags: string[];
+  isToric?: boolean;
+  cylOptions?: number[];   // örn: [-0.75, -1.25, -1.75, -2.25]
+  axisOptions?: number[];  // örn: [10, 20, ..., 180]
 };
 
 export type Brand = {
@@ -48,6 +51,54 @@ export type Review = {
 };
 
 export const brands: Brand[] = [
+  {
+    id: "johnson",
+    name: "Johnson & Johnson",
+    logo: "👁️",
+    bannerImage: "/brands/acuvue.jpg",
+    bannerBg: "from-blue-900 to-blue-600",
+    tagline: "Gün boyu konfor, kristal berraklığında görüş",
+  },
+  {
+    id: "bausch",
+    name: "Bausch + Lomb",
+    logo: "🔬",
+    bannerImage: "/brands/bausch.jpg",
+    bannerBg: "from-green-900 to-emerald-600",
+    tagline: "150 yıllık göz sağlığı uzmanlığı",
+  },
+  {
+    id: "alcon",
+    name: "Alcon (Ciba Vision)",
+    logo: "🔵",
+    bannerImage: "/brands/dailies.jpg",
+    bannerBg: "from-cyan-800 to-cyan-500",
+    tagline: "Her gün taze başlangıç",
+  },
+  {
+    id: "cooper",
+    name: "Cooper Vision",
+    logo: "💙",
+    bannerImage: "/brands/biofinity.jpg",
+    bannerBg: "from-indigo-900 to-indigo-600",
+    tagline: "Aylık konforun en üst noktası",
+  },
+  {
+    id: "tech",
+    name: "Tech Contactlens",
+    logo: "✨",
+    bannerImage: "/brands/freshlook.jpg",
+    bannerBg: "from-purple-900 to-pink-600",
+    tagline: "Yenilikçi lens teknolojileri",
+  },
+  {
+    id: "zeiss",
+    name: "Zeiss (Wöhlk)",
+    logo: "🔭",
+    bannerImage: "/brands/airoptix.jpg",
+    bannerBg: "from-sky-800 to-teal-500",
+    tagline: "Alman optik kalitesi",
+  },
   {
     id: "acuvue",
     name: "Acuvue",
@@ -87,14 +138,6 @@ export const brands: Brand[] = [
     bannerImage: "/brands/airoptix.jpg",
     bannerBg: "from-sky-800 to-teal-500",
     tagline: "Nefes alan teknoloji, özgür gözler",
-  },
-  {
-    id: "bausch",
-    name: "Bausch + Lomb",
-    logo: "🔬",
-    bannerImage: "/brands/bausch.jpg",
-    bannerBg: "from-green-900 to-emerald-600",
-    tagline: "150 yıllık göz sağlığı uzmanlığı",
   },
 ];
 
@@ -464,6 +507,9 @@ export const lenses: Lens[] = [
     oxygenPermeability: 163,
     uvProtection: false,
     tags: ["aylık", "şeffaf", "premium", "astigmat uyumlu"],
+    isToric: true,
+    cylOptions: [-0.75, -1.25, -1.75, -2.25, -2.75],
+    axisOptions: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180],
   },
   {
     id: 15,
@@ -566,6 +612,36 @@ export const lenses: Lens[] = [
     uvProtection: false,
     tags: ["aylık", "şeffaf", "gece kullanım", "maksimum oksijen"],
   },
+  {
+    id: 20,
+    name: "Acuvue Oasys for Astigmatism",
+    brand: "Acuvue",
+    brandId: "acuvue",
+    price: 389,
+    originalPrice: 449,
+    rating: 4.9,
+    reviewCount: 812,
+    image: "/lenses/acuvue-oasys-toric.jpg",
+    imageUrl: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=400&fit=crop&auto=format",
+    color: "clear",
+    usagePeriod: "monthly",
+    requiresPrescription: true,
+    stock: 95,
+    badge: "Çok Satan",
+    description: "HYDRACLEAR Plus teknolojisiyle astigmat için özel tasarlanmış aylık kontakt lens. Stabilite sistemi sayesinde lens, göz hareketlerine rağmen sabit kalır ve net görüş sağlar.",
+    dia: 14.5,
+    bc: 8.6,
+    sphRange: "-9.00 / +4.00",
+    packSizes: [6],
+    material: "Senofilcon A",
+    waterContent: 38,
+    oxygenPermeability: 129,
+    uvProtection: true,
+    tags: ["aylık", "şeffaf", "astigmat", "toric", "astigmat uyumlu", "hidrasyon"],
+    isToric: true,
+    cylOptions: [-0.75, -1.25, -1.75, -2.25, -2.75],
+    axisOptions: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180],
+  },
 ];
 
 export const reviews: Review[] = [
@@ -634,16 +710,17 @@ export type Accessory = {
   imageUrl?: string;
   description: string;
   badge?: string;
+  brandId?: string;
   category: "solution" | "eyedrop";
 };
 
 export const accessories: Accessory[] = [
-  { id: 101, name: "Renu MultiPlus", brand: "Bausch + Lomb", price: 89, originalPrice: 110, rating: 4.7, reviewCount: 523, description: "Çok amaçlı lens bakım solüsyonu. Temizler, sterilize eder, depolar.", badge: "Çok Satan", category: "solution" },
-  { id: 102, name: "Opti-Free Express", brand: "Alcon", price: 95, rating: 4.6, reviewCount: 412, description: "Günlük ve aylık lensler için çok fonksiyonlu bakım solüsyonu.", category: "solution" },
-  { id: 103, name: "Complete Easy Rub", brand: "AMO", price: 72, originalPrice: 85, rating: 4.5, reviewCount: 289, description: "Kolay ovalama formülü ile hızlı lens temizliği.", category: "solution" },
+  { id: 101, name: "Renu MultiPlus", brand: "Bausch + Lomb", brandId: "bausch", price: 89, originalPrice: 110, rating: 4.7, reviewCount: 523, description: "Çok amaçlı lens bakım solüsyonu. Temizler, sterilize eder, depolar.", badge: "Çok Satan", category: "solution" },
+  { id: 102, name: "Opti-Free Express", brand: "Alcon", brandId: "alcon", price: 95, rating: 4.6, reviewCount: 412, description: "Günlük ve aylık lensler için çok fonksiyonlu bakım solüsyonu.", category: "solution" },
+  { id: 103, name: "Complete Easy Rub", brand: "AMO", brandId: "johnson", price: 72, originalPrice: 85, rating: 4.5, reviewCount: 289, description: "Kolay ovalama formülü ile hızlı lens temizliği.", category: "solution" },
 
-  { id: 201, name: "Systane Ultra", brand: "Alcon", price: 65, originalPrice: 79, rating: 4.8, reviewCount: 845, description: "Uzun süreli nem sağlayan göz damlası. Lens kullanıcıları için ideal.", badge: "En Çok Tercih", category: "eyedrop" },
-  { id: 202, name: "Refresh Plus", brand: "Abbott", price: 49, rating: 4.6, reviewCount: 612, description: "Koruyucu içermez, hassas gözler için uygundur.", category: "eyedrop" },
+  { id: 201, name: "Systane Ultra", brand: "Alcon", brandId: "alcon", price: 65, originalPrice: 79, rating: 4.8, reviewCount: 845, description: "Uzun süreli nem sağlayan göz damlası. Lens kullanıcıları için ideal.", badge: "En Çok Tercih", category: "eyedrop" },
+  { id: 202, name: "Refresh Plus", brand: "Abbott", brandId: "johnson", price: 49, rating: 4.6, reviewCount: 612, description: "Koruyucu içermez, hassas gözler için uygundur.", category: "eyedrop" },
   { id: 203, name: "Hyabak", brand: "Thea", price: 85, originalPrice: 99, rating: 4.9, reviewCount: 387, badge: "Premium", description: "%0.15 sodyum hyaluronat. Yoğun kuru göz rahatlaması.", category: "eyedrop" },
 ];
 

@@ -100,6 +100,16 @@ body {
   font-family: "Inter", sans-serif;
 }
 
+button, 
+a, 
+input[type="submit"], 
+input[type="button"], 
+input[type="reset"], 
+[role="button"], 
+select {
+  cursor: pointer;
+}
+
 h1, h2, h3, h4, .font-display {
   font-family: "Plus Jakarta Sans", sans-serif;
 }
@@ -131,3 +141,18 @@ h1, h2, h3, h4, .font-display {
 
 .hide-scrollbar::-webkit-scrollbar { display: none; }
 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Scroll Reveal Animations ── */
+.sr {
+  opacity: 0;
+  transition: opacity 0.65s cubic-bezier(0.22,1,0.36,1), transform 0.65s cubic-bezier(0.22,1,0.36,1);
+  will-change: opacity, transform;
+}
+.sr-up    { transform: translateY(40px); }
+.sr-left  { transform: translateX(-36px); }
+.sr-right { transform: translateX(36px); }
+.sr-scale { transform: scale(0.94); }
+.sr.sr-visible {
+  opacity: 1;
+  transform: none;
+}
