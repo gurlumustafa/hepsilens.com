@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 
 const slides = [
   {
@@ -8,6 +9,7 @@ const slides = [
     title: "Acuvue Oasys ile hassas görüş.",
     desc: "Tüm gün konfor ve nem deneyimi yaşayın. Bu ay Air Optix ve Acuvue markalarında toplu siparişlerde %30'a varan indirim.",
     btn1: "Fırsatları Gör",
+    link: "/urun/1",
     img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDocRANQ75YmANj8xXoCkLsfS-Da0nQvivQRHPuPVbmq91P61w7cPKOjGSgFjhHSr7YMzatlEJpbgCgIcdCaCazK9MEmkc3RTXvwzSBIDJ-I08rmXmV9AHw_78DEa6vY6HW-pK8AVpG2STXsxRhV6_IKNG_kvPUaGziJT2K7cXIBURrkCh0wrF8ei2QBc58k-ju8_6B7--0GG_1dZgY27FOMycDw2f60IWFmZodu_MPPnGoQChMOtjCGdzcHzbXCfPDpwuBRF2azngA",
   },
   {
@@ -16,6 +18,7 @@ const slides = [
     title: "Dailies Total1. Farkı hissedin.",
     desc: "Su gradyanı teknolojisi — yüzeyde %80 su içeriği. Şimdiye kadar üretilen en konforlu günlük lens.",
     btn1: "Hemen Al",
+    link: "/urun/4",
     img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBQYJ88f4Vm-kGwXqb6w9gnE6rUM5THU2-EhEDRsyyzq45g76LwHK_M7sI_Xa1_TjTJKamyx-NRUpGuHQ1XGIKWW7iyVepYTyqVOepgA06TNLT0qDqQXVNCCG6f0-CU7U7EOEdCMRnY4Okiu5KboSu4pyADNoxuQodJsy3GOsSlA058XZNksL9U_GFE71EPhnVUWFICjN-6gxdj9dNc9ZSCcq26Ri-2CaoYq2KeSnYVbdjM_tCEzp3QelohxcQStPmbVG6fuWSRtwj9",
   },
   {
@@ -24,6 +27,7 @@ const slides = [
     title: "Bausch + Lomb ULTRA®. Tüm gün nem.",
     desc: "MoistureSeal® teknolojisi lensleri günde 16 saat nemli tutar. Dijital çağ için tasarlandı.",
     btn1: "Ürünü Gör",
+    link: "/urun/14",
     img: "https://lh3.googleusercontent.com/aida-public/AB6AXuCoh2vwobD5TfxBMrtI3zg4V1Uep16DgKOeDtu90GMrAQEIZdiULlDJi_2o13wQu-DoWycLE3F3-wiQ_kVuueLj9wxsYsViW8m2jnha32iU-7336TdUclU9Tn6wjNdYWQM-dT8O0UhxXxW7-9Dww5vgInHAgkY8AOkhyEjQ00wjh25WFW81WuvvlEjmt5C_cd09jb25g792AZlRGDlUR028mZTiRVT6lKuTeptC1b7vQ4jCTQu_gMMO-_4k46NLl7x60g734HpsO-55",
   },
 ];
@@ -82,12 +86,14 @@ export default function CampaignBanner() {
             {slide.desc}
           </p>
           <div className="flex gap-4">
-            <button
-              className="bg-[#003d9b] text-white px-8 py-4 rounded-[0.5rem] hover:bg-[#0052cc] transition-all"
+            <Link
+              href={slide.link}
+              className="bg-[#003d9b] text-white px-8 py-4 rounded-[0.5rem] hover:bg-[#0052cc] transition-all inline-flex items-center gap-2"
               style={{ fontFamily: "'Inter', sans-serif", fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}
             >
               {slide.btn1}
-            </button>
+              <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>arrow_forward</span>
+            </Link>
           </div>
         </div>
       </div>

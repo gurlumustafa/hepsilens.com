@@ -108,7 +108,6 @@ function AddressForm({ onSubmit, onCancel }: {
         {([
           { label: "Adres Başlığı", key: "title", placeholder: "Ev, İş..." },
           { label: "Ad Soyad", key: "fullName", placeholder: "Adınız Soyadınız" },
-          { label: "Telefon", key: "phone", placeholder: "05XX XXX XX XX" },
           { label: "Şehir", key: "city", placeholder: "İstanbul" },
           { label: "İlçe", key: "district", placeholder: "Kadıköy" },
           { label: "Posta Kodu", key: "postalCode", placeholder: "34000" },
@@ -155,7 +154,7 @@ function HesapContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const {
-    user, prescriptions, orders, addresses, emailPreferences, favorites,
+    user, loaded, prescriptions, orders, addresses, emailPreferences, favorites,
     logout, updateUser, addPrescription, removePrescription,
     addAddress, removeAddress, setDefaultAddress, updateEmailPreferences, toggleFavorite,
   } = useAuth();
@@ -171,7 +170,18 @@ function HesapContent() {
   const [savedMsg, setSavedMsg] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
-  useEffect(() => { if (!user) router.replace("/hesap/giris"); }, [user, router]);
+  useEffect(() => {
+    if (loaded && !user) router.replace("/hesap/giris");
+  }, [loaded, user, router]);
+
+  if (!loaded) return (
+    <div className="pt-[72px] min-h-screen flex items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 rounded-full border-2 border-[#003d9b] border-t-transparent animate-spin" />
+        <p className="text-[#737685]" style={{ fontSize: "13px" }}>Yükleniyor...</p>
+      </div>
+    </div>
+  );
   if (!user) return null;
 
   function showSaved(msg = "Değişiklikler kaydedildi.") {
@@ -279,17 +289,16 @@ function HesapContent() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <p className="font-semibold text-[#191c1e] truncate" style={{ fontSize: "14px" }}>{p.fileName}</p>
-                    <span className="px-2.5 py-0.5 rounded-full shrink-0 font-bold" style={{
-                      fontSize: "10px",
-                      color: expired ? "#dc2626" : nearExp ? "#b45309" : "#16a34a",
-                      background: expired ? "#fee2e2" : nearExp ? "#fef3c7" : "#dcfce7",
-                    }}>
-                      {expired ? "Süresi Doldu" : nearExp ? "Yakında Doluyor" : "Geçerli"}
-                    </span>
+                    {(expired || nearExp) && (
+                      <span className="px-2.5 py-0.5 rounded-full shrink-0 font-bold" style={{
+                        fontSize: "10px",
+                        color: expired ? "#dc2626" : "#b45309",
+                        background: expired ? "#fee2e2" : "#fef3c7",
+                      }}>
+                        {expired ? "Süresi Doldu" : "Yakında Doluyor"}
+                      </span>
+                    )}
                   </div>
-                  <p className="text-[#737685] mt-1" style={{ fontSize: "12px" }}>
-                    Son geçerlilik: <strong className={expired ? "text-red-500" : "text-[#434654]"}>{p.expiryDate}</strong>
-                  </p>
                   {(expired || nearExp) && (
                     <p className="mt-1.5 font-medium" style={{ fontSize: "11px", color: expired ? "#dc2626" : "#b45309" }}>
                       ⚠ {expired ? "Bu reçete geçerliliğini yitirmiştir. Yenilemeniz gerekmektedir." : "Süresi 30 gün içinde dolacak. Lütfen kontrol ediniz."}
@@ -312,6 +321,16 @@ function HesapContent() {
     const [reordered, setReordered] = useState<string | null>(null);
 
     function handleReorder(orderId: string) {
+      const order = orders.find((o) => o.id === orderId);
+      if (!order) return;
+      order.items.forEach((item) => {
+        const product = allProducts.find((p) => p.name === item.name);
+        if (product) {
+          for (let i = 0; i < item.qty; i++) {
+            addItem({ id: product.id, name: product.name, brand: product.brand, price: product.price, imageUrl: product.imageUrl });
+          }
+        }
+      });
       setReordered(orderId);
       setTimeout(() => setReordered(null), 2000);
     }
@@ -348,25 +367,37 @@ function HesapContent() {
               ))}
             </div>
 
-            <div className="border-t border-[#f0f1f5] pt-3 mt-3 flex items-center justify-between">
+            <div className="border-t border-[#f0f1f5] pt-3 mt-3 flex items-center justify-between gap-2 flex-wrap">
               <span className="font-bold text-[#003d9b]" style={{ fontSize: "16px", fontFamily: "'Plus Jakarta Sans'" }}>
                 {order.total.toLocaleString("tr-TR")} ₺
               </span>
-              <button
-                onClick={() => handleReorder(order.id)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold transition-all active:scale-95"
-                style={{
-                  fontSize: "12px",
-                  fontFamily: "'Inter'",
-                  background: reordered === order.id ? "#dcfce7" : "#f0f4ff",
-                  color: reordered === order.id ? "#16a34a" : "#003d9b",
-                }}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
-                  {reordered === order.id ? "check_circle" : "shopping_cart"}
-                </span>
-                {reordered === order.id ? "Sepete Eklendi!" : "Tekrarla"}
-              </button>
+              <div className="flex items-center gap-2">
+                {order.trackingNo && (
+                  <Link
+                    href={`/siparis-takip?no=${order.trackingNo}`}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold transition-all hover:bg-[#dae2ff]"
+                    style={{ fontSize: "12px", fontFamily: "'Inter'", background: "#f0f4ff", color: "#003d9b" }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>local_shipping</span>
+                    Kargo Takip
+                  </Link>
+                )}
+                <button
+                  onClick={() => handleReorder(order.id)}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold transition-all active:scale-95"
+                  style={{
+                    fontSize: "12px",
+                    fontFamily: "'Inter'",
+                    background: reordered === order.id ? "#dcfce7" : "#f0f4ff",
+                    color: reordered === order.id ? "#16a34a" : "#003d9b",
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
+                    {reordered === order.id ? "check_circle" : "shopping_cart"}
+                  </span>
+                  {reordered === order.id ? "Sepete Eklendi!" : "Tekrarla"}
+                </button>
+              </div>
             </div>
           </div>
         ))}

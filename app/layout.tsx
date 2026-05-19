@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import CartSidebar from "@/components/CartSidebar";
+import FloatingContact from "@/components/FloatingContact";
 
 export const metadata: Metadata = {
   title: "Hepsilens | Premium Kontakt Lensler",
@@ -31,6 +32,7 @@ export default function RootLayout({
             <CartSidebar />
             <div className="flex-1">{children}</div>
             <Footer />
+            <FloatingContact />
           </CartProvider>
         </AuthProvider>
       </body>

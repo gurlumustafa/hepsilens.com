@@ -127,6 +127,20 @@ export default function ProductDetail() {
   return (
     <div className="pt-24 pb-16 px-4 md:px-8 max-w-[1280px] mx-auto">
 
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-2 py-4">
+        <Link href="/" className="text-[#737685] hover:text-[#003d9b] transition-colors flex items-center gap-1" style={{ fontSize: "13px", fontWeight: 600 }}>
+          <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>home</span>
+          Anasayfa
+        </Link>
+        <span className="material-symbols-outlined text-[#c3c6d6]" style={{ fontSize: "16px" }}>chevron_right</span>
+        <Link href="/urunler" className="text-[#737685] hover:text-[#003d9b] transition-colors" style={{ fontSize: "13px", fontWeight: 600 }}>
+          Ürünler
+        </Link>
+        <span className="material-symbols-outlined text-[#c3c6d6]" style={{ fontSize: "16px" }}>chevron_right</span>
+        <span className="text-[#003d9b] truncate max-w-[200px] md:max-w-xs" style={{ fontSize: "13px", fontWeight: 600 }}>{lens.name}</span>
+      </nav>
+
       {/* ── Top grid: image + sidebar ── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 

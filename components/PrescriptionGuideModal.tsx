@@ -19,8 +19,6 @@ export default function PrescriptionGuideModal({ onClose }: Props) {
     };
   }, [onClose]);
 
-  if (typeof window === "undefined") return null;
-
   return createPortal(
     <div
       className="fixed inset-0 z-[10000] flex items-center justify-center p-4 overflow-y-auto"

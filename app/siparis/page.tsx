@@ -49,6 +49,7 @@ export default function SiparisPage() {
 
   // Tamamlandı
   const [placed, setPlaced] = useState(false);
+  const [btnHover, setBtnHover] = useState(false);
   const [orderNo] = useState(`HL-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`);
 
   const shipping = total >= 500 ? 0 : 39;
@@ -369,16 +370,29 @@ export default function SiparisPage() {
           <Section title={`${needsRx ? "4" : "3"}. Ödeme Yöntemi`} icon="credit_card">
             <div className="flex flex-col gap-2 mb-4">
               {([
-                { v: "card",     icon: "credit_card",   label: "Kredi / Banka Kartı" },
-                { v: "cod",      icon: "payments",      label: "Kapıda Ödeme" },
-                { v: "transfer", icon: "account_balance", label: "Havale / EFT" },
-              ] as { v: PayMethod; icon: string; label: string }[]).map(({ v, icon, label }) => (
+                { v: "card",     icon: "credit_card",     label: "Kredi / Banka Kartı", soon: false },
+                { v: "cod",      icon: "payments",        label: "Kapıda Ödeme",         soon: true  },
+                { v: "transfer", icon: "account_balance", label: "Havale / EFT",         soon: true  },
+              ] as { v: PayMethod; icon: string; label: string; soon: boolean }[]).map(({ v, icon, label, soon }) => (
                 <label key={v}
-                  className="flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-colors"
-                  style={{ borderColor: payMethod === v ? "#003d9b" : "#edeef3", background: payMethod === v ? "#f0f4ff" : "white" }}>
-                  <input type="radio" name="pay" className="accent-[#003d9b]" checked={payMethod === v} onChange={() => setPayMethod(v)} />
-                  <span className="material-symbols-outlined" style={{ fontSize: "20px", color: payMethod === v ? "#003d9b" : "#737685" }}>{icon}</span>
+                  className="flex items-center gap-3 p-4 rounded-xl border transition-colors"
+                  style={{
+                    borderColor: !soon && payMethod === v ? "#003d9b" : "#edeef3",
+                    background: !soon && payMethod === v ? "#f0f4ff" : soon ? "#fafafa" : "white",
+                    cursor: soon ? "not-allowed" : "pointer",
+                    opacity: soon ? 0.6 : 1,
+                  }}>
+                  <input type="radio" name="pay" className="accent-[#003d9b]"
+                    checked={!soon && payMethod === v}
+                    disabled={soon}
+                    onChange={() => !soon && setPayMethod(v)} />
+                  <span className="material-symbols-outlined" style={{ fontSize: "20px", color: !soon && payMethod === v ? "#003d9b" : "#737685" }}>{icon}</span>
                   <span className="font-semibold text-[#191c1e]" style={{ fontSize: "13px" }}>{label}</span>
+                  {soon && (
+                    <span className="ml-auto px-2 py-0.5 rounded-full bg-[#fef3c7] text-[#b45309] font-bold" style={{ fontSize: "10px" }}>
+                      Yakında
+                    </span>
+                  )}
                 </label>
               ))}
             </div>
@@ -425,18 +439,26 @@ export default function SiparisPage() {
           <button
             onClick={handlePlace}
             disabled={!canSubmit}
-            className="w-full py-4 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all active:scale-95"
+            onMouseEnter={() => setBtnHover(true)}
+            onMouseLeave={() => setBtnHover(false)}
+            className="w-full py-4 rounded-xl font-bold text-white flex items-center justify-center gap-2 active:scale-95"
             style={{
-              background: canSubmit ? "#8c4a00" : "#c3c6d6",
-              color: canSubmit ? "#ffc9a0" : "#737685",
+              background: canSubmit
+                ? (btnHover ? "#15803d" : "#16a34a")
+                : "#c3c6d6",
+              color: canSubmit ? "#ffffff" : "#737685",
               cursor: canSubmit ? "pointer" : "not-allowed",
-              fontSize: "15px",
+              fontSize: "16px",
               fontFamily: "'Inter'",
               letterSpacing: "0.03em",
-              boxShadow: canSubmit ? "0 4px 12px rgba(140,74,0,0.25)" : "none",
+              boxShadow: canSubmit
+                ? (btnHover ? "0 8px 24px rgba(22,163,74,0.45)" : "0 4px 16px rgba(22,163,74,0.3)")
+                : "none",
+              transform: canSubmit && btnHover ? "translateY(-2px)" : "translateY(0)",
+              transition: "all 0.18s ease",
             }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>credit_card</span>
+            <span className="material-symbols-outlined" style={{ fontSize: "22px", fontVariationSettings: "'FILL' 1" }}>check_circle</span>
             Siparişi Onayla — {grandTotal.toLocaleString("tr-TR")} ₺
           </button>
         </div>

@@ -28,8 +28,6 @@ export default function QuickViewModal({ product, onClose }: Props) {
     };
   }, [onClose]);
 
-  if (typeof window === "undefined") return null;
-
   return createPortal(
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center p-4"

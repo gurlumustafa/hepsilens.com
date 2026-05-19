@@ -259,38 +259,6 @@ export default function FilterSidebar({ filters, onChange }: Props) {
           </div>
         </div>
 
-        {/* Sıralama */}
-        <div className="px-4 py-5">
-          <SectionLabel icon="sort" label="Sıralama" />
-          <div
-            className="relative"
-          >
-            <select
-              value={filters.sortBy}
-              onChange={(e) => onChange({ ...filters, sortBy: e.target.value as Filters["sortBy"] })}
-              className="w-full appearance-none pr-8 pl-3 py-2.5 rounded-xl transition-all outline-none"
-              style={{
-                fontSize: "13px",
-                fontFamily: "'Inter'",
-                color: "#191c1e",
-                background: "#f8f9fb",
-                border: "1.5px solid #c3c6d6",
-                fontWeight: 500,
-              }}
-            >
-              <option value="popular">Popülerlik</option>
-              <option value="price-asc">Fiyat: Düşükten Yükseğe</option>
-              <option value="price-desc">Fiyat: Yüksekten Düşüğe</option>
-              <option value="rating">En Çok Beğenilen</option>
-            </select>
-            <span
-              className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
-              style={{ fontSize: "18px", color: "#737685" }}
-            >
-              expand_more
-            </span>
-          </div>
-        </div>
       </div>
 
       {/* ── Alt bant: Temizle butonu ── */}

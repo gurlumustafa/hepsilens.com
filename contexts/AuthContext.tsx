@@ -29,6 +29,7 @@ export type Order = {
   status: "preparing" | "shipped" | "delivered" | "cancelled";
   total: number;
   items: { name: string; qty: number; price: number }[];
+  trackingNo?: string;
 };
 
 export type EmailPreferences = {
@@ -59,6 +60,7 @@ type AuthState = {
 };
 
 type AuthContextType = AuthState & {
+  loaded: boolean;
   register: (name: string, email: string) => void;
   loginAnonymous: () => void;
   logout: () => void;
@@ -83,27 +85,30 @@ const defaultPreferences: EmailPreferences = {
 
 const mockOrders: Order[] = [
   {
-    id: "HL-2024-0891",
-    date: "2024-11-14",
-    status: "delivered",
+    id: "HL-2026-4821",
+    date: "2026-05-18",
+    status: "shipped",
     total: 389,
+    trackingNo: "TR1234567890",
     items: [{ name: "Acuvue Oasys for Astigmatism", qty: 1, price: 389 }],
   },
   {
-    id: "HL-2024-0734",
-    date: "2024-10-02",
+    id: "HL-2026-3174",
+    date: "2026-05-13",
     status: "delivered",
     total: 558,
+    trackingNo: "TR9876543210",
     items: [
       { name: "Dailies Total1", qty: 2, price: 249 },
       { name: "Renu MultiPlus", qty: 1, price: 89 },
     ],
   },
   {
-    id: "HL-2024-0612",
-    date: "2024-08-19",
+    id: "HL-2026-2201",
+    date: "2026-04-29",
     status: "delivered",
     total: 245,
+    trackingNo: "TR5555000111",
     items: [{ name: "FreshLook Colorblends - Mavi", qty: 1, price: 245 }],
   },
 ];
@@ -131,12 +136,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     orders: mockOrders,
     emailPreferences: defaultPreferences,
   });
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setState(JSON.parse(raw));
     } catch {}
+    setLoaded(true);
   }, []);
 
   function persist(next: AuthState) {
@@ -224,7 +231,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ ...state, register, loginAnonymous, logout, updateUser, addPrescription, removePrescription, addAddress, removeAddress, setDefaultAddress, updateEmailPreferences, toggleFavorite, isFavorite }}>
+    <AuthContext.Provider value={{ ...state, loaded, register, loginAnonymous, logout, updateUser, addPrescription, removePrescription, addAddress, removeAddress, setDefaultAddress, updateEmailPreferences, toggleFavorite, isFavorite }}>
       {children}
     </AuthContext.Provider>
   );

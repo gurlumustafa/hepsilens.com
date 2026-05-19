@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
@@ -18,6 +18,13 @@ const defaultFilters: Filters = {
   priceMax: 500,
   sortBy: "popular",
 };
+
+const SORT_OPTIONS = [
+  { value: "popular", label: "Popülerliğe Göre" },
+  { value: "price-asc", label: "Fiyat: Düşükten Yükseğe" },
+  { value: "price-desc", label: "Fiyat: Yüksekten Düşüğe" },
+  { value: "rating", label: "En Çok Beğenilen" },
+];
 
 /*
  * Ürünler Sayfası
@@ -39,6 +46,18 @@ function UrunlerContent() {
     return base;
   });
   const [page, setPage] = useState(1);
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const sortRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
+        setIsSortOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const requiresPrescription = searchParams.get("recete") === "gerekli"
     ? true
@@ -146,17 +165,51 @@ function UrunlerContent() {
                   {filtered.length} ürün bulundu
                 </p>
               </div>
-              <select
-                value={filters.sortBy}
-                onChange={(e) => handleFilterChange({ ...filters, sortBy: e.target.value as Filters["sortBy"] })}
-                className="bg-white border border-[#c3c6d6] rounded-[0.5rem] px-4 py-2.5 hover:border-[#003d9b] transition-colors duration-200 cursor-pointer"
-                style={{ fontSize: "13px", fontWeight: 600, fontFamily: "'Inter'" }}
-              >
-                <option value="popular">Popülerliğe Göre</option>
-                <option value="price-asc">Fiyat: Düşükten Yükseğe</option>
-                <option value="price-desc">Fiyat: Yüksekten Düşüğe</option>
-                <option value="rating">En Çok Beğenilen</option>
-              </select>
+              <div className="relative group" ref={sortRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsSortOpen(!isSortOpen)}
+                  className={`flex items-center justify-between w-full sm:w-[240px] bg-white border-2 rounded-xl px-4 py-2.5 transition-all duration-300 shadow-sm hover:shadow-md outline-none
+                    ${isSortOpen ? "border-[#003d9b] ring-4 ring-[#003d9b]/10" : "border-[#e2e4ee] hover:border-[#c8d6f7]"}`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[#737685] transition-colors duration-300 group-hover:text-[#003d9b]" style={{ fontSize: "18px" }}>sort</span>
+                    <span style={{ fontSize: "13.5px", fontWeight: 600, fontFamily: "'Inter'", color: "#191c1e" }}>
+                      {SORT_OPTIONS.find(opt => opt.value === filters.sortBy)?.label || "Popülerliğe Göre"}
+                    </span>
+                  </div>
+                  <span 
+                    className={`material-symbols-outlined text-[#737685] transition-transform duration-300 group-hover:text-[#003d9b] ${isSortOpen ? "rotate-180" : ""}`} 
+                    style={{ fontSize: "20px" }}
+                  >
+                    expand_more
+                  </span>
+                </button>
+                
+                {/* Dropdown menü */}
+                <div 
+                  className={`absolute top-[calc(100%+8px)] right-0 w-full sm:w-[240px] bg-white border border-[#e2e4ee] rounded-xl shadow-lg overflow-hidden transition-all duration-200 z-50 origin-top
+                    ${isSortOpen ? "opacity-100 scale-y-100" : "opacity-0 scale-y-0 pointer-events-none"}`}
+                >
+                  {SORT_OPTIONS.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        handleFilterChange({ ...filters, sortBy: option.value as Filters["sortBy"] });
+                        setIsSortOpen(false);
+                      }}
+                      className={`w-full text-left px-4 py-3 transition-colors duration-150 flex items-center justify-between
+                        ${filters.sortBy === option.value ? "bg-[#f0f4ff] text-[#003d9b]" : "hover:bg-[#f8f9fb] text-[#434654]"}`}
+                      style={{ fontSize: "13px", fontWeight: filters.sortBy === option.value ? 700 : 500, fontFamily: "'Inter'" }}
+                    >
+                      {option.label}
+                      {filters.sortBy === option.value && (
+                        <span className="material-symbols-outlined" style={{ fontSize: "16px", fontVariationSettings: "'FILL' 1" }}>check</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Izgara */}

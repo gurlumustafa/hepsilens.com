@@ -1,11 +1,15 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useCart } from "@/contexts/CartContext";
 
 export default function CartSidebar() {
   const { items, count, total, sidebarOpen, closeSidebar, removeItem, updateQty, clearCart } = useCart();
+  const [checkoutHover, setCheckoutHover] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   // ESC ile kapat + scroll kilidi
   useEffect(() => {
@@ -19,7 +23,7 @@ export default function CartSidebar() {
     };
   }, [sidebarOpen, closeSidebar]);
 
-  if (typeof window === "undefined") return null;
+  if (!mounted) return null;
 
   return createPortal(
     <>
@@ -79,13 +83,14 @@ export default function CartSidebar() {
               <p className="font-bold text-[#191c1e]" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "16px" }}>Sepetiniz boş</p>
               <p className="text-[#737685] mt-1" style={{ fontSize: "13px" }}>Ürün eklemek için alışverişe başlayın.</p>
             </div>
-            <button
+            <Link
+              href="/urunler"
               onClick={closeSidebar}
               className="px-6 py-2.5 rounded-xl bg-[#003d9b] text-white font-bold hover:opacity-90 transition-opacity"
               style={{ fontSize: "13px" }}
             >
               Alışverişe Başla
-            </button>
+            </Link>
           </div>
         ) : (
           <>
@@ -166,10 +171,20 @@ export default function CartSidebar() {
               <Link
                 href="/siparis"
                 onClick={closeSidebar}
-                className="w-full py-3.5 rounded-xl font-bold text-white text-center flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all"
-                style={{ background: "#8c4a00", fontSize: "14px", fontFamily: "'Inter'", letterSpacing: "0.03em" }}
+                onMouseEnter={() => setCheckoutHover(true)}
+                onMouseLeave={() => setCheckoutHover(false)}
+                className="w-full py-3.5 rounded-xl font-bold text-white text-center flex items-center justify-center gap-2 active:scale-95"
+                style={{
+                  background: checkoutHover ? "#15803d" : "#16a34a",
+                  fontSize: "14px",
+                  fontFamily: "'Inter'",
+                  letterSpacing: "0.03em",
+                  boxShadow: checkoutHover ? "0 8px 24px rgba(22,163,74,0.45)" : "0 4px 16px rgba(22,163,74,0.3)",
+                  transform: checkoutHover ? "translateY(-2px)" : "translateY(0)",
+                  transition: "all 0.18s ease",
+                }}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>credit_card</span>
+                <span className="material-symbols-outlined" style={{ fontSize: "18px", fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                 Siparişi Tamamla
               </Link>
               <button

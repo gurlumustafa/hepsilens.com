@@ -34,7 +34,7 @@ export default function LogoutModal({ isOpen, onClose }: Props) {
     if (!isOpen) { setPhase("confirm"); setCount(3); }
   }, [isOpen]);
 
-  if (!isOpen || typeof window === "undefined") return null;
+  if (!isOpen) return null;
 
   return createPortal(
     <div

@@ -414,9 +414,10 @@ export default function Navbar() {
 
           {/* Sipariş Takibi */}
           <Link
-            href="/siparis-takibi"
+            href="/siparis-takip"
             className="hidden md:flex items-center gap-1.5 px-2.5 py-2 rounded-[0.5rem] text-[#434654] hover:text-[#003d9b] hover:bg-[#f3f4f6] transition-all duration-200 group hover:scale-105"
             style={{ fontSize: "11px", fontWeight: 600 }}
+            title="Sipariş Takibi"
           >
             <span className="material-symbols-outlined group-hover:scale-110 transition-transform duration-200" style={{ fontSize: "20px" }}>
               local_shipping
