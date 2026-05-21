@@ -14,6 +14,7 @@ const defaultFilters: Filters = {
   lensTypes: [],
   color: "all",
   usage: [],
+  category: [],
   priceMin: 0,
   priceMax: 500,
   sortBy: "popular",
@@ -59,6 +60,10 @@ function UrunlerContent() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const tip = searchParams.get("tip");
+  const isDigerUrunler = tip === "diger";
+  const isAllLenses    = tip === "tum";
+
   const requiresPrescription = searchParams.get("recete") === "gerekli"
     ? true
     : searchParams.get("recete") === "serbest"
@@ -66,14 +71,21 @@ function UrunlerContent() {
     : null;
 
   const filtered = useMemo(() => {
-    const isAllLenses = searchParams.get("tip") === "tum";
-    let list: (Lens | Accessory)[] = isAllLenses ? [...lenses] : [...lenses, ...accessories];
+    // Sayfa moduna göre başlangıç listesi
+    let list: (Lens | Accessory)[] = isDigerUrunler
+      ? [...accessories]
+      : isAllLenses
+      ? [...lenses]
+      : [...lenses, ...accessories];
 
     if (filters.brands.length) {
       list = list.filter((l) => {
         if (!("brandId" in l)) return false;
-        const bId = l.brandId as string;
+        const bId = (l as { brandId?: string }).brandId;
         if (!bId) return false;
+        // Aksesuar modunda: doğrudan brandId eşleşmesi
+        if (isDigerUrunler) return filters.brands.includes(bId);
+        // Lens modunda: markanın alt markaları da dahil
         if (filters.brands.includes(bId)) return true;
         if (filters.brands.includes("johnson") && bId === "acuvue") return true;
         if (filters.brands.includes("alcon") && ["dailies", "freshlook", "airoptix"].includes(bId)) return true;
@@ -81,40 +93,48 @@ function UrunlerContent() {
         return false;
       });
     }
-    
-    if (filters.lensTypes.length > 0) {
-      list = list.filter((l) => {
-        if (!("color" in l)) return false; // Filter out accessories
-        if (filters.lensTypes.includes("saydam") && l.color === "clear") return true;
-        if (filters.lensTypes.includes("renkli") && l.color === "colored") return true;
-        if (filters.lensTypes.includes("toric") && (l.name.toLowerCase().includes("toric") || l.name.toLowerCase().includes("astigmat") || l.tags.includes("astigmat uyumlu"))) return true;
-        if (filters.lensTypes.includes("multifocal") && (l.name.toLowerCase().includes("multifocal") || l.name.toLowerCase().includes("presbyopia"))) return true;
-        if (filters.lensTypes.includes("indirimli") && l.originalPrice) return true;
-        return false;
-      });
+
+    // Aksesuar modunda: kategori filtresi (solüsyon / göz damlası)
+    if (isDigerUrunler) {
+      if (filters.category.length > 0) {
+        list = list.filter((l) => "category" in l && filters.category.includes((l as Accessory).category));
+      }
+    } else {
+      // Lens moduna özgü filtreler
+      if (filters.lensTypes.length > 0) {
+        list = list.filter((l) => {
+          if (!("color" in l)) return false;
+          if (filters.lensTypes.includes("saydam") && l.color === "clear") return true;
+          if (filters.lensTypes.includes("renkli") && l.color === "colored") return true;
+          if (filters.lensTypes.includes("toric") && (l.name.toLowerCase().includes("toric") || l.name.toLowerCase().includes("astigmat") || (l as Lens).tags?.includes("astigmat uyumlu"))) return true;
+          if (filters.lensTypes.includes("multifocal") && (l.name.toLowerCase().includes("multifocal") || l.name.toLowerCase().includes("presbyopia"))) return true;
+          if (filters.lensTypes.includes("indirimli") && l.originalPrice) return true;
+          return false;
+        });
+      }
+
+      if (filters.color !== "all") {
+        list = list.filter((l) => "color" in l && l.color === filters.color);
+      }
+
+      if (filters.usage.length > 0) {
+        list = list.filter((l) => "usagePeriod" in l && filters.usage.includes((l as Lens).usagePeriod));
+      }
+
+      if (requiresPrescription !== null) {
+        list = list.filter((l) => "requiresPrescription" in l && (l as Lens).requiresPrescription === requiresPrescription);
+      }
     }
-    
-    if (filters.color !== "all") {
-      list = list.filter((l) => "color" in l && l.color === filters.color);
-    }
-    
-    if (filters.usage.length > 0) {
-      list = list.filter((l) => "usagePeriod" in l && filters.usage.includes(l.usagePeriod));
-    }
-    
-    if (requiresPrescription !== null) {
-      list = list.filter((l) => "requiresPrescription" in l && l.requiresPrescription === requiresPrescription);
-    }
-    
+
     list = list.filter((l) => l.price >= filters.priceMin && l.price <= filters.priceMax);
-    
-    if (filters.sortBy === "price-asc")  list.sort((a, b) => a.price - b.price);
+
+    if (filters.sortBy === "price-asc")       list.sort((a, b) => a.price - b.price);
     else if (filters.sortBy === "price-desc") list.sort((a, b) => b.price - a.price);
     else if (filters.sortBy === "rating")     list.sort((a, b) => b.rating - a.rating);
-    else list.sort((a, b) => b.reviewCount - a.reviewCount);
-    
+    else                                      list.sort((a, b) => b.reviewCount - a.reviewCount);
+
     return list;
-  }, [filters, requiresPrescription, searchParams]);
+  }, [filters, requiresPrescription, isDigerUrunler, isAllLenses]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated  = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -122,12 +142,15 @@ function UrunlerContent() {
   const handleFilterChange = (f: Filters) => { setFilters(f); setPage(1); };
 
   const pageTitle =
-    searchParams.get("tip") === "tum" ? "Tüm Lensler" :
-    filters.usage.includes("daily") && filters.usage.length === 1 ? "Günlük Kontakt Lensler" :
+    isDigerUrunler ? "Diğer Ürünler" :
+    isAllLenses    ? "Tüm Lensler" :
+    filters.usage.includes("daily")   && filters.usage.length === 1 ? "Günlük Kontakt Lensler" :
     filters.usage.includes("monthly") && filters.usage.length === 1 ? "Aylık Kontakt Lensler"  :
     filters.color === "colored"  ? "Renkli Kontakt Lensler" :
     filters.color === "clear"    ? "Saydam Kontakt Lensler"  :
-    "Tüm Ürünler";
+    requiresPrescription === true  ? "Numaralı Lensler" :
+    requiresPrescription === false ? "Kozmetik Lensler" :
+    "Tüm Lensler";
 
   return (
     <main className="pt-[72px] pb-12">
@@ -148,7 +171,11 @@ function UrunlerContent() {
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filtre Kenar Çubuğu */}
-          <FilterSidebar filters={filters} onChange={handleFilterChange} />
+          <FilterSidebar
+            filters={filters}
+            onChange={handleFilterChange}
+            mode={isDigerUrunler ? "accessories" : "lens"}
+          />
 
           {/* Ürün Izgarası */}
           <div className="flex-1">

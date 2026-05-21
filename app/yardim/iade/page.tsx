@@ -71,7 +71,7 @@ export default function IadeDegisimPage() {
         </ul>
 
         <div className="callout">
-          <p><strong>İpucu:</strong> Ürünleri açmadan önce kutunun dışından göz attığınızda doğru ürünü aldığınızı teyit edebilirsiniz. Numarasız lens yerine numaralı lens geldi gibi durumlarda bize hemen ulaşın; yanlış gönderim tamamen ücretsiz değiştirilir.</p>
+          <p><strong>İpucu:</strong> Ürünleri açmadan önce kutunun dışından göz attığınızda doğru ürünü aldığınızı teyit edebilirsiniz. Kozmetik lens yerine numaralı lens geldi gibi durumlarda bize hemen ulaşın; yanlış gönderim tamamen ücretsiz değiştirilir.</p>
         </div>
 
         <h2>Değişim</h2>

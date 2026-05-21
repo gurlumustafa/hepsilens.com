@@ -133,7 +133,7 @@ export default function ReceteRehberiPage() {
 
         <h2>Reçete Olmadan Sipariş Verebilir miyim?</h2>
         <p>
-          <strong>Numarasız (plano / 0.00)</strong> lensler için reçete gerekmez. Renkli ve şeffaf tüm numarasız lensler serbestçe sipariş edilebilir.
+          <strong>Kozmetik (plano / 0.00)</strong> lensler için reçete gerekmez. Renkli ve şeffaf tüm kozmetik lensler serbestçe sipariş edilebilir.
         </p>
         <p>
           <strong>Numaralı</strong> lensler için reçete zorunludur. Bu Türkiye&apos;de yasal bir gerekliliktir. Reçetesiz numaralı lens satışı yasal kapsamda mümkün değildir.

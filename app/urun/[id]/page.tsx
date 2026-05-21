@@ -2,7 +2,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
-import { lenses, reviews, brands, accessories, Lens, Accessory } from "@/lib/data";
+import { lenses, reviews, brands, accessories, accessoryBrands, Lens, Accessory } from "@/lib/data";
 import PrescriptionGuideModal from "@/components/PrescriptionGuideModal";
 import PrescriptionMapModal from "@/components/PrescriptionMapModal";
 import { useAuth } from "@/contexts/AuthContext";
@@ -59,7 +59,11 @@ export default function ProductDetail() {
   const { addItem } = useCart();
   const lens = lenses.find((l) => l.id === Number(id)) || accessories.find((a) => a.id === Number(id));
   const isAccessory = lens && !("dia" in lens);
-  const brand = lens ? brands.find((b) => "brandId" in lens ? b.id === lens.brandId : b.name === lens.brand) : null;
+  const brand = lens
+    ? (isAccessory
+        ? accessoryBrands.find((b) => b.id === (lens as Accessory).brandId)
+        : brands.find((b) => b.id === (lens as Lens).brandId))
+    : null;
   const lensReviews = lens ? reviews.filter((r) => r.lensId === lens.id) : [];
 
   const [eyeMode, setEyeMode] = useState<EyeMode>("same");
@@ -164,7 +168,7 @@ export default function ProductDetail() {
               <ul className="flex flex-col gap-2.5">
                 {[
                   (lens as Lens).color === "colored"
-                    ? "Reçete gerektirmez — numarasız kullanıma uygundur"
+                    ? "Reçete gerektirmez — kozmetik kullanıma uygundur"
                     : `%${(lens as Lens).waterContent} su içeriği ile gün boyu konfor`,
                   (lens as Lens).usagePeriod === "daily"
                     ? `${(lens as Lens).packSizes[0]} adetlik paket — her gün temiz ve hijyenik`

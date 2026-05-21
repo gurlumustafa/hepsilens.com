@@ -83,7 +83,7 @@ const faqGroups = [
     faqs: [
       {
         q: "Reçete olmadan lens satın alabilir miyim?",
-        a: "Numarasız (0.00 / plano) renkli veya şeffaf lensler reçetesiz satın alınabilir. Numaralı tüm lensler için geçerli bir göz doktoru reçetesi gerekmektedir.",
+        a: "Kozmetik (0.00 / plano) renkli veya şeffaf lensler reçetesiz satın alınabilir. Numaralı tüm lensler için geçerli bir göz doktoru reçetesi gerekmektedir.",
       },
       {
         q: "Reçetemi nasıl yüklerim?",

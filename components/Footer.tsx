@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Logo from "@/components/Logo";
 
 const siteBrands = ["Acuvue", "Dailies", "Biofinity", "FreshLook", "Air Optix", "Bausch + Lomb"];
 
@@ -7,7 +8,7 @@ const siteLinks = [
     section: "Lensler", links: [
       { label: "Tüm Lensler", href: "/urunler" },
       { label: "Numaralı Lensler", href: "/urunler?recete=gerekli" },
-      { label: "Numarasız Lensler", href: "/urunler?recete=serbest" },
+      { label: "Kozmetik Lensler", href: "/urunler?recete=serbest" },
       { label: "Renkli Lensler", href: "/urunler?renk=renkli" },
       { label: "Günlük Lensler", href: "/urunler?tur=gunluk" },
       { label: "Toric Lensler", href: "/urunler?tur=toric" },
@@ -44,13 +45,8 @@ export default function Footer() {
         <div className="py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
           {/* Marka & İletişim */}
           <div className="lg:col-span-2">
-            <Link href="/" className="group inline-block">
-              <span
-                className="text-white font-bold group-hover:text-[#50dcff] transition-colors duration-200"
-                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "28px", lineHeight: "36px" }}
-              >
-                Hepsilens
-              </span>
+            <Link href="/" className="group inline-block pt-1">
+              <Logo scale={1.05} theme="dark" className="group-hover:opacity-90 transition-opacity duration-200" />
             </Link>
             <p className="text-[#737685] mt-4 leading-relaxed" style={{ fontSize: "14px", lineHeight: "22px" }}>
               Türkiye&apos;nin en geniş kontakt lens kataloğu. Premium göz sağlığı ürünleri, hızlı teslimat, uzman desteği.

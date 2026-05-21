@@ -699,6 +699,22 @@ export const stripBrands = [
   { name: "Dailies", emoji: "🔵", color: "text-cyan-600" },
 ];
 
+export type AccessoryBrand = {
+  id: string;
+  name: string;
+  tagline?: string;
+};
+
+export const accessoryBrands: AccessoryBrand[] = [
+  { id: "bausch",   name: "Bausch + Lomb", tagline: "150 yıllık göz sağlığı uzmanlığı" },
+  { id: "alcon",    name: "Alcon",          tagline: "Görüşünüzü koruyun, hayatın tadını çıkarın" },
+  { id: "amo",      name: "AMO / J&J Vision", tagline: "Konfor ve temizlik bir arada" },
+  { id: "avizor",   name: "Avizor",          tagline: "Lens bakımında Avrupa kalitesi" },
+  { id: "allergan", name: "Allergan",        tagline: "Kuru göz için güvenilir çözüm" },
+  { id: "thea",     name: "Thea Pharma",    tagline: "Hyaluronat teknolojisiyle göz sağlığı" },
+  { id: "santen",   name: "Santen",         tagline: "Göz yüzeyinde bilimsel konfor" },
+];
+
 export type Accessory = {
   id: number;
   name: string;
@@ -710,18 +726,92 @@ export type Accessory = {
   imageUrl?: string;
   description: string;
   badge?: string;
-  brandId?: string;
+  brandId: string;
   category: "solution" | "eyedrop";
 };
 
 export const accessories: Accessory[] = [
-  { id: 101, name: "Renu MultiPlus", brand: "Bausch + Lomb", brandId: "bausch", price: 89, originalPrice: 110, rating: 4.7, reviewCount: 523, description: "Çok amaçlı lens bakım solüsyonu. Temizler, sterilize eder, depolar.", badge: "Çok Satan", category: "solution" },
-  { id: 102, name: "Opti-Free Express", brand: "Alcon", brandId: "alcon", price: 95, rating: 4.6, reviewCount: 412, description: "Günlük ve aylık lensler için çok fonksiyonlu bakım solüsyonu.", category: "solution" },
-  { id: 103, name: "Complete Easy Rub", brand: "AMO", brandId: "johnson", price: 72, originalPrice: 85, rating: 4.5, reviewCount: 289, description: "Kolay ovalama formülü ile hızlı lens temizliği.", category: "solution" },
+  // ── Lens Solüsyonları ──────────────────────────────────────────────────────
+  {
+    id: 101, name: "Renu Advanced", brand: "Bausch + Lomb", brandId: "bausch",
+    price: 149, originalPrice: 179, rating: 4.7, reviewCount: 523,
+    description: "Çok amaçlı lens bakım solüsyonu. Temizler, sterilize eder ve depolar. 360 ml.",
+    badge: "Çok Satan", category: "solution",
+  },
+  {
+    id: 102, name: "Biotrue Solüsyon", brand: "Bausch + Lomb", brandId: "bausch",
+    price: 165, originalPrice: 199, rating: 4.8, reviewCount: 389,
+    description: "Göz biyolojisinden ilham alan formül. Silikon hidrojel uyumlu, 20 saat nem sağlar.",
+    category: "solution",
+  },
+  {
+    id: 103, name: "Opti-Free PureMoist", brand: "Alcon", brandId: "alcon",
+    price: 175, originalPrice: 210, rating: 4.7, reviewCount: 412,
+    description: "Gün boyu nem sağlayan, silikon hidrojel lenslerle tam uyumlu çok amaçlı solüsyon.",
+    badge: "Çok Satan", category: "solution",
+  },
+  {
+    id: 104, name: "Opti-Free Express", brand: "Alcon", brandId: "alcon",
+    price: 145, rating: 4.5, reviewCount: 298,
+    description: "Günlük ve aylık lensler için çok fonksiyonlu bakım solüsyonu. 355 ml.",
+    category: "solution",
+  },
+  {
+    id: 105, name: "Complete Easy Rub", brand: "AMO / J&J Vision", brandId: "amo",
+    price: 129, originalPrice: 155, rating: 4.5, reviewCount: 289,
+    description: "Kolay ovalama formülü ile hızlı lens temizliği. Günlük ve aylık lensler için. 360 ml.",
+    category: "solution",
+  },
+  {
+    id: 106, name: "Avizor All Clean Soft", brand: "Avizor", brandId: "avizor",
+    price: 119, originalPrice: 139, rating: 4.6, reviewCount: 201,
+    description: "Yumuşak lensler için çok amaçlı solüsyon. Uzun süreli lens konforu sağlar.",
+    category: "solution",
+  },
 
-  { id: 201, name: "Systane Ultra", brand: "Alcon", brandId: "alcon", price: 65, originalPrice: 79, rating: 4.8, reviewCount: 845, description: "Uzun süreli nem sağlayan göz damlası. Lens kullanıcıları için ideal.", badge: "En Çok Tercih", category: "eyedrop" },
-  { id: 202, name: "Refresh Plus", brand: "Abbott", brandId: "johnson", price: 49, rating: 4.6, reviewCount: 612, description: "Koruyucu içermez, hassas gözler için uygundur.", category: "eyedrop" },
-  { id: 203, name: "Hyabak", brand: "Thea", price: 85, originalPrice: 99, rating: 4.9, reviewCount: 387, badge: "Premium", description: "%0.15 sodyum hyaluronat. Yoğun kuru göz rahatlaması.", category: "eyedrop" },
+  // ── Göz Damlaları ──────────────────────────────────────────────────────────
+  {
+    id: 201, name: "Systane Ultra", brand: "Alcon", brandId: "alcon",
+    price: 125, originalPrice: 149, rating: 4.8, reviewCount: 845,
+    description: "Uzun süreli nem sağlayan göz damlası. Lens kullanıcıları için ideal. 10 ml.",
+    badge: "En Çok Tercih", category: "eyedrop",
+  },
+  {
+    id: 202, name: "Systane Hydration", brand: "Alcon", brandId: "alcon",
+    price: 159, rating: 4.9, reviewCount: 512,
+    description: "Hyalüronik asit içerikli, koruyucu madde içermeyen suni gözyaşı. 10 ml.",
+    badge: "Yeni", category: "eyedrop",
+  },
+  {
+    id: 203, name: "Refresh Plus", brand: "Allergan", brandId: "allergan",
+    price: 89, rating: 4.6, reviewCount: 612,
+    description: "Koruyucu içermez, hassas gözler için uygundur. 30 adet tek kullanımlık flakon.",
+    category: "eyedrop",
+  },
+  {
+    id: 204, name: "Refresh Tears", brand: "Allergan", brandId: "allergan",
+    price: 75, rating: 4.5, reviewCount: 401,
+    description: "Suni gözyaşı formülü ile kuru göz semptomlarını hafifletir. 15 ml.",
+    category: "eyedrop",
+  },
+  {
+    id: 205, name: "Hyabak", brand: "Thea Pharma", brandId: "thea",
+    price: 145, originalPrice: 169, rating: 4.9, reviewCount: 387,
+    description: "%0.15 sodyum hyaluronat. Yoğun kuru göz rahatlaması, lens üzerinde kullanılabilir.",
+    badge: "Premium", category: "eyedrop",
+  },
+  {
+    id: 206, name: "Artelac Advanced", brand: "Bausch + Lomb", brandId: "bausch",
+    price: 99, originalPrice: 119, rating: 4.7, reviewCount: 264,
+    description: "%0.2 hyalüronik asit içerikli. Kuru göz için hızlı ve uzun süreli rahatlama.",
+    category: "eyedrop",
+  },
+  {
+    id: 207, name: "Cationorm", brand: "Santen", brandId: "santen",
+    price: 135, rating: 4.8, reviewCount: 198,
+    description: "Katyonik emülsiyon teknolojisi ile göz yüzeyinde kalıcı nem etkisi.",
+    badge: "Eczane Önerisi", category: "eyedrop",
+  },
 ];
 
 export type Testimonial = {

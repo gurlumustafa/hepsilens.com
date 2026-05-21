@@ -1,11 +1,12 @@
 "use client";
-import { brands } from "@/lib/data";
+import { brands, accessoryBrands } from "@/lib/data";
 
 export type Filters = {
   brands: string[];
   lensTypes: string[];
   color: "all" | "clear" | "colored";
   usage: string[];
+  category: string[]; // "solution" | "eyedrop"
   priceMin: number;
   priceMax: number;
   sortBy: "popular" | "price-asc" | "price-desc" | "rating";
@@ -14,6 +15,7 @@ export type Filters = {
 type Props = {
   filters: Filters;
   onChange: (f: Filters) => void;
+  mode?: "lens" | "accessories";
 };
 
 const LENS_TYPES = [
@@ -28,6 +30,11 @@ const DURATIONS = [
   { value: "daily",     label: "Günlük Kullan-At",  icon: "wb_sunny" },
   { value: "biweekly",  label: "2 Haftalık",         icon: "date_range" },
   { value: "monthly",   label: "Aylık",              icon: "calendar_month" },
+];
+
+const CATEGORIES = [
+  { value: "solution", label: "Lens Solüsyonları", icon: "water_drop" },
+  { value: "eyedrop",  label: "Göz Damlaları",     icon: "opacity" },
 ];
 
 /* ── Yardımcı: bölüm başlığı ── */
@@ -133,12 +140,11 @@ function CheckRow({
   );
 }
 
-export default function FilterSidebar({ filters, onChange }: Props) {
+export default function FilterSidebar({ filters, onChange, mode = "lens" }: Props) {
   const activeCount =
     filters.brands.length +
-    filters.lensTypes.length +
-    filters.usage.length +
-    (filters.color !== "all" ? 1 : 0);
+    (mode === "lens" ? filters.lensTypes.length + filters.usage.length + (filters.color !== "all" ? 1 : 0) : 0) +
+    (mode === "accessories" ? filters.category.length : 0);
 
   const toggleBrand = (id: string) => {
     const arr = filters.brands;
@@ -155,8 +161,13 @@ export default function FilterSidebar({ filters, onChange }: Props) {
     onChange({ ...filters, usage: arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id] });
   };
 
+  const toggleCategory = (id: string) => {
+    const arr = filters.category;
+    onChange({ ...filters, category: arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id] });
+  };
+
   const clearAll = () =>
-    onChange({ brands: [], lensTypes: [], color: "all", usage: [], priceMin: 0, priceMax: 500, sortBy: "popular" });
+    onChange({ brands: [], lensTypes: [], color: "all", usage: [], category: [], priceMin: 0, priceMax: 500, sortBy: "popular" });
 
   return (
     <aside
@@ -216,7 +227,7 @@ export default function FilterSidebar({ filters, onChange }: Props) {
         <div className="px-4 py-5">
           <SectionLabel icon="sell" label="Marka" />
           <div className="flex flex-col gap-1">
-            {brands.map((b) => (
+            {(mode === "accessories" ? accessoryBrands : brands).map((b) => (
               <CheckRow
                 key={b.id}
                 checked={filters.brands.includes(b.id)}
@@ -227,37 +238,59 @@ export default function FilterSidebar({ filters, onChange }: Props) {
           </div>
         </div>
 
-        {/* Lens Tipi */}
-        <div className="px-4 py-5">
-          <SectionLabel icon="visibility" label="Lens Tipi" />
-          <div className="flex flex-col gap-1">
-            {LENS_TYPES.map((t) => (
-              <CheckRow
-                key={t.value}
-                checked={filters.lensTypes.includes(t.value)}
-                onChange={() => toggleLensType(t.value)}
-                label={t.label}
-                icon={t.icon}
-              />
-            ))}
-          </div>
-        </div>
+        {mode === "lens" && (
+          <>
+            {/* Lens Tipi */}
+            <div className="px-4 py-5">
+              <SectionLabel icon="visibility" label="Lens Tipi" />
+              <div className="flex flex-col gap-1">
+                {LENS_TYPES.map((t) => (
+                  <CheckRow
+                    key={t.value}
+                    checked={filters.lensTypes.includes(t.value)}
+                    onChange={() => toggleLensType(t.value)}
+                    label={t.label}
+                    icon={t.icon}
+                  />
+                ))}
+              </div>
+            </div>
 
-        {/* Değişim Sıklığı */}
-        <div className="px-4 py-5">
-          <SectionLabel icon="schedule" label="Değişim Sıklığı" />
-          <div className="flex flex-col gap-1">
-            {DURATIONS.map((d) => (
-              <CheckRow
-                key={d.value}
-                checked={filters.usage.includes(d.value)}
-                onChange={() => toggleUsage(d.value)}
-                label={d.label}
-                icon={d.icon}
-              />
-            ))}
+            {/* Değişim Sıklığı */}
+            <div className="px-4 py-5">
+              <SectionLabel icon="schedule" label="Değişim Sıklığı" />
+              <div className="flex flex-col gap-1">
+                {DURATIONS.map((d) => (
+                  <CheckRow
+                    key={d.value}
+                    checked={filters.usage.includes(d.value)}
+                    onChange={() => toggleUsage(d.value)}
+                    label={d.label}
+                    icon={d.icon}
+                  />
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        {mode === "accessories" && (
+          /* Ürün Kategorisi */
+          <div className="px-4 py-5">
+            <SectionLabel icon="category" label="Ürün Kategorisi" />
+            <div className="flex flex-col gap-1">
+              {CATEGORIES.map((c) => (
+                <CheckRow
+                  key={c.value}
+                  checked={filters.category.includes(c.value)}
+                  onChange={() => toggleCategory(c.value)}
+                  label={c.label}
+                  icon={c.icon}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
       </div>
 

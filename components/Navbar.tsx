@@ -6,12 +6,13 @@ import { lenses, accessories, Lens, Accessory } from "@/lib/data";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import LogoutModal from "@/components/LogoutModal";
+import Logo from "@/components/Logo";
 
 const navLinks = [
-  { href: "/urunler", label: "Tüm Ürünler" },
   { href: "/urunler?tip=tum", label: "Tüm Lensler" },
+  { href: "/urunler?tip=diger", label: "Diğer Ürünler" },
   { href: "/urunler?recete=gerekli", label: "Numaralı Lensler" },
-  { href: "/urunler?recete=serbest", label: "Numarasız Lensler" },
+  { href: "/urunler?recete=serbest", label: "Kozmetik Lensler" },
 ];
 
 const blogDropdown = [
@@ -109,14 +110,9 @@ export default function Navbar() {
         <div className="flex justify-between items-center px-6 h-full max-w-[1280px] mx-auto gap-4">
 
           {/* ── Marka & Navigasyon ── */}
-          <div className="flex items-center gap-5 min-w-0">
-            <Link href="/" className="flex-shrink-0 group">
-              <span
-                className="font-bold text-[#003d9b] group-hover:text-[#0052cc] transition-colors duration-200"
-                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "35px", lineHeight: "32px" }}
-              >
-                Hepsilens
-              </span>
+          <div className="flex items-center gap-3 xl:gap-5 min-w-0">
+            <Link href="/" className="flex-shrink-0 group pt-1">
+              <Logo scale={1.15} className="group-hover:opacity-90 transition-opacity duration-200" />
             </Link>
 
             <nav className="hidden lg:flex items-center">
@@ -124,11 +120,11 @@ export default function Navbar() {
                 <Link
                   key={l.href}
                   href={l.href}
-                  className="relative px-3 py-2 text-[#434654] hover:text-[#003d9b] transition-colors duration-200 group whitespace-nowrap"
-                  style={{ fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 600 }}
+                  className="relative px-1.5 xl:px-3 py-2 text-[#434654] hover:text-[#003d9b] transition-colors duration-200 group whitespace-nowrap text-xs xl:text-[13px] font-semibold"
+                  style={{ fontFamily: "'Inter', sans-serif" }}
                 >
                   {l.label}
-                  <span className="absolute bottom-0 left-3 right-3 h-[2px] bg-[#003d9b] scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left rounded-full" />
+                  <span className="absolute bottom-0 left-1.5 xl:left-3 right-1.5 xl:right-3 h-[2px] bg-[#003d9b] scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left rounded-full" />
                 </Link>
               ))}
 
@@ -136,8 +132,8 @@ export default function Navbar() {
               <div className="relative" ref={blogRef} onMouseEnter={() => setBlogOpen(true)} onMouseLeave={() => setBlogOpen(false)}>
                 <button
                   onClick={() => setBlogOpen((o) => !o)}
-                  className="relative px-3 py-2 text-[#434654] hover:text-[#003d9b] transition-colors duration-200 flex items-center gap-0.5 group whitespace-nowrap"
-                  style={{ fontFamily: "'Inter', sans-serif", fontSize: "13px", fontWeight: 600 }}
+                  className="relative px-1.5 xl:px-3 py-2 text-[#434654] hover:text-[#003d9b] transition-colors duration-200 flex items-center gap-0.5 group whitespace-nowrap text-xs xl:text-[13px] font-semibold"
+                  style={{ fontFamily: "'Inter', sans-serif" }}
                 >
                   Blog
                   <span
@@ -178,7 +174,7 @@ export default function Navbar() {
             <div className="relative hidden md:block" ref={searchRef}>
               <form onSubmit={handleSubmit}>
                 <div
-                  className="flex items-center bg-[#f3f4f6] px-4 py-2 rounded-[0.75rem] border transition-all duration-200 group mr-5"
+                  className="flex items-center bg-[#f3f4f6] px-3 xl:px-4 py-2 rounded-[0.75rem] border transition-all duration-200 group mr-1.5 xl:mr-3"
                   style={{
                     borderColor: searchOpen ? "#003d9b" : "#c3c6d6",
                     boxShadow: searchOpen ? "0 0 0 3px rgba(0,61,155,0.12)" : "none",
@@ -192,7 +188,7 @@ export default function Navbar() {
                   </span>
                   <input
                     ref={inputRef}
-                    className="bg-transparent border-none outline-none text-[13px] w-36 xl:w-48 text-[#191c1e] placeholder-[#737685]"
+                    className="bg-transparent border-none outline-none text-[13px] w-24 lg:w-28 xl:w-44 text-[#191c1e] placeholder-[#737685]"
                     placeholder="Lens ara..."
                     type="text"
                     value={query}
@@ -415,14 +411,12 @@ export default function Navbar() {
             {/* Sipariş Takibi */}
             <Link
               href="/siparis-takip"
-              className="hidden md:flex items-center gap-1.5 px-2.5 py-2 rounded-[0.5rem] text-[#434654] hover:text-[#003d9b] hover:bg-[#f3f4f6] transition-all duration-200 group hover:scale-105"
-              style={{ fontSize: "11px", fontWeight: 600 }}
+              className="hidden md:flex items-center justify-center p-4 rounded-[0.5rem] text-[#434654] hover:text-[#003d9b] hover:bg-[#f3f4f6] transition-all duration-200 hover:scale-110 group"
               title="Sipariş Takibi"
             >
-              <span className="material-symbols-outlined group-hover:scale-110 transition-transform duration-200" style={{ fontSize: "20px" }}>
+              <span className="material-symbols-outlined group-hover:scale-110 transition-transform duration-200 block" style={{ fontSize: "22px" }}>
                 local_shipping
               </span>
-              <span className="hidden xl:block whitespace-nowrap">Sipariş Takibi</span>
             </Link>
 
             {/* Mobil Hamburger */}
