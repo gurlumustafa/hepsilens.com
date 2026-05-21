@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { mockOrders, mockTickets, STATUS_LABELS, STATUS_COLORS, TICKET_PRIORITY_COLORS, TICKET_PRIORITY_LABELS } from "@/lib/adminData";
+import { mockOrders, mockTickets, Order, STATUS_LABELS, STATUS_COLORS, TICKET_PRIORITY_COLORS, TICKET_PRIORITY_LABELS } from "@/lib/adminData";
 
 const StatCard = ({ icon, label, value, sub, color, bg }: { icon: string; label: string; value: string | number; sub?: string; color: string; bg: string }) => (
   <div style={{ background: "white", borderRadius: "16px", padding: "20px 24px", border: "1px solid #e5e7eb", display: "flex", alignItems: "flex-start", gap: "16px" }}>
@@ -20,6 +20,14 @@ export default function AdminDashboard() {
   const [activeUsers, setActiveUsers] = useState(47);
   const [newOrderAlert, setNewOrderAlert] = useState<string | null>(null);
   const [orders, setOrders] = useState(mockOrders);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const newOrders = orders.filter(o => o.status === "yeni").length;
   const totalOrders = orders.length;
@@ -37,17 +45,15 @@ export default function AdminDashboard() {
   // Simulate incoming new order
   useEffect(() => {
     const id = setTimeout(() => {
-      const fakeOrder = {
-        id: "HL-2026-0092",
-        customer: "Burak Şahin",
-        email: "burak@gmail.com",
-        phone: "0536 000 1122",
-        product: "Acuvue Oasys 1-Day (90'lı)",
-        amount: 899.90,
-        status: "yeni" as const,
-        date: "2026-05-21 09:35",
-        city: "İstanbul",
-        requiresPrescription: true,
+      const fakeOrder: Order = {
+        id: "HL-2026-0092", orderCode: "#2092",
+        customer: "Burak Şahin", email: "burak@gmail.com", phone: "0536 000 1122",
+        product: "Acuvue Oasys 1-Day (90'lı)", quantity: 1, amount: 899.90,
+        status: "yeni", date: "2026-05-21 09:35",
+        address: "Bağdat Cad. No: 120 D: 5", neighborhood: "Caddebostan Mah.",
+        district: "Kadıköy", city: "İstanbul", postalCode: "34728",
+        requiresPrescription: true, prescriptionStatus: "bekleniyor",
+        paymentMethod: "Kredi Kartı", installments: 3, cardLast4: "1234",
       };
       setOrders(prev => [fakeOrder, ...prev]);
       setNewOrderAlert(fakeOrder.id);
@@ -83,7 +89,7 @@ export default function AdminDashboard() {
         <StatCard icon="payments" label="Bugünkü Ciro" value={`₺${todayRevenue.toLocaleString("tr-TR", { maximumFractionDigits: 0 })}`} sub="Bugün" color="#00687b" bg="#ccf4f9" />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "20px" }}>
 
         {/* Son siparişler */}
         <div style={{ background: "white", borderRadius: "16px", border: "1px solid #e5e7eb", overflow: "hidden" }}>

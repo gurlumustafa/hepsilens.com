@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Slide = {
   id: number;
@@ -47,6 +47,14 @@ export default function AdminBanner() {
   const [slides, setSlides] = useState<Slide[]>(defaultSlides);
   const [selected, setSelected] = useState(0);
   const [saved, setSaved] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const current = slides[selected];
 
@@ -73,23 +81,23 @@ export default function AdminBanner() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "center", flexDirection: isMobile ? "column" : "row", gap: "12px" }}>
         <div>
-          <p style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "22px", fontWeight: 800, color: "#111827" }}>Banner Yönetimi</p>
+          <p style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: isMobile ? "18px" : "22px", fontWeight: 800, color: "#111827" }}>Banner Yönetimi</p>
           <p style={{ fontSize: "13px", color: "#6b7280" }}>Ana sayfa hero slider içeriklerini buradan düzenleyin</p>
         </div>
-        <div style={{ display: "flex", gap: "10px" }}>
-          <button onClick={addSlide} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "9px 18px", borderRadius: "10px", border: "1px solid #e5e7eb", background: "white", fontSize: "13px", fontWeight: 600, color: "#374151", cursor: "pointer" }}>
+        <div style={{ display: "flex", gap: "10px", alignSelf: isMobile ? "stretch" : undefined }}>
+          <button onClick={addSlide} style={{ flex: isMobile ? 1 : undefined, display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "9px 18px", borderRadius: "10px", border: "1px solid #e5e7eb", background: "white", fontSize: "13px", fontWeight: 600, color: "#374151", cursor: "pointer" }}>
             <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>add</span>Slide Ekle
           </button>
-          <button onClick={handleSave} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "9px 20px", borderRadius: "10px", background: saved ? "#16a34a" : "#003d9b", color: "white", border: "none", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>
+          <button onClick={handleSave} style={{ flex: isMobile ? 1 : undefined, display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "9px 20px", borderRadius: "10px", background: saved ? "#16a34a" : "#003d9b", color: "white", border: "none", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>
             <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>{saved ? "check_circle" : "save"}</span>
             {saved ? "Kaydedildi!" : "Kaydet"}
           </button>
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: "20px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "220px 1fr", gap: "20px" }}>
 
         {/* Slide listesi */}
         <div style={{ background: "white", borderRadius: "14px", border: "1px solid #e5e7eb", overflow: "hidden" }}>

@@ -1,11 +1,19 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { lenses } from "@/lib/data";
 
 export default function AdminPopuler() {
   const sorted = [...lenses].sort((a, b) => b.reviewCount - a.reviewCount);
   const [selected, setSelected] = useState<number[]>(sorted.slice(0, 4).map(l => l.id));
   const [saved, setSaved] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const toggle = (id: number) => {
     setSelected(prev =>
@@ -38,18 +46,18 @@ export default function AdminPopuler() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "center", flexDirection: isMobile ? "column" : "row", gap: "12px" }}>
         <div>
-          <p style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "22px", fontWeight: 800, color: "#111827" }}>Popüler Ürünler</p>
+          <p style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: isMobile ? "18px" : "22px", fontWeight: 800, color: "#111827" }}>Popüler Ürünler</p>
           <p style={{ fontSize: "13px", color: "#6b7280" }}>Ana sayfadaki &quot;Popüler Ürünler&quot; bölümünü buradan yönetin. Maksimum 8 ürün.</p>
         </div>
-        <button onClick={handleSave} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "9px 20px", borderRadius: "10px", background: saved ? "#16a34a" : "#003d9b", color: "white", border: "none", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>
+        <button onClick={handleSave} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "9px 20px", borderRadius: "10px", background: saved ? "#16a34a" : "#003d9b", color: "white", border: "none", fontSize: "13px", fontWeight: 700, cursor: "pointer", alignSelf: isMobile ? "stretch" : undefined, justifyContent: isMobile ? "center" : undefined }}>
           <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>{saved ? "check_circle" : "save"}</span>
           {saved ? "Kaydedildi!" : "Kaydet"}
         </button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: "20px" }}>
 
         {/* Seçili ürünler */}
         <div style={{ background: "white", borderRadius: "14px", border: "1px solid #e5e7eb", overflow: "hidden" }}>

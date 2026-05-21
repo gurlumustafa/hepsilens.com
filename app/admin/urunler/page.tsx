@@ -15,8 +15,15 @@ export default function AdminUrunler() {
   const [discountModal, setDiscountModal] = useState<DiscountModal>(null);
   const [discountPct, setDiscountPct] = useState("10");
   const [discountSaved, setDiscountSaved] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => { setDiscounts(getAllDiscounts()); }, []);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const filtered = lenses.filter(l => {
     if (deletedIds.includes(l.id)) return false;
@@ -56,7 +63,7 @@ export default function AdminUrunler() {
       {/* İndirim modalı */}
       {discountModal && (
         <div style={{ position: "fixed", inset: 0, zIndex: 500, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setDiscountModal(null)}>
-          <div style={{ background: "white", borderRadius: "20px", padding: "28px", width: "360px", boxShadow: "0 24px 60px rgba(0,0,0,0.25)" }} onClick={e => e.stopPropagation()}>
+          <div style={{ background: "white", borderRadius: "20px", padding: "24px", width: "min(360px, calc(100vw - 32px))", boxShadow: "0 24px 60px rgba(0,0,0,0.25)", margin: "0 16px" }} onClick={e => e.stopPropagation()}>
             <p style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "16px", fontWeight: 800, color: "#111827", marginBottom: "4px" }}>İndirim Ekle</p>
             <p style={{ fontSize: "13px", color: "#6b7280", marginBottom: "20px" }}>{discountModal.name}</p>
 
@@ -103,12 +110,12 @@ export default function AdminUrunler() {
       )}
 
       {/* Başlık */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "center", flexDirection: isMobile ? "column" : "row", gap: "12px" }}>
         <div>
-          <p style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "22px", fontWeight: 800, color: "#111827" }}>Ürün Yönetimi</p>
+          <p style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: isMobile ? "18px" : "22px", fontWeight: 800, color: "#111827" }}>Ürün Yönetimi</p>
           <p style={{ fontSize: "13px", color: "#6b7280" }}>{filtered.length} ürün listeleniyor · {discounts.length} aktif indirim</p>
         </div>
-        <Link href="/admin/urunler/yeni" style={{ display: "flex", alignItems: "center", gap: "8px", background: "#003d9b", color: "white", padding: "10px 20px", borderRadius: "10px", fontSize: "13px", fontWeight: 700, textDecoration: "none" }}>
+        <Link href="/admin/urunler/yeni" style={{ display: "flex", alignItems: "center", gap: "8px", background: "#003d9b", color: "white", padding: "10px 20px", borderRadius: "10px", fontSize: "13px", fontWeight: 700, textDecoration: "none", alignSelf: isMobile ? "stretch" : undefined, justifyContent: isMobile ? "center" : undefined }}>
           <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>add</span>Yeni Ürün Ekle
         </Link>
       </div>
@@ -128,7 +135,7 @@ export default function AdminUrunler() {
       </div>
 
       {/* Tablo */}
-      <div style={{ background: "white", borderRadius: "14px", border: "1px solid #e5e7eb", overflow: "hidden" }}>
+      <div style={{ background: "white", borderRadius: "14px", border: "1px solid #e5e7eb", overflow: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ background: "#f9fafb", borderBottom: "1px solid #f3f4f6" }}>

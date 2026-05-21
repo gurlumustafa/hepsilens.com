@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { mockTickets, SupportTicket, TicketStatus, TICKET_STATUS_COLORS, TICKET_STATUS_LABELS, TICKET_PRIORITY_COLORS, TICKET_PRIORITY_LABELS } from "@/lib/adminData";
 
 const ALL_STATUSES: TicketStatus[] = ["acik", "yanitlandi", "kapali"];
@@ -9,6 +9,14 @@ export default function AdminDestek() {
   const [filter, setFilter] = useState<TicketStatus | "all">("all");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<SupportTicket | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const filtered = tickets.filter(t => {
     const matchF = filter === "all" || t.status === filter;
@@ -39,7 +47,7 @@ export default function AdminDestek() {
       </div>
 
       {/* Filtreler */}
-      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: "8px", overflowX: "auto", paddingBottom: "4px", scrollbarWidth: "none" }}>
         <button onClick={() => setFilter("all")} style={{ padding: "7px 14px", borderRadius: "999px", border: "1px solid", fontSize: "12px", fontWeight: 700, cursor: "pointer", background: filter === "all" ? "#111827" : "white", color: filter === "all" ? "white" : "#374151", borderColor: filter === "all" ? "#111827" : "#e5e7eb" }}>
           Tümü ({tickets.length})
         </button>
@@ -47,7 +55,7 @@ export default function AdminDestek() {
           const sc = TICKET_STATUS_COLORS[s];
           const active = filter === s;
           return (
-            <button key={s} onClick={() => setFilter(s)} style={{ padding: "7px 14px", borderRadius: "999px", border: "1px solid", fontSize: "12px", fontWeight: 700, cursor: "pointer", background: active ? sc.text : sc.bg, color: active ? "white" : sc.text, borderColor: sc.text }}>
+            <button key={s} onClick={() => setFilter(s)} style={{ padding: "7px 14px", borderRadius: "999px", border: "1px solid", fontSize: "12px", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0, background: active ? sc.text : sc.bg, color: active ? "white" : sc.text, borderColor: sc.text }}>
               {TICKET_STATUS_LABELS[s]} ({counts[s]})
             </button>
           );
@@ -98,16 +106,20 @@ export default function AdminDestek() {
           )}
         </div>
 
-        {/* Detay paneli */}
+        {/* Detay paneli — desktop yan panel, mobile full-screen modal */}
         {selected && (
-          <div style={{ width: "300px", background: "white", borderRadius: "14px", border: "1px solid #e5e7eb", flexShrink: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          <div style={isMobile ? { position: "fixed", inset: 0, zIndex: 600, display: "flex", flexDirection: "column" } : { width: "300px", background: "white", borderRadius: "14px", border: "1px solid #e5e7eb", flexShrink: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            {/* Mobile backdrop */}
+            {isMobile && <div onClick={() => setSelected(null)} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} />}
+            {/* Panel container */}
+            <div style={isMobile ? { position: "relative", background: "white", marginTop: "60px", borderRadius: "20px 20px 0 0", flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" } : { display: "contents" }}>
             {/* Header */}
-            <div style={{ padding: "14px 18px", borderBottom: "1px solid #f3f4f6", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ padding: "14px 18px", borderBottom: "1px solid #f3f4f6", display: "flex", justifyContent: "space-between", alignItems: "center", background: "white", flexShrink: 0 }}>
               <div>
                 <p style={{ fontSize: "12px", fontWeight: 800, color: "#003d9b", fontFamily: "monospace" }}>{selected.id}</p>
                 <span style={{ fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "999px", background: TICKET_STATUS_COLORS[selected.status].bg, color: TICKET_STATUS_COLORS[selected.status].text }}>{TICKET_STATUS_LABELS[selected.status]}</span>
               </div>
-              <button onClick={() => setSelected(null)} style={{ background: "transparent", border: "none", cursor: "pointer", color: "#9ca3af", display: "flex" }}>
+              <button onClick={() => setSelected(null)} style={{ background: isMobile ? "#f3f4f6" : "transparent", border: "none", cursor: "pointer", color: "#374151", display: "flex", padding: "6px", borderRadius: "999px" }}>
                 <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>close</span>
               </button>
             </div>
@@ -192,6 +204,7 @@ export default function AdminDestek() {
                 </div>
               </div>
             </div>
+            </div>{/* Panel container end */}
           </div>
         )}
       </div>
