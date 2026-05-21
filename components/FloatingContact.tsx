@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 type FormState = {
   name: string;
   email: string;
+  phone: string;
   subject: string;
   message: string;
 };
@@ -21,7 +22,7 @@ const subjects = [
 export default function FloatingContact() {
   const [open, setOpen]       = useState(false);
   const [sent, setSent]       = useState(false);
-  const [form, setForm]       = useState<FormState>({ name: "", email: "", subject: subjects[0], message: "" });
+  const [form, setForm]       = useState<FormState>({ name: "", email: "", phone: "", subject: subjects[0], message: "" });
   const [errors, setErrors]   = useState<Partial<FormState>>({});
   const panelRef              = useRef<HTMLDivElement>(null);
 
@@ -56,6 +57,7 @@ export default function FloatingContact() {
     if (!form.email.trim())   e.email   = "E-posta gerekli";
     else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Geçerli bir e-posta girin";
     if (!form.message.trim()) e.message = "Mesaj gerekli";
+    // phone isteğe bağlı — boş bırakılabilir
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -67,7 +69,7 @@ export default function FloatingContact() {
   }
 
   function handleReset() {
-    setForm({ name: "", email: "", subject: subjects[0], message: "" });
+    setForm({ name: "", email: "", phone: "", subject: subjects[0], message: "" });
     setErrors({});
     setSent(false);
     setOpen(false);
@@ -143,6 +145,21 @@ export default function FloatingContact() {
                     onBlur={e  => (e.target.style.borderColor = errors.name ? "#fca5a5" : "#c3c6d6")}
                   />
                   {errors.name && <p className="text-red-500" style={{ fontSize: "11px" }}>{errors.name}</p>}
+                </div>
+
+                {/* Telefon */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[#434654] font-semibold" style={{ fontSize: "11px" }}>Telefon</label>
+                  <input
+                    type="tel"
+                    value={form.phone}
+                    onChange={f("phone")}
+                    placeholder="05XX XXX XX XX"
+                    className="bg-[#f8f9fb] border rounded-xl px-3.5 py-2.5 outline-none transition-all"
+                    style={{ fontSize: "13px", borderColor: "#c3c6d6" }}
+                    onFocus={e => (e.target.style.borderColor = "#003d9b")}
+                    onBlur={e  => (e.target.style.borderColor = "#c3c6d6")}
+                  />
                 </div>
 
                 {/* E-posta */}
