@@ -173,7 +173,7 @@ export default function QuickViewModal({ product, onClose }: Props) {
             ) : (
               <button
                 onClick={() => { addItem({ id: product.id, name: product.name, brand: product.brand, price: product.price, imageUrl: product.imageUrl }); onClose(); }}
-                className="flex-1 bg-[#6a3600] text-white font-bold py-3 rounded-xl hover:bg-[#8c4a00] active:scale-95 transition-all flex items-center justify-center gap-2"
+                className="flex-1 bg-[#d97706] text-white font-bold py-3 rounded-xl hover:bg-[#b45309] active:scale-95 transition-all flex items-center justify-center gap-2"
                 style={{ fontSize: "13px", fontFamily: "'Inter'", letterSpacing: "0.04em" }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>add_shopping_cart</span>

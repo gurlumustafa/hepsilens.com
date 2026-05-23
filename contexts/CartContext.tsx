@@ -8,6 +8,8 @@ export type CartItem = {
   price: number;
   imageUrl?: string;
   quantity: number;
+  needsPrescription?: boolean;
+  prescriptionFile?: string | null;
 };
 
 type CartContextType = {
@@ -15,11 +17,13 @@ type CartContextType = {
   count: number;
   total: number;
   sidebarOpen: boolean;
+  hasPendingPrescription: boolean;
   openSidebar: () => void;
   closeSidebar: () => void;
   addItem: (item: Omit<CartItem, "quantity">) => void;
   removeItem: (id: number) => void;
   updateQty: (id: number, qty: number) => void;
+  updatePrescription: (id: number, file: string | null) => void;
   clearCart: () => void;
 };
 
@@ -63,13 +67,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
     persist(items.map((i) => i.id === id ? { ...i, quantity: qty } : i));
   }
 
+  function updatePrescription(id: number, file: string | null) {
+    persist(items.map((i) => i.id === id ? { ...i, prescriptionFile: file } : i));
+  }
+
   function clearCart() { persist([]); }
 
   const count = items.reduce((s, i) => s + i.quantity, 0);
   const total = items.reduce((s, i) => s + i.price * i.quantity, 0);
+  const hasPendingPrescription = items.some((i) => i.needsPrescription && !i.prescriptionFile);
 
   return (
-    <CartContext.Provider value={{ items, count, total, sidebarOpen, openSidebar: () => setSidebarOpen(true), closeSidebar: () => setSidebarOpen(false), addItem, removeItem, updateQty, clearCart }}>
+    <CartContext.Provider value={{ items, count, total, sidebarOpen, hasPendingPrescription, openSidebar: () => setSidebarOpen(true), closeSidebar: () => setSidebarOpen(false), addItem, removeItem, updateQty, updatePrescription, clearCart }}>
       {children}
     </CartContext.Provider>
   );

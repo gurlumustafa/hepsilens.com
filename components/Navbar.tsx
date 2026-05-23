@@ -110,9 +110,9 @@ export default function Navbar() {
         <div className="flex justify-between items-center px-6 h-full max-w-[1280px] mx-auto gap-4">
 
           {/* ── Marka & Navigasyon ── */}
-          <div className="flex items-center gap-3 xl:gap-5 min-w-0">
-            <Link href="/" className="flex-shrink-0 group pt-1">
-              <Logo scale={1.15} className="group-hover:opacity-90 transition-opacity duration-200" />
+          <div className="flex items-center gap-3 xl:gap-3 min-w-0">
+            <Link href="/" className="flex-shrink-0">
+              <Logo scale={1.15} />
             </Link>
 
             <nav className="hidden lg:flex items-center">

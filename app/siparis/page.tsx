@@ -57,15 +57,31 @@ export default function SiparisPage() {
 
   // Reçete hazır mı?
   const rxReady = !needsRx
-    || (rxSource === "profile" && selectedRxId)
-    || (rxSource === "upload" && uploadedRx);
+    || (rxSource === "profile" && !!selectedRxId)
+    || (rxSource === "upload" && !!uploadedRx);
 
   // Adres hazır mı?
   const addrReady = addrMode === "saved"
     ? !!selectedAddrId
     : !!(newAddr.city && newAddr.district && newAddr.fullAddress);
 
-  const canSubmit = contact.fullName && contact.phone && addrReady && rxReady && items.length > 0;
+  // Kart bilgileri hazır mı?
+  const cardReady = payMethod !== "card"
+    || (
+      card.number.replace(/\s/g, "").length === 16 &&
+      card.name.trim().length > 0 &&
+      card.expiry.length === 5 &&
+      card.cvv.length === 3
+    );
+
+  const canSubmit = !!(
+    contact.fullName &&
+    contact.phone &&
+    addrReady &&
+    rxReady &&
+    cardReady &&
+    items.length > 0
+  );
 
   function handlePlace() {
     if (!canSubmit) return;
@@ -150,14 +166,18 @@ export default function SiparisPage() {
               {items.map((item) => {
                 const isRxItem = lenses.find((l) => l.id === item.id)?.color === "clear";
                 return (
-                  <div key={item.id} className="flex gap-3 py-3 border-b border-[#f0f1f5] last:border-0">
-                    <div className="w-14 h-14 rounded-lg bg-[#f4f5f9] border border-[#edeef3] flex items-center justify-center shrink-0">
+                  <Link
+                    key={item.id}
+                    href={`/urun/${item.id}`}
+                    className="flex gap-3 py-3 border-b border-[#f0f1f5] last:border-0 group hover:bg-[#f8f9fb] rounded-lg px-2 -mx-2 transition-colors"
+                  >
+                    <div className="w-14 h-14 rounded-lg bg-[#f4f5f9] border border-[#edeef3] flex items-center justify-center shrink-0 group-hover:border-[#003d9b] transition-colors">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={item.imageUrl || "/placeholder-lens.jpg"} alt={item.name} className="w-12 h-12 object-contain mix-blend-multiply" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[#737685] uppercase" style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.08em" }}>{item.brand}</p>
-                      <p className="font-semibold text-[#191c1e] truncate" style={{ fontSize: "13px" }}>{item.name}</p>
+                      <p className="font-semibold text-[#191c1e] truncate group-hover:text-[#003d9b] transition-colors" style={{ fontSize: "13px" }}>{item.name}</p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <p className="text-[#737685]" style={{ fontSize: "12px" }}>× {item.quantity}</p>
                         {isRxItem && (
@@ -168,7 +188,7 @@ export default function SiparisPage() {
                     <p className="font-bold text-[#003d9b] shrink-0" style={{ fontSize: "14px", fontFamily: "'Plus Jakarta Sans'" }}>
                       {(item.price * item.quantity).toLocaleString("tr-TR")} ₺
                     </p>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
@@ -428,10 +448,15 @@ export default function SiparisPage() {
             <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
               <span className="material-symbols-outlined text-amber-600 shrink-0" style={{ fontSize: "16px", fontVariationSettings: "'FILL' 1" }}>info</span>
               <p style={{ fontSize: "12px", color: "#92400e" }}>
-                {!contact.fullName || !contact.phone ? "İletişim bilgilerini doldurun." :
-                 !addrReady ? "Teslimat adresi ekleyin." :
-                 !rxReady ? "Reçete yükleyin veya profilden seçin." :
-                 "Bilgileri tamamlayın."}
+                {(!contact.fullName || !contact.phone)
+                  ? "İletişim bilgilerini doldurun."
+                  : !addrReady
+                  ? "Teslimat adresini ekleyin."
+                  : !rxReady
+                  ? "Reçete gerektiren ürün var — reçete yükleyin veya profilden seçin."
+                  : !cardReady
+                  ? "Kart bilgilerini eksiksiz doldurun."
+                  : "Tüm alanları doldurun."}
               </p>
             </div>
           )}
@@ -444,7 +469,7 @@ export default function SiparisPage() {
             className="w-full py-4 rounded-xl font-bold text-white flex items-center justify-center gap-2 active:scale-95"
             style={{
               background: canSubmit
-                ? (btnHover ? "#15803d" : "#16a34a")
+                ? (btnHover ? "#b45309" : "#d97706")
                 : "#c3c6d6",
               color: canSubmit ? "#ffffff" : "#737685",
               cursor: canSubmit ? "pointer" : "not-allowed",
@@ -452,9 +477,9 @@ export default function SiparisPage() {
               fontFamily: "'Inter'",
               letterSpacing: "0.03em",
               boxShadow: canSubmit
-                ? (btnHover ? "0 8px 24px rgba(22,163,74,0.45)" : "0 4px 16px rgba(22,163,74,0.3)")
+                ? (btnHover ? "0 8px 24px rgba(217,119,6,0.45)" : "0 4px 16px rgba(217,119,6,0.3)")
                 : "none",
-              transform: canSubmit && btnHover ? "translateY(-2px)" : "translateY(0)",
+              transform: canSubmit && btnHover ? "scale(1.02) translateY(-2px)" : "scale(1) translateY(0)",
               transition: "all 0.18s ease",
             }}
           >

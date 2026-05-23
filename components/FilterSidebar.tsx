@@ -19,22 +19,22 @@ type Props = {
 };
 
 const LENS_TYPES = [
-  { value: "saydam",     label: "Saydam Lens",                icon: "water_drop" },
-  { value: "renkli",     label: "Renkli Lens",                icon: "palette" },
-  { value: "toric",      label: "Toric (Astigmat) Lens",      icon: "adjust" },
-  { value: "multifocal", label: "Multifocal (Uzak-Yakın)",    icon: "center_focus_strong" },
-  { value: "indirimli",  label: "İndirimli Lens Setleri",     icon: "local_offer" },
+  { value: "saydam", label: "Saydam Lens", icon: "water_drop" },
+  { value: "renkli", label: "Renkli Lens", icon: "palette" },
+  { value: "toric", label: "Toric (Astigmat) Lens", icon: "adjust" },
+  { value: "multifocal", label: "Multifocal (Uzak-Yakın)", icon: "center_focus_strong" },
+  { value: "indirimli", label: "İndirimli Lens Setleri", icon: "local_offer" },
 ];
 
 const DURATIONS = [
-  { value: "daily",     label: "Günlük Kullan-At",  icon: "wb_sunny" },
-  { value: "biweekly",  label: "2 Haftalık",         icon: "date_range" },
-  { value: "monthly",   label: "Aylık",              icon: "calendar_month" },
+  { value: "daily", label: "Günlük Kullan-At", icon: "wb_sunny" },
+  { value: "biweekly", label: "2 Haftalık", icon: "date_range" },
+  { value: "monthly", label: "Aylık", icon: "calendar_month" },
 ];
 
 const CATEGORIES = [
   { value: "solution", label: "Lens Solüsyonları", icon: "water_drop" },
-  { value: "eyedrop",  label: "Göz Damlaları",     icon: "opacity" },
+  { value: "eyedrop", label: "Göz Damlaları", icon: "opacity" },
 ];
 
 /* ── Yardımcı: bölüm başlığı ── */

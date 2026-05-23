@@ -697,8 +697,8 @@ function HesapContent() {
                       <div className="flex gap-2 mt-1">
                         <button
                           onClick={() => addItem({ id: product.id, name: product.name, brand: product.brand, price: product.price, imageUrl: product.imageUrl })}
-                          className="flex-1 py-2 rounded-lg font-bold text-white flex items-center justify-center gap-1 hover:opacity-90 transition-opacity"
-                          style={{ background: "#8c4a00", fontSize: "12px" }}
+                          className="flex-1 py-2 rounded-lg font-bold text-white flex items-center justify-center gap-1 bg-[#d97706] hover:bg-[#b45309] active:scale-95 transition-all duration-200 shadow-sm hover:shadow-md"
+                          style={{ fontSize: "12px" }}
                         >
                           <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>add_shopping_cart</span>
                           Sepete Ekle

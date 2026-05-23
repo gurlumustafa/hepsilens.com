@@ -61,7 +61,7 @@ function AccessoryCard({ item }: { item: Accessory }) {
 
       {/* Sepet butonu */}
       <button
-        className="flex-shrink-0 self-center bg-[#6a3600] text-white p-2.5 rounded-[0.5rem] hover:bg-[#8c4a00] hover:scale-110 active:scale-95 transition-all duration-200 shadow-sm hover:shadow-md"
+        className="flex-shrink-0 self-center bg-[#d97706] text-white p-2.5 rounded-[0.5rem] hover:bg-[#b45309] hover:scale-110 active:scale-95 transition-all duration-200 shadow-sm hover:shadow-md"
         onClick={(e) => e.preventDefault()}
       >
         <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>add_shopping_cart</span>

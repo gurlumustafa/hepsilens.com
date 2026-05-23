@@ -141,6 +141,17 @@ export default function CartSidebar() {
                         <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>delete</span>
                       </button>
                     </div>
+
+                    {/* Reçete rozeti */}
+                    {item.needsPrescription && (
+                      <span
+                        className="inline-flex items-center gap-1 mt-1.5"
+                        style={{ fontSize: "9px", fontWeight: 700, color: "#003d9b", letterSpacing: "0.06em" }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: "11px" }}>receipt_long</span>
+                        REÇETE GEREKTİRİR
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}
@@ -168,6 +179,7 @@ export default function CartSidebar() {
                   <p className="text-green-700 font-semibold" style={{ fontSize: "12px" }}>Ücretsiz kargo kazandınız!</p>
                 </div>
               )}
+
               <Link
                 href="/siparis"
                 onClick={closeSidebar}
@@ -175,12 +187,12 @@ export default function CartSidebar() {
                 onMouseLeave={() => setCheckoutHover(false)}
                 className="w-full py-3.5 rounded-xl font-bold text-white text-center flex items-center justify-center gap-2 active:scale-95"
                 style={{
-                  background: checkoutHover ? "#15803d" : "#16a34a",
+                  background: checkoutHover ? "#b45309" : "#d97706",
                   fontSize: "14px",
                   fontFamily: "'Inter'",
                   letterSpacing: "0.03em",
-                  boxShadow: checkoutHover ? "0 8px 24px rgba(22,163,74,0.45)" : "0 4px 16px rgba(22,163,74,0.3)",
-                  transform: checkoutHover ? "translateY(-2px)" : "translateY(0)",
+                  boxShadow: checkoutHover ? "0 8px 24px rgba(217,119,6,0.45)" : "0 4px 16px rgba(217,119,6,0.3)",
+                  transform: checkoutHover ? "scale(1.02) translateY(-2px)" : "scale(1) translateY(0)",
                   transition: "all 0.18s ease",
                 }}
               >

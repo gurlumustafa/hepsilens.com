@@ -80,8 +80,8 @@ export default function ProductDetail() {
   const [selectedDia] = useState(`${"dia" in (lens || {}) ? (lens as Lens).dia : 14.2} mm`);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<TabId>("details");
-  const [prescriptionFile, setPrescriptionFile] = useState<string | null>(null);
   const [added, setAdded] = useState(false);
+  const [hoverBtn, setHoverBtn] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -107,8 +107,14 @@ export default function ProductDetail() {
   const needsPrescription = !isAccessory && (lens as Lens).color === "clear";
 
   const handleAddToCart = () => {
-    if (needsPrescription && !prescriptionFile) return;
-    addItem({ id: lens.id, name: lens.name, brand: lens.brand, price: lens.price, imageUrl: lens.imageUrl });
+    addItem({
+      id: lens.id,
+      name: lens.name,
+      brand: lens.brand,
+      price: lens.price,
+      imageUrl: lens.imageUrl,
+      needsPrescription: needsPrescription,
+    });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
@@ -159,9 +165,27 @@ export default function ProductDetail() {
             )}
           </div>
 
-          {/* Kısa ürün özeti — reçete gerektirmeyen lensler */}
-          {!needsPrescription && !isAccessory && (
+          {/* Ürün avantajları — tüm lensler */}
+          {!isAccessory && (
             <div className="rounded-xl border border-[#edeef3] bg-white p-6 flex flex-col gap-4">
+              {/* Reçete bilgi notu */}
+              {needsPrescription && (
+                <div
+                  className="flex items-center gap-2.5 rounded-lg px-3.5 py-2.5"
+                  style={{ background: "#f0f4ff", border: "1px solid #c8d6f7" }}
+                >
+                  <span
+                    className="material-symbols-outlined shrink-0"
+                    style={{ fontSize: "16px", color: "#003d9b", fontVariationSettings: "'FILL' 1" }}
+                  >
+                    receipt_long
+                  </span>
+                  <p style={{ fontSize: "12px", color: "#003d9b", fontWeight: 600, lineHeight: "17px" }}>
+                    Bu ürün reçete gerektirir — reçetenizi sepete ekledikten sonra yükleyebilirsiniz.
+                  </p>
+                </div>
+              )}
+
               <p className="text-[#434654] leading-relaxed line-clamp-3" style={{ fontSize: "14px", lineHeight: "22px" }}>
                 {lens.description}
               </p>
@@ -193,208 +217,6 @@ export default function ProductDetail() {
                   </li>
                 ))}
               </ul>
-            </div>
-          )}
-
-          {/* Prescription upload — clear lenses only */}
-          {needsPrescription && (
-            <div
-              className="flex-1 flex flex-col rounded-xl overflow-hidden"
-              style={{ border: "1.5px solid #c3c6d6", background: "#f8f9fb" }}
-            >
-              {/* ── Başlık ── */}
-              <div
-                className="flex items-center gap-3 px-5 py-4"
-                style={{
-                  background: prescriptionFile ? "#eaf2e8" : "#f0f4ff",
-                  borderBottom: prescriptionFile ? "1.5px solid #b8ddb5" : "1.5px solid #c8d6f7",
-                }}
-              >
-                {/* İkon yuvası */}
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                  style={{
-                    background: prescriptionFile ? "#c6e8c2" : "#dae2ff",
-                  }}
-                >
-                  <span
-                    className="material-symbols-outlined"
-                    style={{
-                      fontSize: "20px",
-                      color: prescriptionFile ? "#2e7d32" : "#003d9b",
-                      fontVariationSettings: "'FILL' 1",
-                    }}
-                  >
-                    {prescriptionFile ? "verified" : "receipt_long"}
-                  </span>
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <p
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: 700,
-                      color: "#191c1e",
-                      fontFamily: "'Plus Jakarta Sans'",
-                    }}
-                  >
-                    {prescriptionFile ? "Reçete Yüklendi" : "Reçete Yükleme"}
-                  </p>
-                  <p style={{ fontSize: "12px", color: "#737685", lineHeight: "16px", marginTop: "1px" }}>
-                    {prescriptionFile
-                      ? "Siparişinizi tamamlamaya hazırsınız."
-                      : "Bu ürün için geçerli bir reçete gereklidir."}
-                  </p>
-                </div>
-
-                {prescriptionFile && (
-                  <span
-                    className="px-2.5 py-1 rounded-full shrink-0"
-                    style={{
-                      fontSize: "9px",
-                      fontWeight: 800,
-                      background: "#003d9b",
-                      color: "#fff",
-                      letterSpacing: "0.08em",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    HAZIR
-                  </span>
-                )}
-              </div>
-
-              {/* ── İçerik ── */}
-              <div className="flex-1 flex flex-col p-5 bg-white">
-                {prescriptionFile ? (
-                  /* ── Yüklendi Durumu ── */
-                  <div className="flex-1 flex flex-col gap-3">
-                    {/* Dosya kartı */}
-                    <div
-                      className="flex items-center gap-3 rounded-xl px-4 py-3"
-                      style={{ background: "#f8f9fb", border: "1.5px solid #c3c6d6" }}
-                    >
-                      <div
-                        className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-                        style={{ background: "#dae2ff" }}
-                      >
-                        <span
-                          className="material-symbols-outlined"
-                          style={{ fontSize: "20px", color: "#003d9b", fontVariationSettings: "'FILL' 1" }}
-                        >
-                          description
-                        </span>
-                      </div>
-                      <span
-                        className="flex-1 truncate font-semibold"
-                        style={{ fontSize: "13px", color: "#191c1e" }}
-                      >
-                        {prescriptionFile}
-                      </span>
-                      <span
-                        className="material-symbols-outlined shrink-0"
-                        style={{ fontSize: "18px", color: "#003d9b", fontVariationSettings: "'FILL' 1" }}
-                      >
-                        check_circle
-                      </span>
-                    </div>
-
-                    {/* Eylemler */}
-                    <div className="flex gap-2 mt-auto">
-                      <label
-                        className="flex-1 cursor-pointer flex items-center justify-center gap-1.5 py-2.5 rounded-lg font-semibold transition-all hover:bg-[#dae2ff] hover:border-[#003d9b]"
-                        style={{
-                          fontSize: "12px",
-                          color: "#003d9b",
-                          border: "1.5px solid #c3c6d6",
-                          background: "#f8f9fb",
-                          fontFamily: "'Inter'",
-                        }}
-                      >
-                        <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>swap_horiz</span>
-                        Değiştir
-                        <input
-                          type="file"
-                          accept=".pdf,.jpg,.jpeg,.png"
-                          className="hidden"
-                          onChange={(e) => setPrescriptionFile(e.target.files?.[0]?.name ?? null)}
-                        />
-                      </label>
-                      <button
-                        onClick={() => setPrescriptionFile(null)}
-                        className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg font-semibold transition-all hover:bg-red-50 hover:border-red-200 hover:text-red-600"
-                        style={{
-                          fontSize: "12px",
-                          color: "#737685",
-                          border: "1.5px solid #c3c6d6",
-                          background: "#fff",
-                          fontFamily: "'Inter'",
-                        }}
-                      >
-                        <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>delete</span>
-                        Kaldır
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  /* ── Boş Durum ── */
-                  <label
-                    className="cursor-pointer group flex-1 flex flex-col items-center justify-center gap-4 rounded-xl transition-all duration-200 py-6"
-                    style={{ border: "2px dashed #c3c6d6", background: "#f8f9fb" }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.borderColor = "#003d9b";
-                      e.currentTarget.style.background = "#f0f4ff";
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.borderColor = "#c3c6d6";
-                      e.currentTarget.style.background = "#f8f9fb";
-                    }}
-                  >
-                    {/* İkon */}
-                    <div
-                      className="w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-200 group-hover:scale-110 group-hover:shadow-lg"
-                      style={{ background: "#dae2ff" }}
-                    >
-                      <span
-                        className="material-symbols-outlined text-[#003d9b] transition-transform duration-200 group-hover:scale-110"
-                        style={{ fontSize: "28px" }}
-                      >
-                        cloud_upload
-                      </span>
-                    </div>
-
-                    {/* Metin */}
-                    <div className="text-center px-4">
-                      <p style={{ fontSize: "14px", fontWeight: 700, color: "#191c1e", fontFamily: "'Plus Jakarta Sans'" }}>
-                        Reçetenizi yükleyin
-                      </p>
-                      <p style={{ fontSize: "12px", color: "#737685", marginTop: "3px" }}>
-                        PDF, JPG veya PNG &middot; maks. 5 MB
-                      </p>
-                    </div>
-
-                    {/* CTA Butonu */}
-                    <span
-                      className="px-6 py-2.5 rounded-full font-bold transition-all duration-200 group-hover:shadow-md group-hover:bg-[#0052cc]"
-                      style={{
-                        fontSize: "12px",
-                        background: "#003d9b",
-                        color: "#fff",
-                        letterSpacing: "0.04em",
-                      }}
-                    >
-                      Dosya Seç
-                    </span>
-
-                    <input
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      className="hidden"
-                      onChange={(e) => setPrescriptionFile(e.target.files?.[0]?.name ?? null)}
-                    />
-                  </label>
-                )}
-              </div>
             </div>
           )}
         </div>
@@ -648,24 +470,25 @@ export default function ProductDetail() {
           {/* CTA */}
           <button
             onClick={handleAddToCart}
-            disabled={needsPrescription && !prescriptionFile}
-            className="w-full font-bold py-4 rounded-[0.5rem] shadow-sm hover:shadow-md active:scale-95 transition-all flex items-center justify-center gap-2"
+            onMouseEnter={() => setHoverBtn(true)}
+            onMouseLeave={() => setHoverBtn(false)}
+            className="w-full font-bold py-4 rounded-[0.5rem] active:scale-95 transition-all flex items-center justify-center gap-2"
             style={{
-              background: added ? "#004e5d" : (needsPrescription && !prescriptionFile) ? "#c3c6d6" : "#8c4a00",
-              color: (needsPrescription && !prescriptionFile) ? "#737685" : "#ffc9a0",
-              cursor: (needsPrescription && !prescriptionFile) ? "not-allowed" : "pointer",
+              background: added ? "#b45309" : hoverBtn ? "#b45309" : "#d97706",
+              color: "#ffffff",
+              cursor: "pointer",
               fontFamily: "'Inter'",
               fontSize: "14px",
               letterSpacing: "0.05em",
               fontWeight: 700,
+              boxShadow: added || hoverBtn ? "0 8px 24px rgba(217,119,6,0.45)" : "0 4px 16px rgba(217,119,6,0.3)",
+              transform: added || hoverBtn ? "scale(1.02) translateY(-2px)" : "scale(1) translateY(0)",
             }}
           >
-            <span className="material-symbols-outlined">shopping_cart</span>
-            {added
-              ? "Sepete Eklendi!"
-              : (needsPrescription && !prescriptionFile)
-                ? "Önce Reçete Yükleyin"
-                : "Sepete Ekle"}
+            <span className="material-symbols-outlined">
+              {added ? "check_circle" : "shopping_cart"}
+            </span>
+            {added ? "Sepete Eklendi!" : "Sepete Ekle"}
           </button>
 
           {/* Shipping note */}

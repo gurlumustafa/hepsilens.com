@@ -6,8 +6,8 @@ export default function Logo({ className = "", scale = 1, theme = "light" }: { c
   // 180px genişlik ve 37px yükseklik (oran ~4.86) mükemmel bir yerleşim sunar.
   // transform: scale() yerine doğrudan Image bileşeninin genişlik ve yüksekliğini scale ile çarparak
   // DOM yerleşiminde boşluk kalmasını engelliyoruz.
-  const width = Math.round(210 * scale);
-  const height = Math.round(37 * scale);
+  const width = Math.round(165 * scale);
+  const height = Math.round(45 * scale);
 
   return (
     <div className={`flex items-center ${className}`}>

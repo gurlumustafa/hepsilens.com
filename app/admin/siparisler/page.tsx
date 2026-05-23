@@ -25,8 +25,6 @@ export default function AdminSiparisler() {
   const [selected, setSelected]       = useState<Order | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [adminNoteValue, setAdminNoteValue] = useState("");
-  const [editingNote, setEditingNote] = useState(false);
   const [isMobile, setIsMobile]       = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -37,10 +35,7 @@ export default function AdminSiparisler() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  useEffect(() => {
-    setAdminNoteValue(selected?.adminNote || "");
-    setEditingNote(false);
-  }, [selected?.id]);
+
 
   // Close search dropdown on outside click
   useEffect(() => {
@@ -85,12 +80,7 @@ export default function AdminSiparisler() {
     if (selected?.id === id) setSelected(prev => prev ? { ...prev, prescriptionStatus: newStatus } : null);
   };
 
-  const saveAdminNote = () => {
-    if (!selected) return;
-    setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, adminNote: adminNoteValue } : o));
-    setSelected(prev => prev ? { ...prev, adminNote: adminNoteValue } : null);
-    setEditingNote(false);
-  };
+
 
   const copy = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
@@ -324,39 +314,7 @@ export default function AdminSiparisler() {
         </div>
       )}
 
-      {/* Notlar */}
-      <div>
-        <SecLabel icon="notes" label="Notlar" />
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          {order.customerNote && (
-            <div style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: "10px", padding: "12px" }}>
-              <p style={{ fontSize: "10px", fontWeight: 700, color: "#92400e", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "5px" }}>Müşteri Notu</p>
-              <p style={{ fontSize: "12px", color: "#78350f", lineHeight: "1.6" }}>{order.customerNote}</p>
-            </div>
-          )}
-          <div style={{ background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "12px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-              <p style={{ fontSize: "10px", fontWeight: 700, color: "#374151", textTransform: "uppercase", letterSpacing: "0.05em" }}>Admin Notu</p>
-              {!editingNote && (
-                <button onClick={() => setEditingNote(true)} style={{ background: "transparent", border: "none", cursor: "pointer", color: "#9ca3af", display: "flex" }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>edit</span>
-                </button>
-              )}
-            </div>
-            {editingNote ? (
-              <div>
-                <textarea value={adminNoteValue} onChange={e => setAdminNoteValue(e.target.value)} style={{ width: "100%", minHeight: "80px", border: "1px solid #d1d5db", borderRadius: "8px", padding: "8px", fontSize: "12px", color: "#111827", resize: "vertical", outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} placeholder="Admin notu ekle…" autoFocus />
-                <div style={{ display: "flex", gap: "6px", marginTop: "6px" }}>
-                  <button onClick={saveAdminNote} style={{ flex: 1, padding: "8px", borderRadius: "8px", border: "none", background: "#003d9b", color: "white", cursor: "pointer", fontSize: "11px", fontWeight: 700 }}>Kaydet</button>
-                  <button onClick={() => { setEditingNote(false); setAdminNoteValue(order.adminNote || ""); }} style={{ flex: 1, padding: "8px", borderRadius: "8px", border: "1px solid #e5e7eb", background: "white", color: "#374151", cursor: "pointer", fontSize: "11px", fontWeight: 700 }}>İptal</button>
-                </div>
-              </div>
-            ) : (
-              <p style={{ fontSize: "12px", color: adminNoteValue ? "#374151" : "#9ca3af", lineHeight: "1.6" }}>{adminNoteValue || "Not eklenmedi."}</p>
-            )}
-          </div>
-        </div>
-      </div>
+
 
       {/* Durum Güncelle */}
       <div>
