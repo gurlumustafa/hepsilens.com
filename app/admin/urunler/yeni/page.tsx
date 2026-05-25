@@ -13,7 +13,7 @@ type FormData = {
   imageUrl: string; description: string; tags: string;
   // Lens'e özel
   color: "clear" | "colored"; colorName: string;
-  usagePeriod: "daily" | "monthly" | "yearly";
+  usagePeriod: "daily" | "biweekly" | "monthly" | "yearly";
   requiresPrescription: boolean; isToric: boolean; uvProtection: boolean;
   dia: string; bc: string; sphRange: string;
   material: string; waterContent: string; oxygenPermeability: string;
@@ -121,6 +121,9 @@ export default function YeniUrun() {
   const router = useRouter();
   const [form, setForm] = useState<FormData>(init);
   const [saved, setSaved] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [brandList, setBrandList] = useState<Brand[]>([]);
 
@@ -157,12 +160,47 @@ export default function YeniUrun() {
     return e;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  /* Görsel seçilince hemen sunucuya yükle */
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const data = await res.json() as { url?: string; error?: string };
+      if (!res.ok || !data.url) throw new Error(data.error ?? "Yükleme başarısız");
+      setForm(p => ({ ...p, imageUrl: data.url! }));
+    } catch (err) {
+      alert((err as Error).message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length) { setErrors(errs); return; }
-    setSaved(true);
-    setTimeout(() => router.push("/admin/urunler"), 1500);
+
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const res = await fetch("/api/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json() as { id?: number; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Kayıt başarısız");
+      setSaved(true);
+      setTimeout(() => router.push("/admin/urunler"), 1500);
+    } catch (err) {
+      setSubmitError((err as Error).message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const isLens      = form.productType === "lens";
@@ -182,10 +220,12 @@ export default function YeniUrun() {
             style={{ padding: "9px 18px", borderRadius: "10px", border: "1px solid #e5e7eb", background: "white", fontSize: "13px", fontWeight: 600, color: "#374151", cursor: "pointer" }}>
             İptal
           </button>
-          <button type="submit"
-            style={{ display: "flex", alignItems: "center", gap: "6px", padding: "9px 20px", borderRadius: "10px", background: saved ? "#16a34a" : "#003d9b", color: "white", border: "none", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>
-            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>{saved ? "check_circle" : "save"}</span>
-            {saved ? "Kaydedildi!" : "Kaydet"}
+          <button type="submit" disabled={submitting || uploading || saved}
+            style={{ display: "flex", alignItems: "center", gap: "6px", padding: "9px 20px", borderRadius: "10px", background: saved ? "#16a34a" : "#003d9b", color: "white", border: "none", fontSize: "13px", fontWeight: 700, cursor: submitting ? "default" : "pointer", opacity: (submitting || uploading) && !saved ? 0.7 : 1 }}>
+            <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+              {saved ? "check_circle" : submitting ? "progress_activity" : "save"}
+            </span>
+            {saved ? "Kaydedildi!" : submitting ? "Kaydediliyor…" : "Kaydet"}
           </button>
         </div>
       </div>
@@ -291,11 +331,16 @@ export default function YeniUrun() {
         {/* Görsel */}
         <Field label="Ürün Görseli" full>
           <label
-            style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "10px", border: "2px dashed #e5e7eb", borderRadius: "12px", padding: "20px", cursor: "pointer", background: "#f9fafb", transition: "border-color 0.15s" }}
-            onMouseEnter={e => (e.currentTarget.style.borderColor = "#003d9b")}
+            style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "10px", border: "2px dashed #e5e7eb", borderRadius: "12px", padding: "20px", cursor: uploading ? "default" : "pointer", background: "#f9fafb", transition: "border-color 0.15s", position: "relative" }}
+            onMouseEnter={e => { if (!uploading) e.currentTarget.style.borderColor = "#003d9b"; }}
             onMouseLeave={e => (e.currentTarget.style.borderColor = "#e5e7eb")}
           >
-            {form.imageUrl ? (
+            {uploading ? (
+              <>
+                <span className="material-symbols-outlined" style={{ fontSize: "32px", color: "#003d9b", animation: "spin 1s linear infinite" }}>progress_activity</span>
+                <p style={{ fontSize: "13px", fontWeight: 600, color: "#003d9b" }}>Yükleniyor…</p>
+              </>
+            ) : form.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={form.imageUrl} alt="Önizleme" style={{ width: "100px", height: "100px", objectFit: "contain", borderRadius: "10px", background: "white" }} />
             ) : (
@@ -306,13 +351,11 @@ export default function YeniUrun() {
               </>
             )}
             <input type="file" accept="image/*" style={{ display: "none" }}
-              onChange={e => {
-                const file = e.target.files?.[0];
-                if (file) setForm(p => ({ ...p, imageUrl: URL.createObjectURL(file) }));
-              }}
+              disabled={uploading}
+              onChange={handleFileChange}
             />
           </label>
-          {form.imageUrl && (
+          {form.imageUrl && !uploading && (
             <button type="button" onClick={() => setForm(p => ({ ...p, imageUrl: "" }))}
               style={{ marginTop: "6px", fontSize: "11px", color: "#dc2626", background: "transparent", border: "none", cursor: "pointer", fontWeight: 600 }}>
               Görseli Kaldır
@@ -390,6 +433,7 @@ export default function YeniUrun() {
           <Field label="Kullanım Süresi">
             <select value={form.usagePeriod} onChange={set("usagePeriod")} style={selectStyle}>
               <option value="daily">Günlük</option>
+              <option value="biweekly">2 Haftada Bir</option>
               <option value="monthly">Aylık</option>
               <option value="yearly">Yıllık</option>
             </select>
@@ -498,10 +542,18 @@ export default function YeniUrun() {
           <p style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "18px", fontWeight: 800, color: "#111827" }}>{form.name}</p>
           <p style={{ fontSize: "13px", color: "#374151" }}>
             {form.brand}
-            {isLens && ` · ${form.color === "colored" ? (form.colorName || "Renkli") : "Şeffaf"} · ${{ daily: "Günlük", monthly: "Aylık", yearly: "Yıllık" }[form.usagePeriod]}`}
+            {isLens && ` · ${form.color === "colored" ? (form.colorName || "Renkli") : "Şeffaf"} · ${{ daily: "Günlük", biweekly: "2 Haftalık", monthly: "Aylık", yearly: "Yıllık" }[form.usagePeriod]}`}
             {isAccessory && form.volume && ` · ${form.volume}`}
           </p>
           <p style={{ fontSize: "20px", fontWeight: 800, color: "#003d9b", marginTop: "6px" }}>₺{(+form.price).toLocaleString("tr-TR")}</p>
+        </div>
+      )}
+
+      {/* ── Hata mesajı ──────────────────────────────────────────────────── */}
+      {submitError && (
+        <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "10px", padding: "12px 16px", display: "flex", alignItems: "center", gap: "10px" }}>
+          <span className="material-symbols-outlined" style={{ fontSize: "20px", color: "#dc2626", fontVariationSettings: "'FILL' 1" }}>error</span>
+          <p style={{ fontSize: "13px", color: "#dc2626", fontWeight: 600 }}>{submitError}</p>
         </div>
       )}
 
@@ -511,10 +563,12 @@ export default function YeniUrun() {
           style={{ padding: "11px 22px", borderRadius: "10px", border: "1px solid #e5e7eb", background: "white", fontSize: "13px", fontWeight: 600, color: "#374151", cursor: "pointer" }}>
           İptal
         </button>
-        <button type="submit"
-          style={{ display: "flex", alignItems: "center", gap: "8px", padding: "11px 24px", borderRadius: "10px", background: saved ? "#16a34a" : "#003d9b", color: "white", border: "none", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>
-          <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>{saved ? "check_circle" : "save"}</span>
-          {saved ? "Kaydedildi! Yönlendiriliyor…" : "Ürünü Kaydet"}
+        <button type="submit" disabled={submitting || uploading || saved}
+          style={{ display: "flex", alignItems: "center", gap: "8px", padding: "11px 24px", borderRadius: "10px", background: saved ? "#16a34a" : "#003d9b", color: "white", border: "none", fontSize: "13px", fontWeight: 700, cursor: submitting ? "default" : "pointer", opacity: (submitting || uploading) && !saved ? 0.7 : 1 }}>
+          <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
+            {saved ? "check_circle" : submitting ? "progress_activity" : "save"}
+          </span>
+          {saved ? "Kaydedildi! Yönlendiriliyor…" : submitting ? "Kaydediliyor…" : "Ürünü Kaydet"}
         </button>
       </div>
 

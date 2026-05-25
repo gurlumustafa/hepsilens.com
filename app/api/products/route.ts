@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { queryMany } from "@/lib/db";
+import { queryMany, execute } from "@/lib/db";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -62,4 +62,96 @@ function safeParseJson(value: unknown): unknown {
     try { return JSON.parse(value); } catch { return []; }
   }
   return value; // mysql2 zaten parse ediyor olabilir
+}
+
+/* ─── POST /api/products — Yeni ürün ekle ─────────────────────────────── */
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json() as Record<string, unknown>;
+
+    const {
+      productType, name, brand, brandId,
+      price, originalPrice, stock, badge,
+      imageUrl, description, tags,
+      // lens
+      color, colorName, usagePeriod, requiresPrescription,
+      dia, bc, sphRange, material, waterContent, oxygenPermeability,
+      uvProtection, packSizes, isToric, cylOptions, axisOptions,
+      // accessory
+      accessoryCategory,
+    } = body as {
+      productType: string; name: string; brand: string; brandId: string;
+      price: string; originalPrice: string; stock: string; badge: string;
+      imageUrl: string; description: string; tags: string;
+      color: string; colorName: string; usagePeriod: string; requiresPrescription: boolean;
+      dia: string; bc: string; sphRange: string; material: string;
+      waterContent: string; oxygenPermeability: string; uvProtection: boolean;
+      packSizes: string; isToric: boolean; cylOptions: string; axisOptions: string;
+      accessoryCategory: string;
+    };
+
+    if (!name?.trim() || !productType || !price || !stock) {
+      return Response.json({ error: "Zorunlu alanlar eksik" }, { status: 400 });
+    }
+
+    // Virgülle ayrılmış stringleri JSON array'e dönüştür
+    const parseCsv = (s: string) =>
+      (s ?? "").split(",").map((x) => x.trim()).filter(Boolean);
+    const parseCsvNumbers = (s: string) =>
+      parseCsv(s).map(Number).filter((n) => !isNaN(n));
+
+    const tagsArr      = parseCsv(tags ?? "");
+    const packSizesArr = parseCsvNumbers(packSizes ?? "");
+    const cylArr       = parseCsvNumbers(cylOptions ?? "");
+    const axisArr      = parseCsvNumbers(axisOptions ?? "");
+
+    const isLens      = productType === "lens";
+    const isAccessory = productType === "accessory";
+
+    const result = await execute(
+      `INSERT INTO products (
+        product_type, name, brand, brand_id,
+        price, original_price, stock, badge,
+        image_url, description, tags,
+        color, color_name, usage_period, requires_prescription,
+        dia, bc, sph_range, material, water_content, oxygen_permeability,
+        uv_protection, pack_sizes, is_toric, cyl_options, axis_options,
+        accessory_category
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        productType,
+        name.trim(),
+        brand,
+        brandId || null,
+        parseFloat(price),
+        originalPrice ? parseFloat(originalPrice) : null,
+        parseInt(stock, 10),
+        badge?.trim() || null,
+        imageUrl?.trim() || null,
+        description?.trim() || null,
+        JSON.stringify(tagsArr),
+        isLens ? (color ?? null) : null,
+        isLens ? (colorName?.trim() || null) : null,
+        isLens ? (usagePeriod ?? null) : null,
+        isLens ? (requiresPrescription ? 1 : 0) : 0,
+        isLens ? (dia ? parseFloat(dia) : null) : null,
+        isLens ? (bc  ? parseFloat(bc)  : null) : null,
+        isLens ? (sphRange?.trim() || null) : null,
+        isLens ? (material?.trim() || null) : null,
+        isLens ? (waterContent ? parseInt(waterContent, 10) : null) : null,
+        isLens ? (oxygenPermeability ? parseFloat(oxygenPermeability) : null) : null,
+        isLens ? (uvProtection ? 1 : 0) : 0,
+        isLens ? JSON.stringify(packSizesArr) : null,
+        isLens ? (isToric ? 1 : 0) : 0,
+        isLens && isToric ? JSON.stringify(cylArr) : null,
+        isLens && isToric ? JSON.stringify(axisArr) : null,
+        isAccessory ? (accessoryCategory ?? null) : null,
+      ]
+    );
+
+    return Response.json({ id: result.insertId }, { status: 201 });
+  } catch (err) {
+    console.error("[POST /api/products]", err);
+    return Response.json({ error: "DB hatası" }, { status: 500 });
+  }
 }
