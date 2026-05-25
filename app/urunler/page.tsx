@@ -39,6 +39,7 @@ function UrunlerContent() {
     const recete = searchParams.get("recete");
     const renk   = searchParams.get("renk");
     if (tur === "gunluk")        base.usage = ["daily"];
+    else if (tur === "haftalik") base.usage = ["biweekly"];
     else if (tur === "aylik")    base.usage = ["monthly"];
     if (tur === "toric")         base.lensTypes = ["toric"];
     if (renk === "renkli")       base.color = "colored";
@@ -146,8 +147,9 @@ function UrunlerContent() {
   const pageTitle =
     isDigerUrunler ? "Diğer Ürünler" :
     isAllLenses    ? "Tüm Ürünler" :
-    filters.usage.includes("daily")   && filters.usage.length === 1 ? "Günlük Kontakt Lensler" :
-    filters.usage.includes("monthly") && filters.usage.length === 1 ? "Aylık Kontakt Lensler"  :
+    filters.usage.includes("daily")      && filters.usage.length === 1 ? "Günlük Kontakt Lensler"   :
+    filters.usage.includes("biweekly")   && filters.usage.length === 1 ? "Haftalık Kontakt Lensler" :
+    filters.usage.includes("monthly")    && filters.usage.length === 1 ? "Aylık Kontakt Lensler"    :
     filters.color === "colored"  ? "Renkli Kontakt Lensler" :
     filters.color === "clear"    ? "Saydam Kontakt Lensler"  :
     // 🔒 REÇETELİ LENS DEVRE DIŞI — requiresPrescription === true  ? "Numaralı Lensler" :

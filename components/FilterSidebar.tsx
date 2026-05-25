@@ -143,7 +143,7 @@ function CheckRow({
 export default function FilterSidebar({ filters, onChange, mode = "lens" }: Props) {
   const activeCount =
     filters.brands.length +
-    (mode === "lens" ? filters.lensTypes.length + filters.usage.length + (filters.color !== "all" ? 1 : 0) : 0) +
+    (mode === "lens" ? filters.usage.length + (filters.color !== "all" ? 1 : 0) : 0) +
     (mode === "accessories" ? filters.category.length : 0);
 
   const toggleBrand = (id: string) => {
@@ -240,22 +240,6 @@ export default function FilterSidebar({ filters, onChange, mode = "lens" }: Prop
 
         {mode === "lens" && (
           <>
-            {/* Lens Tipi */}
-            <div className="px-4 py-5">
-              <SectionLabel icon="visibility" label="Lens Tipi" />
-              <div className="flex flex-col gap-1">
-                {LENS_TYPES.map((t) => (
-                  <CheckRow
-                    key={t.value}
-                    checked={filters.lensTypes.includes(t.value)}
-                    onChange={() => toggleLensType(t.value)}
-                    label={t.label}
-                    icon={t.icon}
-                  />
-                ))}
-              </div>
-            </div>
-
             {/* Değişim Sıklığı */}
             <div className="px-4 py-5">
               <SectionLabel icon="schedule" label="Değişim Sıklığı" />

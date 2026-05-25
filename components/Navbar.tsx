@@ -10,9 +10,9 @@ import Logo from "@/components/Logo";
 
 const navLinks = [
   { href: "/urunler?tip=tum", label: "Tüm Ürünler" },
-  { href: "/urunler?tip=diger", label: "Diğer Ürünler" },
-  // 🔒 REÇETELİ LENS DEVRE DIŞI — { href: "/urunler?recete=gerekli", label: "Numaralı Lensler" },
   { href: "/urunler?recete=serbest", label: "Kozmetik Lensler" },
+  // 🔒 REÇETELİ LENS DEVRE DIŞI — { href: "/urunler?recete=gerekli", label: "Numaralı Lensler" },
+  { href: "/urunler?tip=diger", label: "Diğer Ürünler" },
 ];
 
 const blogDropdown = [
@@ -111,8 +111,8 @@ export default function Navbar() {
 
           {/* ── Marka & Navigasyon ── */}
           <div className="flex items-center gap-3 xl:gap-3 min-w-0">
-            <Link href="/" className="flex-shrink-0">
-              <Logo scale={1.15} />
+            <Link href="/" className="flex-shrink-0 mr-3 lg:mr-5">
+              <Logo scale={1.10} />
             </Link>
 
             <nav className="hidden lg:flex items-center">
@@ -174,7 +174,7 @@ export default function Navbar() {
             <div className="relative hidden md:block" ref={searchRef}>
               <form onSubmit={handleSubmit}>
                 <div
-                  className="flex items-center bg-[#f3f4f6] px-3 xl:px-4 py-2 rounded-[0.75rem] border transition-all duration-200 group mr-1.5 xl:mr-3"
+                  className="flex items-center bg-[#f3f4f6] px-3 xl:px-4 py-2 rounded-[0.75rem] border transition-all duration-200 group mr-1.5 xl:mr-6"
                   style={{
                     borderColor: searchOpen ? "#003d9b" : "#c3c6d6",
                     boxShadow: searchOpen ? "0 0 0 3px rgba(0,61,155,0.12)" : "none",
