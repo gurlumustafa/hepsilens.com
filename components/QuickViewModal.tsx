@@ -13,7 +13,9 @@ type Props = {
 export default function QuickViewModal({ product, onClose }: Props) {
   const { addItem } = useCart();
   const isLens = "color" in product;
-  const needsPrescription = isLens && (product as Lens).requiresPrescription;
+  // 🔒 REÇETELİ LENS DEVRE DIŞI — needsPrescription her zaman false
+  // const needsPrescription = isLens && (product as Lens).requiresPrescription;
+  const needsPrescription = false;
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
@@ -151,6 +153,7 @@ export default function QuickViewModal({ product, onClose }: Props) {
             </div>
           )}
 
+          {/* 🔒 REÇETELİ LENS DEVRE DIŞI — reçete uyarısı kaldırıldı
           {needsPrescription && (
             <div className="flex items-start gap-2.5 bg-[#fff8e6] border border-[#f5c842]/60 rounded-xl px-4 py-3 mb-3">
               <span className="material-symbols-outlined shrink-0 mt-0.5" style={{ fontSize: "16px", color: "#b45309" }}>warning</span>
@@ -159,34 +162,26 @@ export default function QuickViewModal({ product, onClose }: Props) {
               </p>
             </div>
           )}
+          */}
 
           <div className="mt-auto flex flex-col sm:flex-row gap-3 pt-2">
-            {needsPrescription ? (
-              <div
-                className="flex-1 bg-[#f0f1f5] text-[#9ea3b8] font-bold py-3 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed select-none"
-                style={{ fontSize: "13px", fontFamily: "'Inter'", letterSpacing: "0.04em" }}
-                title="Sepete eklemek için önce reçetenizi yükleyin"
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: "17px" }}>lock</span>
-                Reçete Gerekli
-              </div>
-            ) : (
-              <button
-                onClick={() => { addItem({ id: product.id, name: product.name, brand: product.brand, price: product.price, imageUrl: product.imageUrl }); onClose(); }}
-                className="flex-1 bg-[#d97706] text-white font-bold py-3 rounded-xl hover:bg-[#b45309] active:scale-95 transition-all flex items-center justify-center gap-2"
-                style={{ fontSize: "13px", fontFamily: "'Inter'", letterSpacing: "0.04em" }}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>add_shopping_cart</span>
-                Sepete Ekle
-              </button>
-            )}
+            {/* 🔒 REÇETELİ LENS DEVRE DIŞI — needsPrescription her zaman false olduğundan
+                "Reçete Gerekli" butonu hiç gösterilmez; Sepete Ekle her zaman görünür */}
+            <button
+              onClick={() => { addItem({ id: product.id, name: product.name, brand: product.brand, price: product.price, imageUrl: product.imageUrl }); onClose(); }}
+              className="flex-1 bg-[#d97706] text-white font-bold py-3 rounded-xl hover:bg-[#b45309] active:scale-95 transition-all flex items-center justify-center gap-2"
+              style={{ fontSize: "13px", fontFamily: "'Inter'", letterSpacing: "0.04em" }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>add_shopping_cart</span>
+              Sepete Ekle
+            </button>
             <Link
               href={`/urun/${product.id}`}
               onClick={onClose}
               className="flex-1 text-center font-bold py-3 rounded-xl transition-all border-2 border-[#003d9b] text-[#003d9b] hover:bg-[#003d9b] hover:text-white"
               style={{ fontSize: "13px", fontFamily: "'Inter'", letterSpacing: "0.04em" }}
             >
-              {needsPrescription ? "Reçete Yükle" : "Ürün Detayı"}
+              Ürün Detayı
             </Link>
           </div>
         </div>

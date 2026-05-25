@@ -142,7 +142,7 @@ export default function CartSidebar() {
                       </button>
                     </div>
 
-                    {/* Reçete rozeti */}
+                    {/* 🔒 REÇETELİ LENS DEVRE DIŞI — Reçete rozeti
                     {item.needsPrescription && (
                       <span
                         className="inline-flex items-center gap-1 mt-1.5"
@@ -152,6 +152,7 @@ export default function CartSidebar() {
                         REÇETE GEREKTİRİR
                       </span>
                     )}
+                    */}
                   </div>
                 </div>
               ))}

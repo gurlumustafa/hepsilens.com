@@ -142,7 +142,11 @@ export const brands: Brand[] = [
 ];
 
 export const lenses: Lens[] = [
-  // ACUVUE
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🔒 REÇETELİ LENSLER DEVRE DIŞI — Yeniden etkinleştirmek için yorum
+  //    satırlarını kaldırın. Kategori: ACUVUE (şeffaf/numaralı lensler)
+  // ═══════════════════════════════════════════════════════════════════════
+  /* 🔒 ACUVUE NUMARALI LENSLER — DEVRE DIŞI
   {
     id: 1,
     name: "Acuvue Oasys 1-Day",
@@ -220,7 +224,11 @@ export const lenses: Lens[] = [
     uvProtection: true,
     tags: ["aylık", "şeffaf", "yüksek oksijen"],
   },
-  // DAILIES
+  */ // 🔒 ACUVUE NUMARALI LENSLER SONU
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🔒 REÇETELİ LENSLER DEVRE DIŞI — Kategori: DAILIES (şeffaf/numaralı)
+  // ═══════════════════════════════════════════════════════════════════════
+  /* 🔒 DAILIES NUMARALI LENSLER — DEVRE DIŞI
   {
     id: 4,
     name: "Dailies Total1",
@@ -272,7 +280,11 @@ export const lenses: Lens[] = [
     uvProtection: false,
     tags: ["günlük", "şeffaf", "uygun fiyat"],
   },
-  // BIOFINITY
+  */ // 🔒 DAILIES NUMARALI LENSLER SONU
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🔒 REÇETELİ LENSLER DEVRE DIŞI — Kategori: BIOFINITY (şeffaf/numaralı)
+  // ═══════════════════════════════════════════════════════════════════════
+  /* 🔒 BIOFINITY NUMARALI LENSLER — DEVRE DIŞI
   {
     id: 6,
     name: "Biofinity",
@@ -324,6 +336,7 @@ export const lenses: Lens[] = [
     uvProtection: false,
     tags: ["aylık", "şeffaf", "dijital ekran", "enerji"],
   },
+  */ // 🔒 BIOFINITY NUMARALI LENSLER SONU
   // FRESHLOOK - Colored
   {
     id: 8,
@@ -403,7 +416,10 @@ export const lenses: Lens[] = [
     uvProtection: false,
     tags: ["aylık", "renkli", "kahverengi", "en çok tercih"],
   },
-  // AIR OPTIX
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🔒 REÇETELİ LENSLER DEVRE DIŞI — Kategori: AIR OPTIX (şeffaf/numaralı)
+  // ═══════════════════════════════════════════════════════════════════════
+  /* 🔒 AIR OPTIX NUMARALI LENS — DEVRE DIŞI
   {
     id: 11,
     name: "Air Optix Plus HydraGlyde",
@@ -431,6 +447,8 @@ export const lenses: Lens[] = [
     uvProtection: false,
     tags: ["aylık", "şeffaf", "silikon hidrojel", "protein önleyici"],
   },
+  */ // 🔒 AIR OPTIX NUMARALI LENS SONU
+  // Air Optix Colors (kozmetik/renkli) — aktif ↓
   {
     id: 12,
     name: "Air Optix Colors - Gri",
@@ -456,7 +474,10 @@ export const lenses: Lens[] = [
     uvProtection: false,
     tags: ["aylık", "renkli", "gri", "silikon hidrojel"],
   },
-  // BAUSCH + LOMB
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🔒 REÇETELİ LENSLER DEVRE DIŞI — Kategori: BAUSCH+LOMB (şeffaf/numaralı)
+  // ═══════════════════════════════════════════════════════════════════════
+  /* 🔒 BAUSCH+LOMB NUMARALI LENSLER — DEVRE DIŞI
   {
     id: 13,
     name: "Biotrue ONEday",
@@ -535,6 +556,7 @@ export const lenses: Lens[] = [
     uvProtection: false,
     tags: ["günlük", "şeffaf", "ekonomik", "başlangıç"],
   },
+  */ // 🔒 BAUSCH+LOMB NUMARALI LENSLER SONU
   {
     id: 16,
     name: "FreshLook One-Day - Mavi",
@@ -587,6 +609,10 @@ export const lenses: Lens[] = [
     uvProtection: false,
     tags: ["aylık", "renkli", "doğal", "büyük göz efekti"],
   },
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🔒 REÇETELİ LENSLER DEVRE DIŞI — Air Optix Night&Day + Acuvue Astigmat
+  // ═══════════════════════════════════════════════════════════════════════
+  /* 🔒 AIR OPTIX NIGHT&DAY + ACUVUE ASTIGMAT — DEVRE DIŞI
   {
     id: 18,
     name: "Air Optix Night & Day",
@@ -642,6 +668,7 @@ export const lenses: Lens[] = [
     cylOptions: [-0.75, -1.25, -1.75, -2.25, -2.75],
     axisOptions: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180],
   },
+  */ // 🔒 AIR OPTIX NIGHT&DAY + ACUVUE ASTIGMAT SONU
 ];
 
 export const reviews: Review[] = [
@@ -837,7 +864,8 @@ export const testimonials: Testimonial[] = [
 ];
 
 export const faqItems = [
-  { q: "Reçetesiz lens satın alabilir miyim?", a: "Renkli ve 0 numara lensler reçetesiz satın alınabilir. Numaralı şeffaf lensler için göz doktoru reçetesi gereklidir ve sipariş aşamasında reçetenizi yüklemeniz gerekmektedir." },
+  // 🔒 REÇETELİ LENS DEVRE DIŞI — aşağıdaki FAQ maddesi yorum satırında
+  // { q: "Reçetesiz lens satın alabilir miyim?", a: "Renkli ve 0 numara lensler reçetesiz satın alınabilir. Numaralı şeffaf lensler için göz doktoru reçetesi gereklidir ve sipariş aşamasında reçetenizi yüklemeniz gerekmektedir." },
   { q: "Sipariş ne zaman gelir?", a: "İstanbul içi siparişler aynı gün veya ertesi iş günü, Türkiye geneli siparişler 1-3 iş günü içinde kargoya verilmektedir." },
   { q: "İade ve değişim şartları nedir?", a: "Açılmamış ve orijinal ambalajında ürünler 14 gün içinde iade edilebilir. Hijyen nedeniyle açılmış lens kutuları iade kabul edilmemektedir." },
   { q: "Lensi kaç saat takılı kalmalıyım?", a: "Günlük kullanım lensler maksimum 12-16 saat, aylık lensler ise uyku sırasında çıkarılmak üzere günlük 12-16 saat kullanılmalıdır. Doktorunuzun tavsiyelerine uymak önemlidir." },

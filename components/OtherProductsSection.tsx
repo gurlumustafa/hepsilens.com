@@ -72,8 +72,9 @@ function AccessoryCard({ item }: { item: Accessory }) {
 
 /* ── section: diger-urunler ── */
 export default function OtherProductsSection() {
-  const solutions = accessories.filter((a) => a.category === "solution");
-  const eyedrops = accessories.filter((a) => a.category === "eyedrop");
+  // En çok puan alan 4 solüsyon ve 4 göz damlası
+  const solutions = accessories.filter((a) => a.category === "solution").sort((a, b) => b.rating - a.rating).slice(0, 4);
+  const eyedrops = accessories.filter((a) => a.category === "eyedrop").sort((a, b) => b.rating - a.rating).slice(0, 4);
 
   return (
     <section id="diger-urunler" className="max-w-[1280px] mx-auto px-8 py-12 border-t border-[#edeef0]">

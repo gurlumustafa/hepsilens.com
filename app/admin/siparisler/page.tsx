@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import {
-  mockOrders, Order, OrderStatus, PrescriptionStatus,
+  mockOrders, Order, OrderStatus,
+  // 🔒 REÇETELİ LENS DEVRE DIŞI — PrescriptionStatus, PRESCRIPTION_STATUS_COLORS, PRESCRIPTION_STATUS_LABELS,
   STATUS_COLORS, STATUS_LABELS,
-  PRESCRIPTION_STATUS_COLORS, PRESCRIPTION_STATUS_LABELS,
 } from "@/lib/adminData";
 
 const ALL_STATUSES: OrderStatus[] = ["yeni", "isleniyor", "kargoda", "teslim", "iptal"];
@@ -56,7 +56,7 @@ export default function AdminSiparisler() {
         product: "Acuvue Oasys 1-Day (90'lı)", quantity: 1, amount: 899.90,
         status: "yeni", date: "2026-05-21 09:35",
         address: "Bağdat Cad. No: 120 D: 5", neighborhood: "Caddebostan Mah.", district: "Kadıköy", city: "İstanbul", postalCode: "34728",
-        requiresPrescription: true, prescriptionStatus: "bekleniyor",
+        requiresPrescription: false, // 🔒 REÇETELİ LENS DEVRE DIŞI — eskiden: true, prescriptionStatus: "bekleniyor"
         paymentMethod: "Kredi Kartı", installments: 3, cardLast4: "1234",
       };
       setOrders(prev => {
@@ -74,11 +74,12 @@ export default function AdminSiparisler() {
     if (selected?.id === id) setSelected(prev => prev ? { ...prev, status } : null);
   };
 
-  const approvePrescription = (id: string, approve: boolean) => {
-    const newStatus: PrescriptionStatus = approve ? "onaylandi" : "reddedildi";
-    setOrders(prev => prev.map(o => o.id === id ? { ...o, prescriptionStatus: newStatus } : o));
-    if (selected?.id === id) setSelected(prev => prev ? { ...prev, prescriptionStatus: newStatus } : null);
-  };
+  // 🔒 REÇETELİ LENS DEVRE DIŞI — approvePrescription fonksiyonu kaldırıldı
+  // const approvePrescription = (id: string, approve: boolean) => {
+  //   const newStatus: PrescriptionStatus = approve ? "onaylandi" : "reddedildi";
+  //   setOrders(prev => prev.map(o => o.id === id ? { ...o, prescriptionStatus: newStatus } : o));
+  //   if (selected?.id === id) setSelected(prev => prev ? { ...prev, prescriptionStatus: newStatus } : null);
+  // };
 
 
 
@@ -111,12 +112,12 @@ export default function AdminSiparisler() {
     return acc;
   }, {} as Record<OrderStatus, number>);
 
-  const prescIcon = (o: Order) => {
-    if (!o.requiresPrescription) return null;
-    return PRESCRIPTION_STATUS_COLORS[o.prescriptionStatus || "bekleniyor"];
-  };
-
-  const pendingPrescCount = orders.filter(o => o.requiresPrescription && o.prescriptionStatus === "bekleniyor").length;
+  // 🔒 REÇETELİ LENS DEVRE DIŞI — prescIcon ve pendingPrescCount kaldırıldı
+  // const prescIcon = (o: Order) => {
+  //   if (!o.requiresPrescription) return null;
+  //   return PRESCRIPTION_STATUS_COLORS[o.prescriptionStatus || "bekleniyor"];
+  // };
+  // const pendingPrescCount = orders.filter(o => o.requiresPrescription && o.prescriptionStatus === "bekleniyor").length;
 
   /* ─────────── Detail Panel Content (shared mobile/desktop) ─────────── */
   const DetailContent = ({ order }: { order: Order }) => (
@@ -216,7 +217,7 @@ export default function AdminSiparisler() {
         </div>
       </div>
 
-      {/* Reçete */}
+      {/* 🔒 REÇETELİ LENS DEVRE DIŞI — Reçete bölümü kaldırıldı
       <div>
         <SecLabel icon="receipt_long" label="Reçete" />
         {!order.requiresPrescription ? (
@@ -225,55 +226,10 @@ export default function AdminSiparisler() {
             <p style={{ fontSize: "12px", color: "#166534", fontWeight: 600 }}>Bu ürün için reçete gerekmiyor</p>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            {order.prescriptionStatus && (
-              <div style={{ display: "flex", alignItems: "center", gap: "7px", background: PRESCRIPTION_STATUS_COLORS[order.prescriptionStatus].bg, borderRadius: "10px", padding: "10px 14px" }}>
-                <span className="material-symbols-outlined" style={{ fontSize: "16px", color: PRESCRIPTION_STATUS_COLORS[order.prescriptionStatus].text, fontVariationSettings: "'FILL' 1" }}>{PRESCRIPTION_STATUS_COLORS[order.prescriptionStatus].icon}</span>
-                <p style={{ fontSize: "12px", color: PRESCRIPTION_STATUS_COLORS[order.prescriptionStatus].text, fontWeight: 700 }}>{PRESCRIPTION_STATUS_LABELS[order.prescriptionStatus]}</p>
-              </div>
-            )}
-            {order.prescriptionFile ? (
-              <div style={{ border: "1px solid #e5e7eb", borderRadius: "12px", padding: "14px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px" }}>
-                  <div style={{ width: "44px", height: "44px", borderRadius: "10px", background: order.prescriptionFile.type === "pdf" ? "#fee2e2" : "#dbeafe", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: "24px", color: order.prescriptionFile.type === "pdf" ? "#dc2626" : "#2563eb", fontVariationSettings: "'FILL' 1" }}>{order.prescriptionFile.type === "pdf" ? "picture_as_pdf" : "image"}</span>
-                  </div>
-                  <div>
-                    <p style={{ fontSize: "12px", fontWeight: 700, color: "#111827" }}>{order.prescriptionFile.name}</p>
-                    <p style={{ fontSize: "11px", color: "#9ca3af", marginTop: "2px" }}>{order.prescriptionFile.size} · {order.prescriptionFile.uploadedAt}</p>
-                  </div>
-                </div>
-                <div style={{ display: "flex", gap: "6px" }}>
-                  <button style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", padding: "8px", borderRadius: "8px", border: "1px solid #003d9b", background: "#003d9b", cursor: "pointer", fontSize: "11px", color: "white", fontWeight: 700 }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>visibility</span>Görüntüle
-                  </button>
-                  <button style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", padding: "8px", borderRadius: "8px", border: "1px solid #e5e7eb", background: "white", cursor: "pointer", fontSize: "11px", color: "#374151", fontWeight: 700 }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>download</span>İndir
-                  </button>
-                </div>
-                {order.prescriptionStatus === "yuklendi" && (
-                  <div style={{ display: "flex", gap: "6px", marginTop: "6px" }}>
-                    <button onClick={() => approvePrescription(order.id, true)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", padding: "8px", borderRadius: "8px", border: "1px solid #16a34a", background: "#dcfce7", cursor: "pointer", fontSize: "11px", color: "#16a34a", fontWeight: 700 }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>verified</span>Onayla
-                    </button>
-                    <button onClick={() => approvePrescription(order.id, false)} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", padding: "8px", borderRadius: "8px", border: "1px solid #dc2626", background: "#fee2e2", cursor: "pointer", fontSize: "11px", color: "#dc2626", fontWeight: 700 }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>cancel</span>Reddet
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div style={{ background: "#fffbeb", border: "1px dashed #fbbf24", borderRadius: "10px", padding: "14px", display: "flex", gap: "10px", alignItems: "flex-start" }}>
-                <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "#d97706", fontVariationSettings: "'FILL' 1", flexShrink: 0, marginTop: "1px" }}>warning</span>
-                <div>
-                  <p style={{ fontSize: "12px", fontWeight: 700, color: "#92400e" }}>Reçete henüz yüklenmedi</p>
-                  <p style={{ fontSize: "11px", color: "#b45309", marginTop: "3px", lineHeight: "1.5" }}>Müşteriyle iletişime geçin veya siparişi beklemeye alın.</p>
-                </div>
-              </div>
-            )}
-          </div>
+          ... (reçete onay/red arayüzü)
         )}
       </div>
+      */}
 
       {/* Kargo */}
       {(order.trackingCode || order.carrier) && (
@@ -352,9 +308,11 @@ export default function AdminSiparisler() {
         <p style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: isMobile ? "18px" : "22px", fontWeight: 800, color: "#111827" }}>Sipariş Yönetimi</p>
         <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginTop: "2px" }}>
           <p style={{ fontSize: "13px", color: "#6b7280" }}>Toplam {orders.length} sipariş · Bugün {orders.filter(o => o.date.startsWith("2026-05-21")).length} yeni</p>
+          {/* 🔒 REÇETELİ LENS DEVRE DIŞI — reçete bekleme rozeti kaldırıldı
           {pendingPrescCount > 0 && (
             <span style={{ background: "#fffbeb", color: "#92400e", fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "999px", border: "1px solid #fde68a" }}>⚠ {pendingPrescCount} reçete bekliyor</span>
           )}
+          */}
         </div>
       </div>
 
@@ -397,7 +355,7 @@ export default function AdminSiparisler() {
           <div style={{ position: "absolute", left: 0, right: 0, top: "100%", background: "white", border: "1px solid #003d9b", borderTop: "1px solid #e5e7eb", borderRadius: "0 0 12px 12px", overflow: "hidden", zIndex: 100, boxShadow: "0 8px 24px rgba(0,0,0,0.1)" }}>
             {suggestions.map(o => {
               const sc = STATUS_COLORS[o.status];
-              const pi = prescIcon(o);
+              // 🔒 REÇETELİ LENS DEVRE DIŞI — const pi = prescIcon(o);
               return (
                 <button key={o.id} onMouseDown={() => { setSelected(o); setSearch(""); setSearchFocused(false); }} style={{ width: "100%", display: "flex", alignItems: "center", gap: "12px", padding: "10px 14px", background: "white", border: "none", borderBottom: "1px solid #f9fafb", cursor: "pointer", textAlign: "left" }}
                   onMouseEnter={e => (e.currentTarget.style.background = "#f9fafb")}
@@ -407,7 +365,7 @@ export default function AdminSiparisler() {
                     <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                       <span style={{ fontSize: "13px", fontWeight: 800, color: "#111827" }}>{o.orderCode}</span>
                       <span style={{ fontSize: "10px", color: "#9ca3af", fontFamily: "monospace" }}>{o.id}</span>
-                      {pi && <span className="material-symbols-outlined" style={{ fontSize: "13px", color: pi.text, fontVariationSettings: "'FILL' 1" }}>{pi.icon}</span>}
+                      {/* 🔒 REÇETELİ LENS DEVRE DIŞI — {pi && <span className="material-symbols-outlined" style={{ fontSize: "13px", color: pi.text, fontVariationSettings: "'FILL' 1" }}>{pi.icon}</span>} */}
                     </div>
                     <p style={{ fontSize: "12px", color: "#374151" }}>{o.customer} · <span style={{ color: "#9ca3af" }}>{o.product}</span></p>
                   </div>
@@ -435,14 +393,14 @@ export default function AdminSiparisler() {
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           {filtered.map(order => {
             const sc = STATUS_COLORS[order.status];
-            const pi = prescIcon(order);
+            // 🔒 REÇETELİ LENS DEVRE DIŞI — const pi = prescIcon(order);
             return (
               <button key={order.id} onClick={() => setSelected(order)} style={{ display: "block", width: "100%", background: "white", borderRadius: "14px", border: "1px solid #e5e7eb", padding: "14px 16px", cursor: "pointer", textAlign: "left" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <span style={{ fontSize: "16px", fontWeight: 900, color: "#111827", fontFamily: "'Plus Jakarta Sans'" }}>{order.orderCode}</span>
                     <span style={{ fontSize: "11px", color: "#9ca3af", fontFamily: "monospace" }}>{order.id}</span>
-                    {pi && <span className="material-symbols-outlined" style={{ fontSize: "14px", color: pi.text, fontVariationSettings: "'FILL' 1" }}>{pi.icon}</span>}
+                    {/* 🔒 REÇETELİ LENS DEVRE DIŞI — {pi && <span className="material-symbols-outlined" style={{ fontSize: "14px", color: pi.text, fontVariationSettings: "'FILL' 1" }}>{pi.icon}</span>} */}
                   </div>
                   <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", borderRadius: "999px", background: sc.bg, color: sc.text, whiteSpace: "nowrap" }}>{STATUS_LABELS[order.status]}</span>
                 </div>
@@ -514,7 +472,7 @@ export default function AdminSiparisler() {
                 {filtered.map(order => {
                   const sc = STATUS_COLORS[order.status];
                   const isSelected = selected?.id === order.id;
-                  const pi = prescIcon(order);
+                  // 🔒 REÇETELİ LENS DEVRE DIŞI — const pi = prescIcon(order);
                   return (
                     <tr key={order.id}
                       onClick={() => setSelected(isSelected ? null : order)}
@@ -528,7 +486,7 @@ export default function AdminSiparisler() {
                             <p style={{ fontSize: "11px", color: "#9ca3af", fontFamily: "monospace" }}>{order.id}</p>
                             <p style={{ fontSize: "13px", fontWeight: 800, color: "#111827" }}>{order.orderCode}</p>
                           </div>
-                          {pi && <span className="material-symbols-outlined" style={{ fontSize: "14px", color: pi.text, fontVariationSettings: "'FILL' 1" }} title={order.prescriptionStatus}>{pi.icon}</span>}
+                          {/* 🔒 REÇETELİ LENS DEVRE DIŞI — {pi && <span className="material-symbols-outlined" style={{ fontSize: "14px", color: pi.text, fontVariationSettings: "'FILL' 1" }} title={order.prescriptionStatus}>{pi.icon}</span>} */}
                         </div>
                       </td>
                       <td style={{ padding: "11px 14px" }}>

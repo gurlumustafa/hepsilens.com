@@ -3,12 +3,16 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
-import { useAuth, Address, isExpired, isNearExpiry } from "@/contexts/AuthContext";
+// 🔒 REÇETELİ LENS DEVRE DIŞI — isExpired ve isNearExpiry kaldırıldı
+// import { useAuth, Address, isExpired, isNearExpiry } from "@/contexts/AuthContext";
+import { useAuth, Address } from "@/contexts/AuthContext";
 import { lenses, accessories } from "@/lib/data";
 import { useCart } from "@/contexts/CartContext";
 import LogoutModal from "@/components/LogoutModal";
 
-type Section = "favorites" | "prescriptions" | "orders" | "addresses" | "emails" | "settings";
+// 🔒 REÇETELİ LENS DEVRE DIŞI — "prescriptions" Section tipi kaldırıldı
+// type Section = "favorites" | "prescriptions" | "orders" | "addresses" | "emails" | "settings";
+type Section = "favorites" | "orders" | "addresses" | "emails" | "settings";
 
 const statusLabel: Record<string, { label: string; color: string; bg: string }> = {
   preparing: { label: "Hazırlanıyor", color: "#b45309", bg: "#fef3c7" },
@@ -19,7 +23,7 @@ const statusLabel: Record<string, { label: string; color: string; bg: string }> 
 
 const navItems: { id: Section; icon: string; label: string }[] = [
   { id: "favorites", icon: "favorite", label: "Favorilerim" },
-  { id: "prescriptions", icon: "receipt_long", label: "Reçetelerim" },
+  // 🔒 REÇETELİ LENS DEVRE DIŞI — { id: "prescriptions", icon: "receipt_long", label: "Reçetelerim" },
   { id: "orders", icon: "shopping_bag", label: "Siparişlerim" },
   { id: "addresses", icon: "location_on", label: "Adreslerim" },
   { id: "emails", icon: "notifications", label: "Bildirim Tercihleri" },
@@ -154,17 +158,20 @@ function HesapContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const {
-    user, loaded, prescriptions, orders, addresses, emailPreferences, favorites,
-    logout, updateUser, addPrescription, removePrescription,
+    user, loaded, orders, addresses, emailPreferences, favorites,
+    // 🔒 REÇETELİ LENS DEVRE DIŞI — prescriptions, addPrescription, removePrescription kaldırıldı
+    // prescriptions, addPrescription, removePrescription,
+    logout, updateUser,
     addAddress, removeAddress, setDefaultAddress, updateEmailPreferences, toggleFavorite,
   } = useAuth();
 
-  const validSections: Section[] = ["favorites", "prescriptions", "orders", "addresses", "emails", "settings"];
+  // 🔒 REÇETELİ LENS DEVRE DIŞI — "prescriptions" validSections'dan kaldırıldı
+  const validSections: Section[] = ["favorites", "orders", "addresses", "emails", "settings"];
   const paramSection = searchParams.get("s") as Section | null;
   const [section, setSection] = useState<Section>(
     paramSection && validSections.includes(paramSection) ? paramSection : "favorites"
   );
-  const [showPrescForm, setShowPrescForm] = useState(false);
+  // 🔒 REÇETELİ LENS DEVRE DIŞI — const [showPrescForm, setShowPrescForm] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [showAddrForm, setShowAddrForm] = useState(false);
   const [savedMsg, setSavedMsg] = useState("");
@@ -235,86 +242,18 @@ function HesapContent() {
     </aside>
   );
 
-  // ── Reçetelerim ───────────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🔒 REÇETELİ LENS DEVRE DIŞI — Reçetelerim bileşeni tümüyle yorum satırında
+  // Yeniden etkinleştirmek için aşağıdaki yorum bloğunu açın ve Section tipine
+  // "prescriptions" ekleyin, navItems'e geri ekleyin, sections'a geri ekleyin.
+  // ═══════════════════════════════════════════════════════════════════════
+  /* 🔒 PRESCRIPTIONS BİLEŞENİ — DEVRE DIŞI
   const Prescriptions = () => (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-[#191c1e]" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "20px", fontWeight: 700 }}>Reçetelerim</h2>
-        {!showPrescForm && (
-          <button onClick={() => setShowPrescForm(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-white hover:opacity-90 transition-all"
-            style={{ background: "#003d9b", fontSize: "12px", fontFamily: "'Inter'" }}>
-            <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>add</span>
-            Reçete Yükle
-          </button>
-        )}
-      </div>
-
-      {showPrescForm && (
-        <PrescriptionForm
-          onSubmit={(p) => { addPrescription(p); setShowPrescForm(false); showSaved("Reçete kaydedildi."); }}
-          onCancel={() => setShowPrescForm(false)}
-        />
-      )}
-
-      <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-xl px-5 py-4">
-        <span className="material-symbols-outlined text-blue-600 shrink-0 mt-0.5" style={{ fontSize: "18px", fontVariationSettings: "'FILL' 1" }}>info</span>
-        <p style={{ fontSize: "13px", color: "#1e40af", lineHeight: "20px" }}>
-          Reçeteler maksimum <strong>6 ay</strong> sonrasına kadar kullanılabilmektedir. Lütfen reçetenizin geçerliliğini kontrol ediniz.
-        </p>
-      </div>
-
-      {prescriptions.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-xl border border-[#edeef3]">
-          <span className="material-symbols-outlined text-[#c3c6d6]" style={{ fontSize: "48px" }}>receipt_long</span>
-          <p className="text-[#737685] mt-3" style={{ fontSize: "14px" }}>Henüz reçete yüklemediniz.</p>
-          <button onClick={() => setShowPrescForm(true)} className="mt-4 px-6 py-2.5 rounded-xl font-bold text-white hover:opacity-90 transition-all" style={{ background: "#003d9b", fontSize: "13px" }}>
-            İlk Reçetenizi Yükleyin
-          </button>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {prescriptions.map((p) => {
-            const expired = isExpired(p.expiryDate);
-            const nearExp = isNearExpiry(p.expiryDate);
-            return (
-              <div key={p.id} className="bg-white rounded-xl border p-5 flex items-start gap-4"
-                style={{ borderColor: expired ? "#fca5a5" : nearExp ? "#fcd34d" : "#edeef3" }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                  style={{ background: expired ? "#fee2e2" : nearExp ? "#fef3c7" : "#dae2ff" }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: "20px", color: expired ? "#dc2626" : nearExp ? "#b45309" : "#003d9b", fontVariationSettings: "'FILL' 1" }}>
-                    {expired ? "warning" : "description"}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="font-semibold text-[#191c1e] truncate" style={{ fontSize: "14px" }}>{p.fileName}</p>
-                    {(expired || nearExp) && (
-                      <span className="px-2.5 py-0.5 rounded-full shrink-0 font-bold" style={{
-                        fontSize: "10px",
-                        color: expired ? "#dc2626" : "#b45309",
-                        background: expired ? "#fee2e2" : "#fef3c7",
-                      }}>
-                        {expired ? "Süresi Doldu" : "Yakında Doluyor"}
-                      </span>
-                    )}
-                  </div>
-                  {(expired || nearExp) && (
-                    <p className="mt-1.5 font-medium" style={{ fontSize: "11px", color: expired ? "#dc2626" : "#b45309" }}>
-                      ⚠ {expired ? "Bu reçete geçerliliğini yitirmiştir. Yenilemeniz gerekmektedir." : "Süresi 30 gün içinde dolacak. Lütfen kontrol ediniz."}
-                    </p>
-                  )}
-                </div>
-                <button onClick={() => removePrescription(p.id)} className="text-[#737685] hover:text-red-500 transition-colors shrink-0" title="Sil">
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>delete</span>
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      ... (tüm reçete yükleme ve listeleme UI)
     </div>
   );
+  */ // 🔒 PRESCRIPTIONS BİLEŞENİ SONU
 
   // ── Siparişlerim ──────────────────────────────────────────────────
   const Orders = () => {
@@ -724,7 +663,7 @@ function HesapContent() {
 
   const sections: Record<Section, React.ReactNode> = {
     favorites: <Favorites />,
-    prescriptions: <Prescriptions />,
+    // 🔒 REÇETELİ LENS DEVRE DIŞI — prescriptions: <Prescriptions />,
     orders: <Orders />,
     addresses: <Addresses />,
     emails: <EmailPrefs />,

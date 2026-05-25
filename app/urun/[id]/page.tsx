@@ -3,8 +3,9 @@ import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 import { lenses, reviews, brands, accessories, accessoryBrands, Lens, Accessory } from "@/lib/data";
-import PrescriptionGuideModal from "@/components/PrescriptionGuideModal";
-import PrescriptionMapModal from "@/components/PrescriptionMapModal";
+// 🔒 REÇETELİ LENS DEVRE DIŞI — modal importları yorum satırında
+// import PrescriptionGuideModal from "@/components/PrescriptionGuideModal";
+// import PrescriptionMapModal from "@/components/PrescriptionMapModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import FavoriteButton from "@/components/FavoriteButton";
@@ -82,8 +83,9 @@ export default function ProductDetail() {
   const [activeTab, setActiveTab] = useState<TabId>("details");
   const [added, setAdded] = useState(false);
   const [hoverBtn, setHoverBtn] = useState(false);
-  const [showGuide, setShowGuide] = useState(false);
-  const [showMapModal, setShowMapModal] = useState(false);
+  // 🔒 REÇETELİ LENS DEVRE DIŞI — reçete modalları yorum satırında
+  // const [showGuide, setShowGuide] = useState(false);
+  // const [showMapModal, setShowMapModal] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   if (!lens) {
@@ -104,7 +106,9 @@ export default function ProductDetail() {
     ? ({ daily: "Günlük", monthly: "Aylık", yearly: "Yıllık" }[(lens as Lens).usagePeriod] ?? "Belirtilmemiş")
     : "Belirtilmemiş";
 
-  const needsPrescription = !isAccessory && (lens as Lens).color === "clear";
+  // 🔒 REÇETELİ LENS DEVRE DIŞI — needsPrescription her zaman false
+  // const needsPrescription = !isAccessory && (lens as Lens).color === "clear";
+  const needsPrescription = false;
 
   const handleAddToCart = () => {
     addItem({
@@ -168,16 +172,12 @@ export default function ProductDetail() {
           {/* Ürün avantajları — tüm lensler */}
           {!isAccessory && (
             <div className="rounded-xl border border-[#edeef3] bg-white p-6 flex flex-col gap-4">
-              {/* Reçete bilgi notu */}
+              {/* 🔒 REÇETELİ LENS DEVRE DIŞI — reçete bilgi notu kaldırıldı
               {needsPrescription && (
-                <div
-                  className="flex items-center gap-2.5 rounded-lg px-3.5 py-2.5"
-                  style={{ background: "#f0f4ff", border: "1px solid #c8d6f7" }}
-                >
-                  <span
-                    className="material-symbols-outlined shrink-0"
-                    style={{ fontSize: "16px", color: "#003d9b", fontVariationSettings: "'FILL' 1" }}
-                  >
+                <div className="flex items-center gap-2.5 rounded-lg px-3.5 py-2.5"
+                  style={{ background: "#f0f4ff", border: "1px solid #c8d6f7" }}>
+                  <span className="material-symbols-outlined shrink-0"
+                    style={{ fontSize: "16px", color: "#003d9b", fontVariationSettings: "'FILL' 1" }}>
                     receipt_long
                   </span>
                   <p style={{ fontSize: "12px", color: "#003d9b", fontWeight: 600, lineHeight: "17px" }}>
@@ -185,6 +185,7 @@ export default function ProductDetail() {
                   </p>
                 </div>
               )}
+              */}
 
               <p className="text-[#434654] leading-relaxed line-clamp-3" style={{ fontSize: "14px", lineHeight: "22px" }}>
                 {lens.description}
@@ -294,6 +295,7 @@ export default function ProductDetail() {
                       </button>
                     ))}
                   </div>
+                  {/* 🔒 REÇETELİ LENS DEVRE DIŞI — reçete rehber linki kaldırıldı
                   <button
                     onClick={() => setShowMapModal(true)}
                     className="flex items-center gap-1 mt-1 text-[#003d9b] hover:underline self-start transition-opacity hover:opacity-80"
@@ -302,6 +304,7 @@ export default function ProductDetail() {
                       Reçetemdeki numaraları nasıl seçebilirim?
                     </span>
                   </button>
+                  */}
                 </div>
 
                 {/* SPH selection */}
@@ -310,6 +313,7 @@ export default function ProductDetail() {
                     <label className="text-[#434654]" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>
                       Sferik Güç (PWR/SPH)
                     </label>
+                    {/* 🔒 REÇETELİ LENS DEVRE DIŞI — Rehber linki kaldırıldı
                     <span
                       onClick={() => setShowGuide(true)}
                       className="text-[#003d9b] cursor-pointer hover:underline"
@@ -317,6 +321,7 @@ export default function ProductDetail() {
                     >
                       Rehber
                     </span>
+                    */}
                   </div>
 
                   {eyeMode === "same" ? (
@@ -873,8 +878,10 @@ export default function ProductDetail() {
           ))}
         </div>
       </section>
+      {/* 🔒 REÇETELİ LENS DEVRE DIŞI — reçete modalları yorum satırında
       {showGuide && <PrescriptionGuideModal onClose={() => setShowGuide(false)} />}
       {showMapModal && <PrescriptionMapModal onClose={() => setShowMapModal(false)} />}
+      */}
     </div>
   );
 }

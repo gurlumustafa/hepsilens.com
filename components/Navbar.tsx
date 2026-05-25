@@ -9,9 +9,9 @@ import LogoutModal from "@/components/LogoutModal";
 import Logo from "@/components/Logo";
 
 const navLinks = [
-  { href: "/urunler?tip=tum", label: "Tüm Lensler" },
+  { href: "/urunler?tip=tum", label: "Tüm Ürünler" },
   { href: "/urunler?tip=diger", label: "Diğer Ürünler" },
-  { href: "/urunler?recete=gerekli", label: "Numaralı Lensler" },
+  // 🔒 REÇETELİ LENS DEVRE DIŞI — { href: "/urunler?recete=gerekli", label: "Numaralı Lensler" },
   { href: "/urunler?recete=serbest", label: "Kozmetik Lensler" },
 ];
 
@@ -331,7 +331,7 @@ export default function Navbar() {
                       {/* Menü öğeleri */}
                       {[
                         { href: "/hesap", icon: "favorite", label: "Favorilerim" },
-                        { href: "/hesap?s=prescriptions", icon: "receipt_long", label: "Reçetelerim" },
+                        // 🔒 REÇETELİ LENS DEVRE DIŞI — { href: "/hesap?s=prescriptions", icon: "receipt_long", label: "Reçetelerim" },
                         { href: "/hesap?s=orders", icon: "shopping_bag", label: "Siparişlerim" },
                         { href: "/hesap?s=addresses", icon: "location_on", label: "Adreslerim" },
                         { href: "/hesap?s=settings", icon: "manage_accounts", label: "Ayarlar" },

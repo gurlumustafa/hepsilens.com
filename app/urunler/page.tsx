@@ -43,7 +43,7 @@ function UrunlerContent() {
     if (tur === "toric")         base.lensTypes = ["toric"];
     if (renk === "renkli")       base.color = "colored";
     else if (renk === "seffaf")  base.color = "clear";
-    if (recete === "gerekli")    { /* requiresPrescription filter handled below */ }
+    // 🔒 REÇETELİ LENS DEVRE DIŞI — if (recete === "gerekli") { /* ... */ }
     return base;
   });
   const [page, setPage] = useState(1);
@@ -64,11 +64,13 @@ function UrunlerContent() {
   const isDigerUrunler = tip === "diger";
   const isAllLenses    = tip === "tum";
 
-  const requiresPrescription = searchParams.get("recete") === "gerekli"
-    ? true
-    : searchParams.get("recete") === "serbest"
-    ? false
-    : null;
+  // 🔒 REÇETELİ LENS DEVRE DIŞI — recete=gerekli filtresi kaldırıldı
+  // const requiresPrescription = searchParams.get("recete") === "gerekli"
+  //   ? true
+  //   : searchParams.get("recete") === "serbest"
+  //   ? false
+  //   : null;
+  const requiresPrescription = searchParams.get("recete") === "serbest" ? false : null;
 
   const filtered = useMemo(() => {
     // Sayfa moduna göre başlangıç listesi
@@ -143,14 +145,14 @@ function UrunlerContent() {
 
   const pageTitle =
     isDigerUrunler ? "Diğer Ürünler" :
-    isAllLenses    ? "Tüm Lensler" :
+    isAllLenses    ? "Tüm Ürünler" :
     filters.usage.includes("daily")   && filters.usage.length === 1 ? "Günlük Kontakt Lensler" :
     filters.usage.includes("monthly") && filters.usage.length === 1 ? "Aylık Kontakt Lensler"  :
     filters.color === "colored"  ? "Renkli Kontakt Lensler" :
     filters.color === "clear"    ? "Saydam Kontakt Lensler"  :
-    requiresPrescription === true  ? "Numaralı Lensler" :
+    // 🔒 REÇETELİ LENS DEVRE DIŞI — requiresPrescription === true  ? "Numaralı Lensler" :
     requiresPrescription === false ? "Kozmetik Lensler" :
-    "Tüm Lensler";
+    "Tüm Ürünler";
 
   return (
     <main className="pt-[72px] pb-12">

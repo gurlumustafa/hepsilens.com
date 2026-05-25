@@ -19,7 +19,7 @@ const siteLinks = [
       { label: "SSS", href: "/yardim/sss" },
       { label: "Kargo Politikası", href: "/yardim/kargo" },
       { label: "İade & Değişim", href: "/yardim/iade" },
-      { label: "Reçete Rehberi", href: "/yardim/recete" },
+      // 🔒 REÇETELİ LENS DEVRE DIŞI — { label: "Reçete Rehberi", href: "/yardim/recete" },
       { label: "Sipariş Takibi", href: "/siparis-takip" },
     ]
   },

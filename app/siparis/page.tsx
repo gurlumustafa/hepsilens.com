@@ -3,25 +3,30 @@ import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/contexts/CartContext";
-import { useAuth, isExpired, Prescription } from "@/contexts/AuthContext";
-import { lenses } from "@/lib/data";
+// 🔒 REÇETELİ LENS DEVRE DIŞI — isExpired ve Prescription import'ları kaldırıldı
+// import { useAuth, isExpired, Prescription } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
+// 🔒 REÇETELİ LENS DEVRE DIŞI — lenses importu artık kullanılmıyor
+// import { lenses } from "@/lib/data";
 
 type PayMethod = "card" | "cod" | "transfer";
 
-// Hangi sepet ürünleri reçete gerektiriyor?
-function useRxCheck() {
-  const { items } = useCart();
-  return items.some((item) => {
-    const lens = lenses.find((l) => l.id === item.id);
-    return lens && lens.color === "clear";
-  });
-}
+// 🔒 REÇETELİ LENS DEVRE DIŞI — reçete kontrolü kaldırıldı
+// function useRxCheck() {
+//   const { items } = useCart();
+//   return items.some((item) => {
+//     const lens = lenses.find((l) => l.id === item.id);
+//     return lens && lens.color === "clear";
+//   });
+// }
 
 export default function SiparisPage() {
   const router = useRouter();
   const { items, total, count, clearCart } = useCart();
-  const { user, prescriptions, addresses, addPrescription } = useAuth();
-  const needsRx = useRxCheck();
+  const { user, addresses } = useAuth();
+  // 🔒 REÇETELİ LENS DEVRE DIŞI — prescriptions, addPrescription, needsRx kaldırıldı
+  // const { user, prescriptions, addresses, addPrescription } = useAuth();
+  const needsRx = false; // 🔒 her zaman false — reçeteli lens satışı yok
 
   // Teslimat
   const defaultAddr = addresses.find((a) => a.isDefault) ?? addresses[0];
@@ -34,14 +39,14 @@ export default function SiparisPage() {
   const [selectedAddrId, setSelectedAddrId] = useState<string>(defaultAddr?.id ?? "");
   const [newAddr, setNewAddr] = useState({ city: "", district: "", postalCode: "", fullAddress: "" });
 
-  // Reçete
-  const validRx = prescriptions.filter((p) => !isExpired(p.expiryDate));
-  const [rxSource, setRxSource] = useState<"profile" | "upload" | null>(
-    needsRx ? (validRx.length > 0 ? "profile" : "upload") : null
-  );
-  const [selectedRxId, setSelectedRxId] = useState<string>(validRx[0]?.id ?? "");
-  const [uploadedRx, setUploadedRx] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
+  // 🔒 REÇETELİ LENS DEVRE DIŞI — Reçete state'leri yorum satırında
+  // const validRx = prescriptions.filter((p) => !isExpired(p.expiryDate));
+  // const [rxSource, setRxSource] = useState<"profile" | "upload" | null>(
+  //   needsRx ? (validRx.length > 0 ? "profile" : "upload") : null
+  // );
+  // const [selectedRxId, setSelectedRxId] = useState<string>(validRx[0]?.id ?? "");
+  // const [uploadedRx, setUploadedRx] = useState<string | null>(null);
+  // const fileRef = useRef<HTMLInputElement>(null);
 
   // Ödeme
   const [payMethod, setPayMethod] = useState<PayMethod>("card");
@@ -55,10 +60,11 @@ export default function SiparisPage() {
   const shipping = total >= 500 ? 0 : 39;
   const grandTotal = total + shipping;
 
-  // Reçete hazır mı?
-  const rxReady = !needsRx
-    || (rxSource === "profile" && !!selectedRxId)
-    || (rxSource === "upload" && !!uploadedRx);
+  // 🔒 REÇETELİ LENS DEVRE DIŞI — rxReady her zaman true
+  // const rxReady = !needsRx
+  //   || (rxSource === "profile" && !!selectedRxId)
+  //   || (rxSource === "upload" && !!uploadedRx);
+  const rxReady = true;
 
   // Adres hazır mı?
   const addrReady = addrMode === "saved"
@@ -85,9 +91,10 @@ export default function SiparisPage() {
 
   function handlePlace() {
     if (!canSubmit) return;
-    if (rxSource === "upload" && uploadedRx) {
-      addPrescription({ fileName: uploadedRx, doctorName: "", issueDate: new Date().toISOString().split("T")[0], notes: "" });
-    }
+    // 🔒 REÇETELİ LENS DEVRE DIŞI — reçete kaydetme kaldırıldı
+    // if (rxSource === "upload" && uploadedRx) {
+    //   addPrescription({ fileName: uploadedRx, doctorName: "", issueDate: new Date().toISOString().split("T")[0], notes: "" });
+    // }
     setPlaced(true);
     clearCart();
   }
@@ -156,15 +163,16 @@ export default function SiparisPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-        {/* ── Sol: Sipariş Özeti ─────────────────────────────────── */}
-        <div className="lg:col-span-5 flex flex-col gap-4">
+        {/* ── Sağ: Sipariş Özeti ─────────────────────────────────── */}
+        <div className="lg:col-span-5 flex flex-col gap-4 order-2">
           <div className="bg-white rounded-xl border border-[#edeef3] p-5">
             <h2 className="font-bold text-[#191c1e] mb-4" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "16px" }}>
               Sipariş Özeti ({count} ürün)
             </h2>
             <div className="flex flex-col gap-3">
               {items.map((item) => {
-                const isRxItem = lenses.find((l) => l.id === item.id)?.color === "clear";
+                // 🔒 REÇETELİ LENS DEVRE DIŞI — isRxItem ve REÇETE rozeti kaldırıldı
+                // const isRxItem = lenses.find((l) => l.id === item.id)?.color === "clear";
                 return (
                   <Link
                     key={item.id}
@@ -180,9 +188,11 @@ export default function SiparisPage() {
                       <p className="font-semibold text-[#191c1e] truncate group-hover:text-[#003d9b] transition-colors" style={{ fontSize: "13px" }}>{item.name}</p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <p className="text-[#737685]" style={{ fontSize: "12px" }}>× {item.quantity}</p>
+                        {/* 🔒 REÇETELİ LENS DEVRE DIŞI — REÇETE rozeti
                         {isRxItem && (
                           <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-semibold" style={{ fontSize: "9px" }}>REÇETE</span>
                         )}
+                        */}
                       </div>
                     </div>
                     <p className="font-bold text-[#003d9b] shrink-0" style={{ fontSize: "14px", fontFamily: "'Plus Jakarta Sans'" }}>
@@ -231,8 +241,8 @@ export default function SiparisPage() {
           </div>
         </div>
 
-        {/* ── Sağ: Form ─────────────────────────────────────────── */}
-        <div className="lg:col-span-7 flex flex-col gap-5">
+        {/* ── Sol: Form ─────────────────────────────────────────── */}
+        <div className="lg:col-span-7 flex flex-col gap-5 order-1">
 
           {/* 1. Teslimat Bilgileri */}
           <Section title="1. İletişim Bilgileri" icon="person">
@@ -301,93 +311,16 @@ export default function SiparisPage() {
             )}
           </Section>
 
-          {/* 3. Reçete (gerekiyorsa) */}
+          {/* 🔒 REÇETELİ LENS DEVRE DIŞI — 3. Reçete bölümü tümüyle yorum satırında
           {needsRx && (
             <Section title="3. Reçete" icon="receipt_long" accent="amber">
-              <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4">
-                <span className="material-symbols-outlined text-amber-600 shrink-0 mt-0.5" style={{ fontSize: "16px", fontVariationSettings: "'FILL' 1" }}>warning</span>
-                <p style={{ fontSize: "12px", color: "#92400e", lineHeight: "18px" }}>
-                  Sepetinizdeki şeffaf lensler tıbbi sınıf ürün olduğundan geçerli bir reçete gerekmektedir.
-                  Reçeteler maksimum <strong>6 ay</strong> sonrasına kadar geçerlidir.
-                </p>
-              </div>
-
-              {/* Reçete kaynağı seçimi */}
-              {validRx.length > 0 && (
-                <div className="flex gap-2 mb-4">
-                  {([
-                    { v: "profile", label: "Profilimden Seç" },
-                    { v: "upload",  label: "Yeni Yükle" },
-                  ] as const).map(({ v, label }) => (
-                    <button key={v} onClick={() => setRxSource(v)}
-                      className="flex-1 py-2 rounded-lg font-semibold transition-colors border"
-                      style={{
-                        fontSize: "12px",
-                        background: rxSource === v ? "#003d9b" : "white",
-                        color: rxSource === v ? "white" : "#434654",
-                        borderColor: rxSource === v ? "#003d9b" : "#c3c6d6",
-                      }}>
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Profilden seç */}
-              {rxSource === "profile" && validRx.length > 0 && (
-                <div className="flex flex-col gap-2">
-                  {validRx.map((rx: Prescription) => (
-                    <label key={rx.id}
-                      className="flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-colors"
-                      style={{ borderColor: selectedRxId === rx.id ? "#003d9b" : "#edeef3", background: selectedRxId === rx.id ? "#f0f4ff" : "white" }}>
-                      <input type="radio" name="rx" className="accent-[#003d9b]"
-                        checked={selectedRxId === rx.id}
-                        onChange={() => setSelectedRxId(rx.id)} />
-                      <span className="material-symbols-outlined text-[#003d9b]" style={{ fontSize: "18px", fontVariationSettings: "'FILL' 1" }}>description</span>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-[#191c1e] truncate" style={{ fontSize: "13px" }}>{rx.fileName}</p>
-                        <p className="text-[#737685]" style={{ fontSize: "11px" }}>Son geçerlilik: {rx.expiryDate}</p>
-                      </div>
-                      <span className="px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-bold shrink-0" style={{ fontSize: "10px" }}>Geçerli</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-
-              {/* Yeni yükle */}
-              {(rxSource === "upload" || validRx.length === 0) && (
-                <label
-                  className="cursor-pointer group flex flex-col items-center justify-center gap-3 border-2 border-dashed rounded-xl py-8 transition-all"
-                  style={{ borderColor: uploadedRx ? "#003d9b" : "#c3c6d6" }}
-                  onMouseEnter={e => (e.currentTarget.style.borderColor = "#003d9b")}
-                  onMouseLeave={e => (e.currentTarget.style.borderColor = uploadedRx ? "#003d9b" : "#c3c6d6")}
-                >
-                  <div className="w-12 h-12 rounded-xl bg-[#f0f4ff] group-hover:bg-[#dae2ff] flex items-center justify-center transition-colors">
-                    <span className="material-symbols-outlined text-[#003d9b]" style={{ fontSize: "24px" }}>
-                      {uploadedRx ? "description" : "cloud_upload"}
-                    </span>
-                  </div>
-                  <div className="text-center">
-                    <p className="font-semibold text-[#191c1e]" style={{ fontSize: "13px" }}>{uploadedRx || "Reçetenizi yükleyin"}</p>
-                    <p className="text-[#737685]" style={{ fontSize: "11px" }}>PDF, JPG veya PNG · maks. 5 MB</p>
-                  </div>
-                  {!uploadedRx && (
-                    <span className="px-5 py-2 rounded-full bg-[#003d9b] text-white font-bold" style={{ fontSize: "12px" }}>Dosya Seç</span>
-                  )}
-                  <input ref={fileRef} type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden"
-                    onChange={(e) => setUploadedRx(e.target.files?.[0]?.name ?? null)} />
-                </label>
-              )}
-              {uploadedRx && (
-                <button onClick={() => setUploadedRx(null)} className="mt-2 text-[#737685] hover:text-red-500 transition-colors text-sm font-semibold">
-                  × Reçeteyi Kaldır
-                </button>
-              )}
+              ... (reçete yükleme formu)
             </Section>
           )}
+          */}
 
-          {/* 4. Ödeme */}
-          <Section title={`${needsRx ? "4" : "3"}. Ödeme Yöntemi`} icon="credit_card">
+          {/* 3. Ödeme (🔒 REÇETELİ LENS DEVRE DIŞI — eski: needsRx ? "4" : "3") */}
+          <Section title="3. Ödeme Yöntemi" icon="credit_card">
             <div className="flex flex-col gap-2 mb-4">
               {([
                 { v: "card",     icon: "credit_card",     label: "Kredi / Banka Kartı", soon: false },
@@ -452,8 +385,7 @@ export default function SiparisPage() {
                   ? "İletişim bilgilerini doldurun."
                   : !addrReady
                   ? "Teslimat adresini ekleyin."
-                  : !rxReady
-                  ? "Reçete gerektiren ürün var — reçete yükleyin veya profilden seçin."
+                  // 🔒 REÇETELİ LENS DEVRE DIŞI — : !rxReady ? "Reçete gerektiren ürün var..." :
                   : !cardReady
                   ? "Kart bilgilerini eksiksiz doldurun."
                   : "Tüm alanları doldurun."}

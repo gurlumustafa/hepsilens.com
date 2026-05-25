@@ -52,7 +52,7 @@ export default function AdminDashboard() {
         status: "yeni", date: "2026-05-21 09:35",
         address: "Bağdat Cad. No: 120 D: 5", neighborhood: "Caddebostan Mah.",
         district: "Kadıköy", city: "İstanbul", postalCode: "34728",
-        requiresPrescription: true, prescriptionStatus: "bekleniyor",
+        requiresPrescription: false, // 🔒 REÇETELİ LENS DEVRE DIŞI — eskiden: true, prescriptionStatus: "bekleniyor"
         paymentMethod: "Kredi Kartı", installments: 3, cardLast4: "1234",
       };
       setOrders(prev => [fakeOrder, ...prev]);
