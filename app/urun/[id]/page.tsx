@@ -1,8 +1,8 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { lenses, reviews, brands, accessories, accessoryBrands, Lens, Accessory } from "@/lib/data";
+import { Lens, Accessory } from "@/lib/data";
 // 🔒 REÇETELİ LENS DEVRE DIŞI — modal importları yorum satırında
 // import PrescriptionGuideModal from "@/components/PrescriptionGuideModal";
 // import PrescriptionMapModal from "@/components/PrescriptionMapModal";
@@ -14,6 +14,32 @@ const sphOptions = ["-1.25", "-1.50", "-1.75", "-2.00", "-2.50", "-3.00", "-3.50
 
 type TabId = "details" | "about" | "specs" | "reviews" | "installments" | "faq";
 type EyeMode = "same" | "different";
+
+type ProductDetail = (Lens | Accessory) & {
+  brand_full_name?: string;
+  tagline?: string;
+};
+
+type Review = {
+  id: number;
+  user_name: string;
+  rating: number;
+  comment: string;
+  helpful_count: number;
+  verified: boolean;
+  created_at: string;
+};
+
+type RelatedProduct = {
+  id: number;
+  name: string;
+  brand: string;
+  price: number;
+  original_price?: number;
+  image_url?: string;
+  badge?: string;
+  rating: number;
+};
 
 function SphGrid({
   label,
@@ -58,14 +84,24 @@ export default function ProductDetail() {
   const router = useRouter();
   const { user } = useAuth();
   const { addItem } = useCart();
-  const lens = lenses.find((l) => l.id === Number(id)) || accessories.find((a) => a.id === Number(id));
-  const isAccessory = lens && !("dia" in lens);
-  const brand = lens
-    ? (isAccessory
-        ? accessoryBrands.find((b) => b.id === (lens as Accessory).brandId)
-        : brands.find((b) => b.id === (lens as Lens).brandId))
-    : null;
-  const lensReviews = lens ? reviews.filter((r) => r.lensId === lens.id) : [];
+
+  const [product, setProduct] = useState<ProductDetail | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [related, setRelated] = useState<RelatedProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(`/api/products/${id}`)
+      .then((r) => r.json())
+      .then((d) => {
+        setProduct(d.product || null);
+        setReviews(d.reviews || []);
+        setRelated(d.related || []);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [id]);
 
   const [eyeMode, setEyeMode] = useState<EyeMode>("same");
   const [sphSame, setSphSame] = useState(0);
@@ -77,8 +113,6 @@ export default function ProductDetail() {
   const [axisSame, setAxisSame] = useState(0);
   const [axisOD, setAxisOD] = useState(0);
   const [axisOS, setAxisOS] = useState(0);
-  const [selectedBc] = useState(`${"bc" in (lens || {}) ? (lens as Lens).bc : 8.5} mm`);
-  const [selectedDia] = useState(`${"dia" in (lens || {}) ? (lens as Lens).dia : 14.2} mm`);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<TabId>("details");
   const [added, setAdded] = useState(false);
@@ -88,7 +122,15 @@ export default function ProductDetail() {
   // const [showMapModal, setShowMapModal] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  if (!lens) {
+  if (loading) {
+    return (
+      <div className="pt-24 min-h-screen flex items-center justify-center">
+        <div className="text-[#737685]">Yükleniyor...</div>
+      </div>
+    );
+  }
+
+  if (!product) {
     return (
       <div className="pt-24 max-w-[1280px] mx-auto px-8 py-20 text-center">
         <span className="material-symbols-outlined" style={{ fontSize: "64px", color: "#c3c6d6" }}>search_off</span>
@@ -98,25 +140,31 @@ export default function ProductDetail() {
     );
   }
 
-  const discount = lens.originalPrice
-    ? Math.round(((lens.originalPrice - lens.price) / lens.originalPrice) * 100)
+  const isAccessory = product.product_type === "accessory";
+  const lens = product as Lens & ProductDetail;
+  const accessory = product as Accessory & ProductDetail;
+
+  const discount = product.original_price
+    ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
     : 0;
 
   const usagePeriodLabel = !isAccessory
-    ? ({ daily: "Günlük", monthly: "Aylık", yearly: "Yıllık" }[(lens as Lens).usagePeriod] ?? "Belirtilmemiş")
+    ? ({ daily: "Günlük", biweekly: "Haftalık", monthly: "Aylık", yearly: "Yıllık" }[lens.usage_period] ?? "Belirtilmemiş")
     : "Belirtilmemiş";
 
   // 🔒 REÇETELİ LENS DEVRE DIŞI — needsPrescription her zaman false
-  // const needsPrescription = !isAccessory && (lens as Lens).color === "clear";
   const needsPrescription = false;
+
+  const selectedBc = !isAccessory ? `${lens.bc} mm` : "";
+  const selectedDia = !isAccessory ? `${lens.dia} mm` : "";
 
   const handleAddToCart = () => {
     addItem({
-      id: lens.id,
-      name: lens.name,
-      brand: lens.brand,
-      price: lens.price,
-      imageUrl: lens.imageUrl,
+      id: product.id,
+      name: product.name,
+      brand: product.brand,
+      price: product.price,
+      imageUrl: product.image_url,
       needsPrescription: needsPrescription,
     });
     setAdded(true);
@@ -127,13 +175,13 @@ export default function ProductDetail() {
     acuvue: "#003d9b", dailies: "#0052cc", biofinity: "#004e5d",
     freshlook: "#6a3600", airoptix: "#004e5d", bausch: "#003d9b",
   };
-  const bannerBg = !isAccessory ? (brandBgMap[(lens as Lens).brandId] ?? "#003d9b") : "#003d9b";
+  const bannerBg = !isAccessory ? (brandBgMap[lens.brand_id] ?? "#003d9b") : "#003d9b";
 
   const tabs: { id: TabId; label: string }[] = [
     { id: "details", label: "Ürün Detayları" },
     { id: "about", label: "Ürün Hakkında" },
     { id: "specs", label: "Teknik Özellikler" },
-    { id: "reviews", label: `Değerlendirmeler (${lensReviews.length})` },
+    { id: "reviews", label: `Değerlendirmeler (${reviews.length})` },
     { id: "installments", label: "Taksit Seçenekleri" },
     { id: "faq", label: "Sıkça Sorulan Sorular" },
   ];
@@ -152,7 +200,7 @@ export default function ProductDetail() {
           Ürünler
         </Link>
         <span className="material-symbols-outlined text-[#c3c6d6]" style={{ fontSize: "16px" }}>chevron_right</span>
-        <span className="text-[#003d9b] truncate max-w-[200px] md:max-w-xs" style={{ fontSize: "13px", fontWeight: 600 }}>{lens.name}</span>
+        <span className="text-[#003d9b] truncate max-w-[200px] md:max-w-xs" style={{ fontSize: "13px", fontWeight: 600 }}>{product.name}</span>
       </nav>
 
       {/* ── Top grid: image + sidebar ── */}
@@ -161,9 +209,9 @@ export default function ProductDetail() {
         {/* Left: image + prescription */}
         <div className="lg:col-span-7 flex flex-col gap-6 h-full">
           <div className="bg-white rounded-[0.5rem] p-10 border border-[#c3c6d6] shadow-sm flex items-center justify-center" style={{ minHeight: "480px" }}>
-            {lens.imageUrl ? (
+            {product.image_url ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={lens.imageUrl} alt={lens.name} className="max-w-full h-auto object-contain" style={{ maxHeight: "420px" }} />
+              <img src={product.image_url} alt={product.name} className="max-w-full h-auto object-contain" style={{ maxHeight: "420px" }} />
             ) : (
               <div className="text-[120px] opacity-30">👁️</div>
             )}
@@ -172,38 +220,23 @@ export default function ProductDetail() {
           {/* Ürün avantajları — tüm lensler */}
           {!isAccessory && (
             <div className="rounded-xl border border-[#edeef3] bg-white p-6 flex flex-col gap-4">
-              {/* 🔒 REÇETELİ LENS DEVRE DIŞI — reçete bilgi notu kaldırıldı
-              {needsPrescription && (
-                <div className="flex items-center gap-2.5 rounded-lg px-3.5 py-2.5"
-                  style={{ background: "#f0f4ff", border: "1px solid #c8d6f7" }}>
-                  <span className="material-symbols-outlined shrink-0"
-                    style={{ fontSize: "16px", color: "#003d9b", fontVariationSettings: "'FILL' 1" }}>
-                    receipt_long
-                  </span>
-                  <p style={{ fontSize: "12px", color: "#003d9b", fontWeight: 600, lineHeight: "17px" }}>
-                    Bu ürün reçete gerektirir — reçetenizi sepete ekledikten sonra yükleyebilirsiniz.
-                  </p>
-                </div>
-              )}
-              */}
-
               <p className="text-[#434654] leading-relaxed line-clamp-3" style={{ fontSize: "14px", lineHeight: "22px" }}>
-                {lens.description}
+                {product.description}
               </p>
               <ul className="flex flex-col gap-2.5">
                 {[
-                  (lens as Lens).color === "colored"
+                  lens.color === "colored"
                     ? "Reçete gerektirmez — kozmetik kullanıma uygundur"
-                    : `%${(lens as Lens).waterContent} su içeriği ile gün boyu konfor`,
-                  (lens as Lens).usagePeriod === "daily"
-                    ? `${(lens as Lens).packSizes[0]} adetlik paket — her gün temiz ve hijyenik`
-                    : `Aylık kullanım — ${(lens as Lens).packSizes[0]} adetlik ekonomik paket`,
-                  (lens as Lens).uvProtection
+                    : `%${lens.water_content} su içeriği ile gün boyu konfor`,
+                  lens.usage_period === "daily"
+                    ? `${lens.pack_sizes?.[0]} adetlik paket — her gün temiz ve hijyenik`
+                    : `${usagePeriodLabel} kullanım — ${lens.pack_sizes?.[0]} adetlik ekonomik paket`,
+                  lens.uv_protection
                     ? "UV Koruma Sınıf 2 — güneş ışınlarına karşı ekstra koruma"
-                    : `${(lens as Lens).oxygenPermeability} Dk/t oksijen geçirgenliği — gözler nefes alır`,
-                  (lens as Lens).color === "colored" && (lens as Lens).colorName
-                    ? `${(lens as Lens).colorName} renk seçeneği — doğal ve etkileyici görünüm`
-                    : `${(lens as Lens).dia} mm çap, ${(lens as Lens).bc} mm taban eğrilik`,
+                    : `${lens.oxygen_permeability} Dk/t oksijen geçirgenliği — gözler nefes alır`,
+                  lens.color === "colored" && lens.color_name
+                    ? `${lens.color_name} renk seçeneği — doğal ve etkileyici görünüm`
+                    : `${lens.dia} mm çap, ${lens.bc} mm taban eğrilik`,
                 ].map((point) => (
                   <li key={point} className="flex items-start gap-2.5">
                     <span
@@ -235,32 +268,30 @@ export default function ProductDetail() {
               )}
               <div className="flex text-[#6a3600]">
                 {[1, 2, 3, 4, 5].map((s) => (
-                  <span key={s} style={{ fontSize: s <= Math.round(lens.rating) ? "16px" : "14px", fontVariationSettings: s <= Math.round(lens.rating) ? "'FILL' 1" : "'FILL' 0" }}>★</span>
+                  <span key={s} style={{ fontSize: s <= Math.round(product.rating) ? "16px" : "14px", fontVariationSettings: s <= Math.round(product.rating) ? "'FILL' 1" : "'FILL' 0" }}>★</span>
                 ))}
               </div>
-              <span className="text-[#434654]" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>({lens.rating})</span>
+              <span className="text-[#434654]" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>({product.rating})</span>
             </div>
             <div className="flex items-start justify-between gap-3">
               <h1 className="text-[#003d9b]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "32px", lineHeight: "40px", fontWeight: 600 }}>
-                {lens.name}
+                {product.name}
               </h1>
-              <FavoriteButton productId={lens.id} size="lg" className="shrink-0 mt-1" />
+              <FavoriteButton productId={product.id} size="lg" className="shrink-0 mt-1" />
             </div>
             <div className="flex items-baseline gap-2">
               <span className="text-[#191c1e]" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "24px", lineHeight: "32px", fontWeight: 600 }}>
-                {lens.price.toLocaleString("tr-TR")} ₺
+                {product.price.toLocaleString("tr-TR")} ₺
               </span>
-              {lens.originalPrice && (
+              {product.original_price && (
                 <span className="text-[#434654] line-through" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>
-                  {lens.originalPrice.toLocaleString("tr-TR")} ₺{discount > 0 && <> (%{discount} indirim)</>}
+                  {product.original_price.toLocaleString("tr-TR")} ₺{discount > 0 && <> (%{discount} indirim)</>}
                 </span>
               )}
             </div>
 
             {/* Taksit bilgisi */}
-            <p
-              className="flex items-center gap-1.5 self-start hover:opacity-80 transition-opacity"
-            >
+            <p className="flex items-center gap-1.5 self-start hover:opacity-80 transition-opacity">
               <span className="material-symbols-outlined" style={{ fontSize: "14px", color: "#00687b" }}>credit_card</span>
               <span style={{ fontSize: "12px", color: "#00687b", fontWeight: 600, fontFamily: "'Inter'" }}>
                 12 aya kadar taksit imkanlarıyla
@@ -295,16 +326,6 @@ export default function ProductDetail() {
                       </button>
                     ))}
                   </div>
-                  {/* 🔒 REÇETELİ LENS DEVRE DIŞI — reçete rehber linki kaldırıldı
-                  <button
-                    onClick={() => setShowMapModal(true)}
-                    className="flex items-center gap-1 mt-1 text-[#003d9b] hover:underline self-start transition-opacity hover:opacity-80"
-                  >
-                    <span style={{ fontSize: "12.5px", letterSpacing: "0.02em", fontWeight: 600, fontFamily: "'Inter'" }}>
-                      Reçetemdeki numaraları nasıl seçebilirim?
-                    </span>
-                  </button>
-                  */}
                 </div>
 
                 {/* SPH selection */}
@@ -313,15 +334,6 @@ export default function ProductDetail() {
                     <label className="text-[#434654]" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>
                       Sferik Güç (PWR/SPH)
                     </label>
-                    {/* 🔒 REÇETELİ LENS DEVRE DIŞI — Rehber linki kaldırıldı
-                    <span
-                      onClick={() => setShowGuide(true)}
-                      className="text-[#003d9b] cursor-pointer hover:underline"
-                      style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}
-                    >
-                      Rehber
-                    </span>
-                    */}
                   </div>
 
                   {eyeMode === "same" ? (
@@ -335,7 +347,7 @@ export default function ProductDetail() {
                 </div>
 
                 {/* CYL + AXIS — sadece toric lenslerde */}
-                {(lens as Lens).isToric && (
+                {lens.is_toric && (
                   <>
                     {/* CYL */}
                     <div className="flex flex-col gap-2">
@@ -344,7 +356,7 @@ export default function ProductDetail() {
                       </label>
                       {eyeMode === "same" ? (
                         <div className="grid grid-cols-4 gap-1.5">
-                          {((lens as Lens).cylOptions ?? []).map((cyl, i) => (
+                          {(lens.cyl_options ?? []).map((cyl, i) => (
                             <button
                               key={cyl}
                               onClick={() => setCylSame(i)}
@@ -369,7 +381,7 @@ export default function ProductDetail() {
                             <div key={label} className="flex flex-col gap-1.5">
                               <p className="text-[#434654] uppercase" style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em" }}>{label}</p>
                               <div className="grid grid-cols-4 gap-1.5">
-                                {((lens as Lens).cylOptions ?? []).map((cyl, i) => (
+                                {(lens.cyl_options ?? []).map((cyl, i) => (
                                   <button
                                     key={cyl}
                                     onClick={() => set(i)}
@@ -403,7 +415,7 @@ export default function ProductDetail() {
                           className="w-full bg-white border border-[#c3c6d6] rounded-[0.25rem] p-2"
                           style={{ fontSize: "14px" }}
                         >
-                          {((lens as Lens).axisOptions ?? []).map((ax) => (
+                          {(lens.axis_options ?? []).map((ax) => (
                             <option key={ax} value={ax}>{ax}°</option>
                           ))}
                         </select>
@@ -421,7 +433,7 @@ export default function ProductDetail() {
                                 className="w-full bg-white border border-[#c3c6d6] rounded-[0.25rem] p-2"
                                 style={{ fontSize: "14px" }}
                               >
-                                {((lens as Lens).axisOptions ?? []).map((ax) => (
+                                {(lens.axis_options ?? []).map((ax) => (
                                   <option key={ax} value={ax}>{ax}°</option>
                                 ))}
                               </select>
@@ -438,14 +450,14 @@ export default function ProductDetail() {
                   <div className="flex flex-col gap-2">
                     <label className="text-[#434654]" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>Taban Eğrilik (BC)</label>
                     <select defaultValue={selectedBc} className="w-full bg-white border border-[#c3c6d6] rounded-[0.25rem] p-2" style={{ fontSize: "14px" }}>
-                      <option>{(lens as Lens).bc} mm</option>
-                      <option>{((lens as Lens).bc + 0.2).toFixed(1)} mm</option>
+                      <option>{lens.bc} mm</option>
+                      <option>{(lens.bc + 0.2).toFixed(1)} mm</option>
                     </select>
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-[#434654]" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>Çap (DIA)</label>
                     <select defaultValue={selectedDia} className="w-full bg-white border border-[#c3c6d6] rounded-[0.25rem] p-2" style={{ fontSize: "14px" }}>
-                      <option>{(lens as Lens).dia} mm</option>
+                      <option>{lens.dia} mm</option>
                     </select>
                   </div>
                 </div>
@@ -466,7 +478,7 @@ export default function ProductDetail() {
                   </button>
                 </div>
                 <span className="text-[#434654]" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>
-                  {!isAccessory ? `${(lens as Lens).packSizes[0]}'li Paket` : "1 Kutu"}
+                  {!isAccessory ? `${lens.pack_sizes?.[0]}'li Paket` : "1 Kutu"}
                 </span>
               </div>
             </div>
@@ -537,21 +549,18 @@ export default function ProductDetail() {
           {/* Ürün Detayları — tam genişlik afiş */}
           {activeTab === "details" && (
             <div className="relative w-full rounded-2xl overflow-hidden" style={{ height: "460px" }}>
-              {/* Arka plan fotoğrafı */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 className="absolute inset-0 w-full h-full object-cover"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4zTqZpGie9ab2vSOSpI40VUOHF2iW48JjAmsqnrdNJgxdwyBGhe4-c1WjyaprB4X8tSnf1bv4UIP49yi4IKgyixzSwfgX-Ucuzy0ihxhRAHRvkEyUN7Au9JW8epRKIj5DsCEOHCS844vpBJReNWvnLmeCw6Pm2VTkoFqlNeeo6vzZ8O7rZf8qUaIMNV0zssoeeqwKJFG_CxnivLdXEVJGFAYG4uXX4qocQEMKap21ga9yCqZ-4beY0jTrixYOAqY_maUtx-oSUKzE"
                 alt=""
               />
-              {/* Renk gradyanı */}
               <div
                 className="absolute inset-0"
                 style={{
                   background: `linear-gradient(105deg, ${bannerBg}ee 0%, ${bannerBg}99 45%, ${bannerBg}22 100%)`,
                 }}
               />
-              {/* İçerik */}
               <div className="absolute inset-0 flex flex-col justify-end p-10 md:p-14">
                 <span
                   className="inline-flex items-center gap-1.5 mb-4 self-start px-3 py-1 rounded-full"
@@ -564,19 +573,19 @@ export default function ProductDetail() {
                   className="text-white mb-2"
                   style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "clamp(36px, 5vw, 64px)", lineHeight: 1.1, fontWeight: 800, letterSpacing: "-0.02em", textShadow: "0 2px 20px rgba(0,0,0,0.3)" }}
                 >
-                  {brand?.name ?? lens.brand}
+                  {product.brand_full_name ?? product.brand}
                 </h2>
                 <p
                   className="text-white mb-3"
                   style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "clamp(16px, 2vw, 22px)", lineHeight: 1.4, fontWeight: 500, opacity: 0.9, maxWidth: "520px" }}
                 >
-                  {lens.name}
+                  {product.name}
                 </p>
                 <p
                   className="text-white/75"
                   style={{ fontSize: "15px", lineHeight: "22px", maxWidth: "420px" }}
                 >
-                  {brand?.tagline ?? "Uzun süreli konfor ve nem deneyimi yaşayın."}
+                  {product.tagline ?? "Uzun süreli konfor ve nem deneyimi yaşayın."}
                 </p>
               </div>
             </div>
@@ -585,18 +594,18 @@ export default function ProductDetail() {
           {/* Ürün Hakkında */}
           {activeTab === "about" && (
             <div className="w-full">
-              <p className="text-[#434654]" style={{ fontSize: "15px", lineHeight: "26px" }}>{lens.description}</p>
+              <p className="text-[#434654]" style={{ fontSize: "15px", lineHeight: "26px" }}>{product.description}</p>
               {!isAccessory && (
                 <p className="text-[#434654] mt-4" style={{ fontSize: "15px", lineHeight: "26px" }}>
-                  {(lens as Lens).color === "colored"
-                    ? `${lens.name}, doğal görünümünü koruyan ya da farklı bir göz rengine kavuşmak isteyenler için tasarlanmış ${usagePeriodLabel.toLowerCase()} renkli kontakt lenstir. Reçete gerektirmez; görme bozukluğu olmayan kullanıcılar da güvenle kullanabilir.`
-                    : `${lens.name}, ${(lens as Lens).material} malzemesinden üretilmiş, yüksek oksijen geçirgenliğine sahip bir ${usagePeriodLabel.toLowerCase()} kontakt lenstir. Gün boyu göz sağlığını korurken maksimum görüş netliği sağlar. Tıbbi sınıf ürün olduğundan geçerli bir optometri reçetesi ile satışı yapılmaktadır.`
+                  {lens.color === "colored"
+                    ? `${product.name}, doğal görünümünü koruyan ya da farklı bir göz rengine kavuşmak isteyenler için tasarlanmış ${usagePeriodLabel.toLowerCase()} renkli kontakt lenstir. Reçete gerektirmez; görme bozukluğu olmayan kullanıcılar da güvenle kullanabilir.`
+                    : `${product.name}, ${lens.material} malzemesinden üretilmiş, yüksek oksijen geçirgenliğine sahip bir ${usagePeriodLabel.toLowerCase()} kontakt lenstir. Gün boyu göz sağlığını korurken maksimum görüş netliği sağlar.`
                   }
                 </p>
               )}
-              {!isAccessory && (lens as Lens).tags?.length > 0 && (
+              {!isAccessory && lens.tags?.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-6">
-                  {(lens as Lens).tags.map((tag) => (
+                  {lens.tags.map((tag: string) => (
                     <span key={tag} className="bg-[#f0f1f8] text-[#434654] px-3 py-1.5 rounded-full" style={{ fontSize: "12px", fontWeight: 600 }}>
                       {tag}
                     </span>
@@ -610,18 +619,18 @@ export default function ProductDetail() {
           {activeTab === "specs" && !isAccessory && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16">
               {[
-                { label: "Materyal / Malzeme", value: (lens as Lens).material },
-                { label: "Su İçeriği", value: `%${(lens as Lens).waterContent}` },
-                { label: "Oksijen Geçirgenliği", value: `${(lens as Lens).oxygenPermeability} Dk/t` },
-                { label: "Çap (DIA)", value: `${(lens as Lens).dia} mm` },
-                { label: "Taban Eğrilik (BC)", value: `${(lens as Lens).bc} mm` },
-                { label: "Sferik Güç Aralığı", value: (lens as Lens).sphRange },
+                { label: "Materyal / Malzeme", value: lens.material },
+                { label: "Su İçeriği", value: `%${lens.water_content}` },
+                { label: "Oksijen Geçirgenliği", value: `${lens.oxygen_permeability} Dk/t` },
+                { label: "Çap (DIA)", value: `${lens.dia} mm` },
+                { label: "Taban Eğrilik (BC)", value: `${lens.bc} mm` },
+                { label: "Sferik Güç Aralığı", value: lens.sph_range },
                 { label: "Kullanım Süresi", value: usagePeriodLabel },
-                { label: "UV Koruma", value: (lens as Lens).uvProtection ? "Var — Sınıf 2" : "Yok" },
-                { label: "Renk", value: (lens as Lens).color === "colored" ? `Renkli${(lens as Lens).colorName ? ` — ${(lens as Lens).colorName}` : ""}` : "Şeffaf" },
-                { label: "Paket Boyutları", value: (lens as Lens).packSizes.map((s) => `${s} adet`).join(" / ") },
-                { label: "Reçete Gereksinimi", value: (lens as Lens).color === "clear" ? "Gerekli" : "Gerekmiyor" },
-                { label: "Stok Durumu", value: (lens as Lens).stock > 0 ? `Mevcut (${(lens as Lens).stock} adet)` : "Tükendi" },
+                { label: "UV Koruma", value: lens.uv_protection ? "Var — Sınıf 2" : "Yok" },
+                { label: "Renk", value: lens.color === "colored" ? `Renkli${lens.color_name ? ` — ${lens.color_name}` : ""}` : "Şeffaf" },
+                { label: "Paket Boyutları", value: lens.pack_sizes?.map((s: number) => `${s} adet`).join(" / ") },
+                { label: "Reçete Gereksinimi", value: lens.color === "clear" ? "Gerekli" : "Gerekmiyor" },
+                { label: "Stok Durumu", value: lens.stock > 0 ? `Mevcut (${lens.stock} adet)` : "Tükendi" },
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-center justify-between py-3 border-b border-[#edeef3] last:border-0">
                   <span className="text-[#737685]" style={{ fontSize: "13px", fontWeight: 600, fontFamily: "'Inter'" }}>{label}</span>
@@ -632,10 +641,10 @@ export default function ProductDetail() {
           )}
           {activeTab === "specs" && isAccessory && (
             <div className="max-w-2xl space-y-3">
-              <p style={{ fontSize: "15px", lineHeight: "24px", color: "#434654" }}>{lens.description}</p>
+              <p style={{ fontSize: "15px", lineHeight: "24px", color: "#434654" }}>{product.description}</p>
               <div className="flex items-center justify-between py-3 border-b border-[#edeef3]">
                 <span className="text-[#737685]" style={{ fontSize: "13px", fontWeight: 600 }}>Kategori</span>
-                <span className="text-[#191c1e]" style={{ fontSize: "14px" }}>{(lens as Accessory).category === "solution" ? "Bakım Solüsyonu" : "Göz Damlası"}</span>
+                <span className="text-[#191c1e]" style={{ fontSize: "14px" }}>{accessory.accessory_category === "solution" ? "Bakım Solüsyonu" : "Göz Damlası"}</span>
               </div>
             </div>
           )}
@@ -643,21 +652,21 @@ export default function ProductDetail() {
           {/* Değerlendirmeler */}
           {activeTab === "reviews" && (
             <div>
-              {lensReviews.length === 0 ? (
+              {reviews.length === 0 ? (
                 <div className="text-center py-16">
                   <span className="material-symbols-outlined" style={{ fontSize: "48px", color: "#c3c6d6" }}>star</span>
                   <p className="text-[#434654] mt-3">Henüz yorum yok. İlk sen ol!</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {lensReviews.map((rev) => (
+                  {reviews.map((rev) => (
                     <div key={rev.id} className="bg-white border border-[#c3c6d6] rounded-[0.5rem] p-5">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="font-semibold text-[#191c1e]" style={{ fontSize: "14px" }}>{rev.user}</span>
+                        <span className="font-semibold text-[#191c1e]" style={{ fontSize: "14px" }}>{rev.user_name}</span>
                         {rev.verified && (
                           <span className="text-[#00687b] bg-[#afecff] rounded-full px-2 py-0.5" style={{ fontSize: "10px", fontWeight: 700 }}>✓ Doğrulandı</span>
                         )}
-                        <span className="text-[#737685] ml-auto" style={{ fontSize: "12px" }}>{rev.date}</span>
+                        <span className="text-[#737685] ml-auto" style={{ fontSize: "12px" }}>{new Date(rev.created_at).toLocaleDateString("tr-TR")}</span>
                       </div>
                       <div className="flex mb-3">
                         {[1, 2, 3, 4, 5].map((s) => (
@@ -665,7 +674,7 @@ export default function ProductDetail() {
                         ))}
                       </div>
                       <p className="text-[#191c1e]" style={{ fontSize: "14px", lineHeight: "20px" }}>{rev.comment}</p>
-                      <p className="text-[#737685] mt-3 text-xs">{rev.helpful} kişi bu yorumu faydalı buldu</p>
+                      <p className="text-[#737685] mt-3 text-xs">{rev.helpful_count} kişi bu yorumu faydalı buldu</p>
                     </div>
                   ))}
                 </div>
@@ -732,7 +741,7 @@ export default function ProductDetail() {
                       { m: 9, multi: 1.24523 },
                       { m: 12, multi: 1.35091 },
                     ].map(({ m, multi }) => {
-                      const total = lens.price * multi;
+                      const total = product.price * multi;
                       const monthly = total / m;
                       return (
                         <div key={m} className="flex items-center justify-between">
@@ -750,42 +759,19 @@ export default function ProductDetail() {
               ))}
             </div>
           )}
+
           {/* Sıkça Sorulan Sorular */}
           {activeTab === "faq" && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
               {[
-                {
-                  q: "BC Nedir?",
-                  a: "Base Curve teriminin kısaltmasıdır. Temel eğri değerini gösterir. Bir diğer ifadeyle korneanın bombelik değeridir. Doktor tarafından yapılan ölçümle belli olur ve bu değerlerin lens reçetesinde yazması gerekmektedir.",
-                },
-                {
-                  q: "Dia Nedir?",
-                  a: "Kontakt lensin mm olarak çapını ifade eder. Lensin iki kenarının birbirine olan uzaklığını anlatmaktadır.",
-                },
-                {
-                  q: "Gözlük Reçetesi ile Lens Alabilir Miyim?",
-                  a: "Gözlük reçetesi ile lens reçetesinde olması gereken değerler farklıdır. Bu nedenle göz doktorunuzun lens kullanımına özel bir reçete oluşturması gerekmektedir.",
-                },
-                {
-                  q: "Ücretsiz Kargonun Koşulu Var Mı?",
-                  a: "Alt limit ve hiçbir koşul olmadan tüm siparişlerinizi ücretsiz kargo avantajı ile oluşturabilirsiniz.",
-                },
-                {
-                  q: "Hangi Ödeme Yöntemleri Var?",
-                  a: "Kapıda ödeme, havale/EFT veya kredi kartı ödeme seçeneklerinden birini kullanarak sipariş oluşturabilirsiniz.",
-                },
-                {
-                  q: "Lens Nasıl Takılır?",
-                  a: "Kontakt lens nasıl takılır? Öğrenmek için blog sayfamızı ziyaret ederek size özel oluşturduğumuz yazımızı okuyabilir ve uygulamalı olarak anlattığımız videomuzu izleyebilirsiniz.",
-                },
-                {
-                  q: "Kontakt Lens Reçetemi Nasıl Okuyabilirim?",
-                  a: "Kontakt lens reçetelerinin hepsi aynı formatta olmasa bile kullanılan temel değerler ve terimler aynıdır. Dioptri (miyopi veya hipermetropi değeri), BC (temel eğri), Çap (Dia), Cyl (silindir veya toric astigmat değeri), Aks (Ax — astigmatın açısı). Bu değerlerden reçetenizde bulunanları lens sepete ekleme esnasında seçerek siparişinizi kolaylıkla verebilirsiniz.",
-                },
-                {
-                  q: "Gözlük Reçetesiyle Kontakt Lens Alınır Mı?",
-                  a: "Maalesef gözlük reçetesi ile kontakt lens almak mümkün olmamaktadır. Gözlük camı gözden 12-14 mm arasında bir mesafede konumlanır; kontakt lens ise göz yüzeyinde (kornea) bulunduğundan numaralar birbirinden farklı olabilir. Ayrıca BC (temel eğri) ve Dia (çap) gibi değerlerin ölçümü yapılarak kontakt lens reçetesine yazılır; gözlük reçetesinde bu değerler bulunmaz. Bundan dolayı kontakt lens kullanımı için göz hekiminize giderek lens muayenesi olmanız gereklidir.",
-                },
+                { q: "BC Nedir?", a: "Base Curve teriminin kısaltmasıdır. Temel eğri değerini gösterir. Bir diğer ifadeyle korneanın bombelik değeridir. Doktor tarafından yapılan ölçümle belli olur ve bu değerlerin lens reçetesinde yazması gerekmektedir." },
+                { q: "Dia Nedir?", a: "Kontakt lensin mm olarak çapını ifade eder. Lensin iki kenarının birbirine olan uzaklığını anlatmaktadır." },
+                { q: "Gözlük Reçetesi ile Lens Alabilir Miyim?", a: "Gözlük reçetesi ile lens reçetesinde olması gereken değerler farklıdır. Bu nedenle göz doktorunuzun lens kullanımına özel bir reçete oluşturması gerekmektedir." },
+                { q: "Ücretsiz Kargonun Koşulu Var Mı?", a: "Alt limit ve hiçbir koşul olmadan tüm siparişlerinizi ücretsiz kargo avantajı ile oluşturabilirsiniz." },
+                { q: "Hangi Ödeme Yöntemleri Var?", a: "Kapıda ödeme, havale/EFT veya kredi kartı ödeme seçeneklerinden birini kullanarak sipariş oluşturabilirsiniz." },
+                { q: "Lens Nasıl Takılır?", a: "Kontakt lens nasıl takılır? Öğrenmek için blog sayfamızı ziyaret ederek size özel oluşturduğumuz yazımızı okuyabilir ve uygulamalı olarak anlattığımız videomuzu izleyebilirsiniz." },
+                { q: "Kontakt Lens Reçetemi Nasıl Okuyabilirim?", a: "Kontakt lens reçetelerinin hepsi aynı formatta olmasa bile kullanılan temel değerler ve terimler aynıdır. Dioptri (miyopi veya hipermetropi değeri), BC (temel eğri), Çap (Dia), Cyl (silindir veya toric astigmat değeri), Aks (Ax — astigmatın açısı)." },
+                { q: "Gözlük Reçetesiyle Kontakt Lens Alınır Mı?", a: "Maalesef gözlük reçetesi ile kontakt lens almak mümkün olmamaktadır. Gözlük camı gözden 12-14 mm arasında bir mesafede konumlanır; kontakt lens ise göz yüzeyinde (kornea) bulunduğundan numaralar birbirinden farklı olabilir." },
               ].map((item, i) => (
                 <div
                   key={i}
@@ -797,33 +783,19 @@ export default function ProductDetail() {
                     style={{ background: openFaq === i ? "#f0f4ff" : "#ffffff" }}
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   >
-                    <span
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        fontFamily: "'Plus Jakarta Sans'",
-                        color: openFaq === i ? "#003d9b" : "#191c1e",
-                      }}
-                    >
+                    <span style={{ fontSize: "14px", fontWeight: 600, fontFamily: "'Plus Jakarta Sans'", color: openFaq === i ? "#003d9b" : "#191c1e" }}>
                       {item.q}
                     </span>
                     <span
                       className="material-symbols-outlined shrink-0 transition-transform duration-200"
-                      style={{
-                        fontSize: "20px",
-                        color: openFaq === i ? "#003d9b" : "#737685",
-                        transform: openFaq === i ? "rotate(180deg)" : "rotate(0deg)",
-                      }}
+                      style={{ fontSize: "20px", color: openFaq === i ? "#003d9b" : "#737685", transform: openFaq === i ? "rotate(180deg)" : "rotate(0deg)" }}
                     >
                       expand_more
                     </span>
                   </button>
-
                   {openFaq === i && (
                     <div className="px-5 pb-5 border-t" style={{ borderColor: "#dae2ff" }}>
-                      <p className="text-[#434654] pt-4" style={{ fontSize: "14px", lineHeight: "22px" }}>
-                        {item.a}
-                      </p>
+                      <p className="text-[#434654] pt-4" style={{ fontSize: "14px", lineHeight: "22px" }}>{item.a}</p>
                     </div>
                   )}
                 </div>
@@ -835,53 +807,51 @@ export default function ProductDetail() {
       </div>
 
       {/* ── Customers also viewed ── */}
-      <section className="mt-20 pt-12 border-t border-[#edeef3]">
-        <div className="flex justify-between items-end mb-8">
-          <div>
-            <h2 className="text-[#191c1e]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "24px", lineHeight: "32px", fontWeight: 600 }}>
-              Bunları da İnceleyenler
-            </h2>
-            <p className="text-[#434654]" style={{ fontSize: "14px", lineHeight: "20px" }}>
-              Optometristler tarafından önerilen klinik olarak benzer alternatifler.
-            </p>
-          </div>
-          <Link href="/" className="text-[#003d9b] flex items-center gap-1 hover:underline" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>
-            Tümünü Gör <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>arrow_forward</span>
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {lenses.filter((l) => l.id !== lens.id).slice(0, 4).map((rel) => (
-            <Link key={rel.id} href={`/urun/${rel.id}`} className="group cursor-pointer">
-              <div className="bg-[#f3f4f6] rounded-[0.5rem] p-4 mb-2 relative overflow-hidden aspect-square flex items-center justify-center border border-[#c3c6d6] group-hover:border-[#003d9b] transition-all shadow-sm">
-                {rel.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={rel.imageUrl} alt={rel.name} className="max-w-[80%] h-auto object-contain group-hover:scale-105 transition-transform duration-300" />
-                ) : (
-                  <span className="text-5xl opacity-30">👁️</span>
-                )}
-                {rel.badge && (
-                  <div className="absolute top-2 right-2">
-                    <span className="bg-white/80 backdrop-blur-sm text-[#00687b] rounded-full font-bold shadow-sm px-2 py-1 whitespace-nowrap" style={{ fontSize: "10px", fontWeight: 700 }}>
-                      {rel.badge}
-                    </span>
-                  </div>
-                )}
-              </div>
-              <p className="text-[#434654]" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>{rel.brand}</p>
-              <h3 className="text-[#191c1e] group-hover:text-[#003d9b] transition-colors" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "20px", lineHeight: "28px", fontWeight: 600 }}>
-                {rel.name}
-              </h3>
-              <p className="text-[#003d9b] mt-1" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "20px", lineHeight: "28px", fontWeight: 600 }}>
-                {rel.price.toLocaleString("tr-TR")} ₺
+      {related.length > 0 && (
+        <section className="mt-20 pt-12 border-t border-[#edeef3]">
+          <div className="flex justify-between items-end mb-8">
+            <div>
+              <h2 className="text-[#191c1e]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "24px", lineHeight: "32px", fontWeight: 600 }}>
+                Bunları da İnceleyenler
+              </h2>
+              <p className="text-[#434654]" style={{ fontSize: "14px", lineHeight: "20px" }}>
+                Optometristler tarafından önerilen klinik olarak benzer alternatifler.
               </p>
+            </div>
+            <Link href="/urunler" className="text-[#003d9b] flex items-center gap-1 hover:underline" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>
+              Tümünü Gör <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>arrow_forward</span>
             </Link>
-          ))}
-        </div>
-      </section>
-      {/* 🔒 REÇETELİ LENS DEVRE DIŞI — reçete modalları yorum satırında
-      {showGuide && <PrescriptionGuideModal onClose={() => setShowGuide(false)} />}
-      {showMapModal && <PrescriptionMapModal onClose={() => setShowMapModal(false)} />}
-      */}
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {related.map((rel) => (
+              <Link key={rel.id} href={`/urun/${rel.id}`} className="group cursor-pointer">
+                <div className="bg-[#f3f4f6] rounded-[0.5rem] p-4 mb-2 relative overflow-hidden aspect-square flex items-center justify-center border border-[#c3c6d6] group-hover:border-[#003d9b] transition-all shadow-sm">
+                  {rel.image_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={rel.image_url} alt={rel.name} className="max-w-[80%] h-auto object-contain group-hover:scale-105 transition-transform duration-300" />
+                  ) : (
+                    <span className="text-5xl opacity-30">👁️</span>
+                  )}
+                  {rel.badge && (
+                    <div className="absolute top-2 right-2">
+                      <span className="bg-white/80 backdrop-blur-sm text-[#00687b] rounded-full font-bold shadow-sm px-2 py-1 whitespace-nowrap" style={{ fontSize: "10px", fontWeight: 700 }}>
+                        {rel.badge}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <p className="text-[#434654]" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>{rel.brand}</p>
+                <h3 className="text-[#191c1e] group-hover:text-[#003d9b] transition-colors" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "20px", lineHeight: "28px", fontWeight: 600 }}>
+                  {rel.name}
+                </h3>
+                <p className="text-[#003d9b] mt-1" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "20px", lineHeight: "28px", fontWeight: 600 }}>
+                  {rel.price.toLocaleString("tr-TR")} ₺
+                </p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

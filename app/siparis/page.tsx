@@ -29,14 +29,14 @@ export default function SiparisPage() {
   const needsRx = false; // 🔒 her zaman false — reçeteli lens satışı yok
 
   // Teslimat
-  const defaultAddr = addresses.find((a) => a.isDefault) ?? addresses[0];
+  const defaultAddr = addresses.find((a) => a.is_default) ?? addresses[0];
   const [contact, setContact] = useState({
     fullName: user?.name ?? "",
     email:    user?.email ?? "",
     phone:    user?.phone ?? "",
   });
   const [addrMode, setAddrMode] = useState<"saved" | "new">(defaultAddr && addresses.length > 0 ? "saved" : "new");
-  const [selectedAddrId, setSelectedAddrId] = useState<string>(defaultAddr?.id ?? "");
+  const [selectedAddrId, setSelectedAddrId] = useState<number | "">(defaultAddr?.id ?? "");
   const [newAddr, setNewAddr] = useState({ city: "", district: "", postalCode: "", fullAddress: "" });
 
   // 🔒 REÇETELİ LENS DEVRE DIŞI — Reçete state'leri yorum satırında
@@ -290,10 +290,10 @@ export default function SiparisPage() {
                       onChange={() => setSelectedAddrId(addr.id)} />
                     <div>
                       <p className="font-bold text-[#191c1e]" style={{ fontSize: "13px" }}>{addr.title}</p>
-                      <p className="text-[#737685]" style={{ fontSize: "12px" }}>{addr.fullName} · {addr.phone}</p>
-                      <p className="text-[#737685]" style={{ fontSize: "12px" }}>{addr.fullAddress}, {addr.district} / {addr.city}{addr.postalCode ? ` ${addr.postalCode}` : ""}</p>
+                      <p className="text-[#737685]" style={{ fontSize: "12px" }}>{addr.full_name} · {addr.phone}</p>
+                      <p className="text-[#737685]" style={{ fontSize: "12px" }}>{addr.full_address}, {addr.district} / {addr.city}{addr.postal_code ? ` ${addr.postal_code}` : ""}</p>
                     </div>
-                    {addr.isDefault && (
+                    {addr.is_default && (
                       <span className="ml-auto shrink-0 px-2 py-0.5 rounded-full bg-[#dae2ff] text-[#003d9b] font-bold" style={{ fontSize: "9px" }}>Varsayılan</span>
                     )}
                   </label>

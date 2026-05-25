@@ -1,11 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
-import { mockTickets, SupportTicket, TicketStatus, TICKET_STATUS_COLORS, TICKET_STATUS_LABELS, TICKET_PRIORITY_COLORS, TICKET_PRIORITY_LABELS } from "@/lib/adminData";
+import { SupportTicket, TicketStatus, TICKET_STATUS_COLORS, TICKET_STATUS_LABELS, TICKET_PRIORITY_COLORS, TICKET_PRIORITY_LABELS } from "@/lib/adminData";
 
 const ALL_STATUSES: TicketStatus[] = ["acik", "yanitlandi", "kapali"];
 
 export default function AdminDestek() {
-  const [tickets, setTickets] = useState<SupportTicket[]>(mockTickets);
+  const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [filter, setFilter] = useState<TicketStatus | "all">("all");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<SupportTicket | null>(null);
@@ -18,15 +18,22 @@ export default function AdminDestek() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
+  useEffect(() => {
+    fetch("/api/admin/tickets")
+      .then(r => r.json())
+      .then(d => setTickets(d.tickets || []))
+      .catch(console.error);
+  }, []);
+
   const filtered = tickets.filter(t => {
     const matchF = filter === "all" || t.status === filter;
-    const matchS = t.id.toLowerCase().includes(search.toLowerCase())
+    const matchS = String(t.id).toLowerCase().includes(search.toLowerCase())
       || t.name.toLowerCase().includes(search.toLowerCase())
       || t.subject.toLowerCase().includes(search.toLowerCase());
     return matchF && matchS;
   });
 
-  const updateStatus = (id: string, status: TicketStatus) => {
+  const updateStatus = (id: number, status: TicketStatus) => {
     setTickets(prev => prev.map(t => t.id === id ? { ...t, status } : t));
     if (selected?.id === id) setSelected(prev => prev ? { ...prev, status } : null);
   };
@@ -91,7 +98,7 @@ export default function AdminDestek() {
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "6px", flexShrink: 0 }}>
                     <span style={{ fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "999px", background: sc.bg, color: sc.text }}>{TICKET_STATUS_LABELS[t.status]}</span>
-                    <span style={{ fontSize: "10px", color: "#9ca3af" }}>{t.date}</span>
+                    <span style={{ fontSize: "10px", color: "#9ca3af" }}>{t.created_at}</span>
                     <span style={{ fontSize: "10px", fontWeight: 700, color: TICKET_PRIORITY_COLORS[t.priority] }}>{TICKET_PRIORITY_LABELS[t.priority]}</span>
                   </div>
                 </div>
@@ -161,16 +168,16 @@ export default function AdminDestek() {
                 {/* Telefon */}
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                   <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "#9ca3af", fontVariationSettings: "'FILL' 1" }}>phone</span>
-                  <a href={`tel:${selected.phone.replace(/\s/g, "")}`} style={{ fontSize: "13px", color: "#003d9b", fontWeight: 600, textDecoration: "none" }}
+                  <a href={`tel:${(selected.phone ?? "").replace(/\s/g, "")}`} style={{ fontSize: "13px", color: "#003d9b", fontWeight: 600, textDecoration: "none" }}
                     onMouseEnter={e => (e.currentTarget.style.textDecoration = "underline")}
                     onMouseLeave={e => (e.currentTarget.style.textDecoration = "none")}
-                  >{selected.phone}</a>
+                  >{selected.phone ?? "—"}</a>
                 </div>
 
                 {/* Tarih */}
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                   <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "#9ca3af" }}>schedule</span>
-                  <span style={{ fontSize: "12px", color: "#6b7280" }}>{selected.date}</span>
+                  <span style={{ fontSize: "12px", color: "#6b7280" }}>{selected.created_at}</span>
                 </div>
               </div>
 
@@ -181,7 +188,7 @@ export default function AdminDestek() {
                   <span className="material-symbols-outlined" style={{ fontSize: "16px", fontVariationSettings: "'FILL' 1" }}>mail</span>
                   E-posta Gönder
                 </a>
-                <a href={`tel:${selected.phone.replace(/\s/g, "")}`}
+                <a href={`tel:${(selected.phone ?? "").replace(/\s/g, "")}`}
                   style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "9px 12px", borderRadius: "10px", background: "#dcfce7", color: "#166534", textDecoration: "none", fontSize: "12px", fontWeight: 700 }}>
                   <span className="material-symbols-outlined" style={{ fontSize: "16px", fontVariationSettings: "'FILL' 1" }}>phone</span>
                   Ara

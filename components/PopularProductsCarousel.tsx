@@ -1,17 +1,31 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { lenses } from "@/lib/data";
+import { Product } from "@/lib/data";
 import ProductCard from "./ProductCard";
 
 const ITEMS_PER_PAGE = 4;
 
 /* ── section: populer-urunler ── */
 export default function PopularProductsCarousel() {
-  const popularProducts = [...lenses].sort((a, b) => b.reviewCount - a.reviewCount);
-  const total = popularProducts.length;
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [start, setStart] = useState(0);
   const [animKey, setAnimKey] = useState(0);
+
+  useEffect(() => {
+    fetch("/api/products?type=lens")
+      .then((r) => r.json())
+      .then((d) => {
+        const sorted = [...(d.products || [])].sort(
+          (a: Product, b: Product) => b.review_count - a.review_count
+        );
+        setAllProducts(sorted);
+      })
+      .catch(console.error);
+  }, []);
+
+  const popularProducts = allProducts;
+  const total = popularProducts.length;
 
   const canGoLeft = start > 0;
   const canGoRight = start + ITEMS_PER_PAGE < total;

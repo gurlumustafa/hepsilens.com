@@ -6,7 +6,7 @@ import Link from "next/link";
 // 🔒 REÇETELİ LENS DEVRE DIŞI — isExpired ve isNearExpiry kaldırıldı
 // import { useAuth, Address, isExpired, isNearExpiry } from "@/contexts/AuthContext";
 import { useAuth, Address } from "@/contexts/AuthContext";
-import { lenses, accessories } from "@/lib/data";
+import { Product } from "@/lib/data";
 import { useCart } from "@/contexts/CartContext";
 import LogoutModal from "@/components/LogoutModal";
 
@@ -15,10 +15,11 @@ import LogoutModal from "@/components/LogoutModal";
 type Section = "favorites" | "orders" | "addresses" | "emails" | "settings";
 
 const statusLabel: Record<string, { label: string; color: string; bg: string }> = {
-  preparing: { label: "Hazırlanıyor", color: "#b45309", bg: "#fef3c7" },
-  shipped: { label: "Kargoda", color: "#003d9b", bg: "#dae2ff" },
-  delivered: { label: "Teslim Edildi", color: "#16a34a", bg: "#dcfce7" },
-  cancelled: { label: "İptal", color: "#dc2626", bg: "#fee2e2" },
+  yeni:      { label: "Yeni", color: "#1d4ed8", bg: "#dbeafe" },
+  isleniyor: { label: "Hazırlanıyor", color: "#b45309", bg: "#fef3c7" },
+  kargoda:   { label: "Kargoda", color: "#003d9b", bg: "#dae2ff" },
+  teslim:    { label: "Teslim Edildi", color: "#16a34a", bg: "#dcfce7" },
+  iptal:     { label: "İptal", color: "#dc2626", bg: "#fee2e2" },
 };
 
 const navItems: { id: Section; icon: string; label: string }[] = [
@@ -102,7 +103,7 @@ function AddressForm({ onSubmit, onCancel }: {
   onSubmit: (a: Omit<Address, "id">) => void;
   onCancel: () => void;
 }) {
-  const [form, setForm] = useState({ title: "", fullName: "", phone: "", city: "", district: "", postalCode: "", fullAddress: "", isDefault: false });
+  const [form, setForm] = useState({ title: "", full_name: "", phone: "", city: "", district: "", postal_code: "", full_address: "", is_default: false });
   const f = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, [k]: e.target.value });
 
   return (
@@ -111,10 +112,10 @@ function AddressForm({ onSubmit, onCancel }: {
       <div className="grid grid-cols-2 gap-3">
         {([
           { label: "Adres Başlığı", key: "title", placeholder: "Ev, İş..." },
-          { label: "Ad Soyad", key: "fullName", placeholder: "Adınız Soyadınız" },
+          { label: "Ad Soyad", key: "full_name", placeholder: "Adınız Soyadınız" },
           { label: "Şehir", key: "city", placeholder: "İstanbul" },
           { label: "İlçe", key: "district", placeholder: "Kadıköy" },
-          { label: "Posta Kodu", key: "postalCode", placeholder: "34000" },
+          { label: "Posta Kodu", key: "postal_code", placeholder: "34000" },
         ] as { label: string; key: keyof typeof form; placeholder: string }[]).map(({ label, key, placeholder }) => (
           <div key={String(key)} className="flex flex-col gap-1.5">
             <label className="text-[#434654] font-semibold" style={{ fontSize: "11px" }}>{label}</label>
@@ -130,16 +131,16 @@ function AddressForm({ onSubmit, onCancel }: {
         <label className="text-[#434654] font-semibold" style={{ fontSize: "11px" }}>Tam Adres</label>
         <input className="bg-white border border-[#c3c6d6] rounded-lg px-3 py-2 outline-none focus:border-[#003d9b] transition-colors"
           style={{ fontSize: "13px" }} placeholder="Mahalle, cadde, apartman, daire..."
-          value={form.fullAddress} onChange={(e) => setForm({ ...form, fullAddress: e.target.value })} />
+          value={form.full_address} onChange={(e) => setForm({ ...form, full_address: e.target.value })} />
       </div>
       <label className="flex items-center gap-2 cursor-pointer">
         <input type="checkbox" className="w-4 h-4 accent-[#003d9b]"
-          checked={form.isDefault} onChange={(e) => setForm({ ...form, isDefault: e.target.checked })} />
+          checked={form.is_default} onChange={(e) => setForm({ ...form, is_default: e.target.checked })} />
         <span className="text-[#434654]" style={{ fontSize: "13px" }}>Varsayılan adres olarak ayarla</span>
       </label>
       <div className="flex gap-2">
         <button
-          onClick={() => { if (form.title && form.fullName && form.city) onSubmit(form); }}
+          onClick={() => { if (form.title && form.full_name && form.city) onSubmit(form); }}
           className="flex-1 py-2.5 rounded-xl font-bold text-white hover:opacity-90 active:scale-95 transition-all"
           style={{ background: "#003d9b", fontSize: "13px", fontFamily: "'Inter'" }}
         >
@@ -158,12 +159,23 @@ function HesapContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const {
-    user, loaded, orders, addresses, emailPreferences, favorites,
+    user, loaded, orders, addresses, favorites,
     // 🔒 REÇETELİ LENS DEVRE DIŞI — prescriptions, addPrescription, removePrescription kaldırıldı
     // prescriptions, addPrescription, removePrescription,
     logout, updateUser,
-    addAddress, removeAddress, setDefaultAddress, updateEmailPreferences, toggleFavorite,
+    addAddress, removeAddress, setDefaultAddress, toggleFavorite,
   } = useAuth();
+  const [favoriteProducts, setFavoriteProducts] = useState<Product[]>([]);
+  useEffect(() => {
+    if (favorites.length === 0) { setFavoriteProducts([]); return; }
+    fetch("/api/products")
+      .then((r) => r.json())
+      .then((d) => {
+        const all: Product[] = d.products || [];
+        setFavoriteProducts(all.filter((p) => favorites.includes(p.id)));
+      })
+      .catch(console.error);
+  }, [favorites]);
 
   // 🔒 REÇETELİ LENS DEVRE DIŞI — "prescriptions" validSections'dan kaldırıldı
   const validSections: Section[] = ["favorites", "orders", "addresses", "emails", "settings"];
@@ -205,7 +217,7 @@ function HesapContent() {
         </div>
         <p className="font-bold text-[#191c1e] text-center truncate" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "15px" }}>{user.name}</p>
         {user.email && <p className="text-[#737685] text-center truncate mt-0.5" style={{ fontSize: "12px" }}>{user.email}</p>}
-        {user.isAnonymous && (
+        {user.is_anonymous && (
           <span className="block text-center mt-2 text-[#737685] bg-[#f0f1f5] rounded-full px-3 py-0.5" style={{ fontSize: "10px", fontWeight: 600 }}>
             Misafir Hesap
           </span>
@@ -257,17 +269,14 @@ function HesapContent() {
 
   // ── Siparişlerim ──────────────────────────────────────────────────
   const Orders = () => {
-    const [reordered, setReordered] = useState<string | null>(null);
+    const [reordered, setReordered] = useState<number | null>(null);
 
-    function handleReorder(orderId: string) {
+    function handleReorder(orderId: number) {
       const order = orders.find((o) => o.id === orderId);
-      if (!order) return;
+      if (!order || !order.items) return;
       order.items.forEach((item) => {
-        const product = allProducts.find((p) => p.name === item.name);
-        if (product) {
-          for (let i = 0; i < item.qty; i++) {
-            addItem({ id: product.id, name: product.name, brand: product.brand, price: product.price, imageUrl: product.imageUrl });
-          }
+        for (let i = 0; i < item.quantity; i++) {
+          addItem({ id: 0, name: item.product_name, brand: item.product_brand ?? "", price: item.unit_price, imageUrl: undefined });
         }
       });
       setReordered(orderId);
@@ -289,31 +298,31 @@ function HesapContent() {
           <div key={order.id} className="bg-white rounded-xl border border-[#edeef3] p-5">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <p className="font-bold text-[#191c1e]" style={{ fontSize: "14px" }}>#{order.id}</p>
-                <p className="text-[#737685]" style={{ fontSize: "12px" }}>{order.date}</p>
+                <p className="font-bold text-[#191c1e]" style={{ fontSize: "14px" }}>#{order.order_no}</p>
+                <p className="text-[#737685]" style={{ fontSize: "12px" }}>{new Date(order.created_at).toLocaleDateString("tr-TR")}</p>
               </div>
-              <span className="px-3 py-1 rounded-full font-bold" style={{ fontSize: "11px", color: statusLabel[order.status].color, background: statusLabel[order.status].bg }}>
-                {statusLabel[order.status].label}
+              <span className="px-3 py-1 rounded-full font-bold" style={{ fontSize: "11px", color: statusLabel[order.status]?.color, background: statusLabel[order.status]?.bg }}>
+                {statusLabel[order.status]?.label ?? order.status}
               </span>
             </div>
 
             <div className="border-t border-[#f0f1f5] pt-3 flex flex-col gap-2">
-              {order.items.map((item) => (
-                <div key={item.name} className="flex justify-between items-center">
-                  <span className="text-[#434654]" style={{ fontSize: "13px" }}>{item.name} × {item.qty}</span>
-                  <span className="font-semibold text-[#191c1e]" style={{ fontSize: "13px" }}>{item.price.toLocaleString("tr-TR")} ₺</span>
+              {(order.items ?? []).map((item, i) => (
+                <div key={i} className="flex justify-between items-center">
+                  <span className="text-[#434654]" style={{ fontSize: "13px" }}>{item.product_name} × {item.quantity}</span>
+                  <span className="font-semibold text-[#191c1e]" style={{ fontSize: "13px" }}>{item.unit_price.toLocaleString("tr-TR")} ₺</span>
                 </div>
               ))}
             </div>
 
             <div className="border-t border-[#f0f1f5] pt-3 mt-3 flex items-center justify-between gap-2 flex-wrap">
               <span className="font-bold text-[#003d9b]" style={{ fontSize: "16px", fontFamily: "'Plus Jakarta Sans'" }}>
-                {order.total.toLocaleString("tr-TR")} ₺
+                {order.total_amount.toLocaleString("tr-TR")} ₺
               </span>
               <div className="flex items-center gap-2">
-                {order.trackingNo && (
+                {order.tracking_code && (
                   <Link
-                    href={`/siparis-takip?no=${order.trackingNo}`}
+                    href={`/siparis-takip?no=${order.tracking_code}`}
                     className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold transition-all hover:bg-[#dae2ff]"
                     style={{ fontSize: "12px", fontFamily: "'Inter'", background: "#f0f4ff", color: "#003d9b" }}
                   >
@@ -375,17 +384,17 @@ function HesapContent() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {addresses.map((addr) => (
             <div key={addr.id} className="bg-white rounded-xl border p-5 relative"
-              style={{ borderColor: addr.isDefault ? "#003d9b" : "#edeef3" }}>
-              {addr.isDefault && (
+              style={{ borderColor: addr.is_default ? "#003d9b" : "#edeef3" }}>
+              {addr.is_default && (
                 <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-[#dae2ff] text-[#003d9b] font-bold" style={{ fontSize: "10px" }}>
                   Varsayılan
                 </span>
               )}
               <p className="font-bold text-[#191c1e] mb-1" style={{ fontSize: "14px" }}>{addr.title}</p>
-              <p className="text-[#434654]" style={{ fontSize: "13px" }}>{addr.fullName} · {addr.phone}</p>
-              <p className="text-[#737685] mt-1" style={{ fontSize: "13px" }}>{addr.fullAddress}, {addr.district} / {addr.city}</p>
+              <p className="text-[#434654]" style={{ fontSize: "13px" }}>{addr.full_name} · {addr.phone}</p>
+              <p className="text-[#737685] mt-1" style={{ fontSize: "13px" }}>{addr.full_address}, {addr.district} / {addr.city}</p>
               <div className="flex gap-3 mt-3">
-                {!addr.isDefault && (
+                {!addr.is_default && (
                   <button onClick={() => setDefaultAddress(addr.id)} className="text-[#003d9b] hover:underline font-semibold" style={{ fontSize: "12px" }}>
                     Varsayılan Yap
                   </button>
@@ -407,8 +416,8 @@ function HesapContent() {
       <h2 className="text-[#191c1e]" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "20px", fontWeight: 700 }}>Bildirim Tercihleri</h2>
       <div className="bg-white rounded-xl border border-[#edeef3] divide-y divide-[#f0f1f5]">
         {([
-          { key: "campaigns" as const, icon: "mail", label: "E-posta Bildirimleri", desc: "Kampanya, indirim, sipariş güncellemeleri ve bülten e-postaları" },
-          { key: "smsNotifications" as const, icon: "sms", label: "SMS Bildirimleri", desc: "Kargo takibi ve sipariş güncellemelerini SMS ile alın" },
+          { key: "notif_email" as const, icon: "mail", label: "E-posta Bildirimleri", desc: "Kampanya, indirim, sipariş güncellemeleri ve bülten e-postaları" },
+          { key: "notif_sms" as const, icon: "sms", label: "SMS Bildirimleri", desc: "Kargo takibi ve sipariş güncellemelerini SMS ile alın" },
         ]).map(({ key, icon, label, desc }) => (
           <div key={key} className="flex items-center justify-between px-5 py-5">
             <div className="flex items-center gap-4">
@@ -421,13 +430,13 @@ function HesapContent() {
               </div>
             </div>
             <button
-              onClick={() => { updateEmailPreferences({ [key]: !emailPreferences[key] }); showSaved(); }}
+              onClick={() => { updateUser({ [key]: !user[key] }); showSaved(); }}
               className="relative w-12 h-6 rounded-full transition-colors duration-200 shrink-0 ml-4"
-              style={{ background: emailPreferences[key] ? "#003d9b" : "#c3c6d6" }}
+              style={{ background: user[key] ? "#003d9b" : "#c3c6d6" }}
             >
               <span
                 className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-all duration-200"
-                style={{ left: emailPreferences[key] ? "calc(100% - 22px)" : "2px" }}
+                style={{ left: user[key] ? "calc(100% - 22px)" : "2px" }}
               />
             </button>
           </div>
@@ -471,7 +480,7 @@ function HesapContent() {
           </button>
         </div>
 
-        {!user.isAnonymous && (
+        {!user.is_anonymous && (
           <div className="bg-white rounded-xl border border-[#edeef3] p-5 flex flex-col gap-4">
             <h3 className="font-bold text-[#191c1e]" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "15px" }}>Şifre Değiştir</h3>
             <div className="flex flex-col gap-3 max-w-sm">
@@ -547,15 +556,13 @@ function HesapContent() {
         </div>
 
         <p className="text-[#737685] text-center" style={{ fontSize: "12px" }}>
-          Üyelik tarihi: {user.memberSince} · ID: {user.id.slice(0, 8).toUpperCase()}
+          Üyelik tarihi: {new Date(user.member_since).toLocaleDateString("tr-TR")} · ID: #{user.id}
         </p>
       </div>
     );
   };
 
   // ── Favorilerim ───────────────────────────────────────────────────
-  const allProducts = [...lenses, ...accessories];
-  const favoriteProducts = allProducts.filter((p) => (favorites ?? []).includes(p.id));
   const { addItem } = useCart();
 
   const Favorites = () => {
@@ -575,8 +582,8 @@ function HesapContent() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {favoriteProducts.map((product) => {
-              const discount = product.originalPrice
-                ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
+              const discount = product.original_price
+                ? Math.round(((product.original_price - product.price) / product.original_price) * 100) : 0;
               const confirming = confirmId === product.id;
 
               return (
@@ -587,7 +594,7 @@ function HesapContent() {
                 >
                   <Link href={`/urun/${product.id}`} className="relative block bg-[#f8f9fb] p-6 flex items-center justify-center" style={{ height: "180px" }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={product.imageUrl || "/placeholder-lens.jpg"} alt={product.name}
+                    <img src={product.image_url || "/placeholder-lens.jpg"} alt={product.name}
                       className="max-h-36 object-contain mix-blend-multiply" />
                     {discount > 0 && (
                       <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-[#ffdcc3] text-[#2f1500] font-bold" style={{ fontSize: "10px" }}>
@@ -603,8 +610,8 @@ function HesapContent() {
                     </Link>
                     <div className="flex items-baseline gap-2 mt-auto pt-2">
                       <span className="font-bold text-[#003d9b]" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "18px" }}>{product.price.toLocaleString("tr-TR")} ₺</span>
-                      {product.originalPrice && (
-                        <span className="text-[#737685] line-through" style={{ fontSize: "11px" }}>{product.originalPrice.toLocaleString("tr-TR")} ₺</span>
+                      {product.original_price && (
+                        <span className="text-[#737685] line-through" style={{ fontSize: "11px" }}>{product.original_price.toLocaleString("tr-TR")} ₺</span>
                       )}
                     </div>
 
@@ -635,7 +642,7 @@ function HesapContent() {
                       /* Normal butonlar */
                       <div className="flex gap-2 mt-1">
                         <button
-                          onClick={() => addItem({ id: product.id, name: product.name, brand: product.brand, price: product.price, imageUrl: product.imageUrl })}
+                          onClick={() => addItem({ id: product.id, name: product.name, brand: product.brand, price: product.price, imageUrl: product.image_url })}
                           className="flex-1 py-2 rounded-lg font-bold text-white flex items-center justify-center gap-1 bg-[#d97706] hover:bg-[#b45309] active:scale-95 transition-all duration-200 shadow-sm hover:shadow-md"
                           style={{ fontSize: "12px" }}
                         >

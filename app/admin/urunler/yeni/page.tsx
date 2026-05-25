@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { brands, accessoryBrands } from "@/lib/data";
+
+type Brand = { id: string; name: string };
 
 /* ─── Tipler ──────────────────────────────────────────────────────────────── */
 type FormData = {
@@ -121,6 +122,14 @@ export default function YeniUrun() {
   const [form, setForm] = useState<FormData>(init);
   const [saved, setSaved] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+  const [brandList, setBrandList] = useState<Brand[]>([]);
+
+  useEffect(() => {
+    fetch("/api/brands")
+      .then(r => r.json())
+      .then(d => setBrandList(d.brands || []))
+      .catch(console.error);
+  }, []);
 
   const set = (key: keyof FormData) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -129,8 +138,7 @@ export default function YeniUrun() {
   /* Marka seçilince hem brand hem brandId güncelle */
   const handleBrandSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const id = e.target.value;
-    const list = form.productType === "lens" ? brands : accessoryBrands;
-    const found = list.find(b => b.id === id);
+    const found = brandList.find(b => b.id === id);
     setForm(p => ({ ...p, brandId: id, brand: found?.name ?? "" }));
   };
 
@@ -237,7 +245,7 @@ export default function YeniUrun() {
           <select value={form.brandId} onChange={handleBrandSelect}
             style={{ ...selectStyle, borderColor: errors.brandId ? "#dc2626" : "#e5e7eb" }}>
             <option value="">— Marka seçin —</option>
-            {(isLens ? brands : accessoryBrands).map(b => (
+            {brandList.map(b => (
               <option key={b.id} value={b.id}>{b.name}</option>
             ))}
           </select>

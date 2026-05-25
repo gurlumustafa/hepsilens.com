@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import {
-  mockOrders, Order, OrderStatus,
+  Order, OrderStatus,
   // 🔒 REÇETELİ LENS DEVRE DIŞI — PrescriptionStatus, PRESCRIPTION_STATUS_COLORS, PRESCRIPTION_STATUS_LABELS,
   STATUS_COLORS, STATUS_LABELS,
 } from "@/lib/adminData";
@@ -18,7 +18,7 @@ function SecLabel({ icon, label }: { icon: string; label: string }) {
 }
 
 export default function AdminSiparisler() {
-  const [orders, setOrders]           = useState<Order[]>(mockOrders);
+  const [orders, setOrders]           = useState<Order[]>([]);
   const [filter, setFilter]           = useState<OrderStatus | "all">("all");
   const [search, setSearch]           = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
@@ -49,27 +49,13 @@ export default function AdminSiparisler() {
   }, []);
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      const newOrder: Order = {
-        id: "HL-2026-0092", orderCode: "#2092",
-        customer: "Burak Şahin", email: "burak@gmail.com", phone: "0536 000 1122",
-        product: "Acuvue Oasys 1-Day (90'lı)", quantity: 1, amount: 899.90,
-        status: "yeni", date: "2026-05-21 09:35",
-        address: "Bağdat Cad. No: 120 D: 5", neighborhood: "Caddebostan Mah.", district: "Kadıköy", city: "İstanbul", postalCode: "34728",
-        requiresPrescription: false, // 🔒 REÇETELİ LENS DEVRE DIŞI — eskiden: true, prescriptionStatus: "bekleniyor"
-        paymentMethod: "Kredi Kartı", installments: 3, cardLast4: "1234",
-      };
-      setOrders(prev => {
-        if (prev.find(o => o.id === newOrder.id)) return prev;
-        return [newOrder, ...prev];
-      });
-      setNotification(newOrder.id);
-      setTimeout(() => setNotification(null), 5000);
-    }, 8000);
-    return () => clearTimeout(t);
+    fetch("/api/admin/orders")
+      .then(r => r.json())
+      .then(d => setOrders(d.orders || []))
+      .catch(console.error);
   }, []);
 
-  const updateStatus = (id: string, status: OrderStatus) => {
+  const updateStatus = (id: number, status: OrderStatus) => {
     setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
     if (selected?.id === id) setSelected(prev => prev ? { ...prev, status } : null);
   };
@@ -92,8 +78,8 @@ export default function AdminSiparisler() {
   const filtered = orders.filter(o => {
     const matchFilter = filter === "all" || o.status === filter;
     const q = search.toLowerCase();
-    const matchSearch = !q || o.id.toLowerCase().includes(q) || o.orderCode.toLowerCase().includes(q) ||
-      o.customer.toLowerCase().includes(q) || o.product.toLowerCase().includes(q);
+    const matchSearch = !q || String(o.id).toLowerCase().includes(q) || o.order_no.toLowerCase().includes(q) ||
+      o.customer_name.toLowerCase().includes(q) || (o.products ?? "").toLowerCase().includes(q);
     return matchFilter && matchSearch;
   });
 
@@ -101,8 +87,8 @@ export default function AdminSiparisler() {
   const suggestions = search.trim().length > 0
     ? orders.filter(o => {
         const q = search.toLowerCase();
-        return o.id.toLowerCase().includes(q) || o.orderCode.toLowerCase().includes(q) ||
-          o.customer.toLowerCase().includes(q) || o.product.toLowerCase().includes(q);
+        return String(o.id).toLowerCase().includes(q) || o.order_no.toLowerCase().includes(q) ||
+          o.customer_name.toLowerCase().includes(q) || (o.products ?? "").toLowerCase().includes(q);
       }).slice(0, 6)
     : [];
   const showDropdown = searchFocused && suggestions.length > 0;
@@ -127,8 +113,8 @@ export default function AdminSiparisler() {
       <div style={{ background: "linear-gradient(135deg, #003d9b 0%, #0056e0 100%)", borderRadius: "14px", padding: "18px 20px", color: "white" }}>
         <p style={{ fontSize: "10px", fontWeight: 700, opacity: 0.65, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "2px" }}>Sipariş Kodu</p>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "4px" }}>
-          <p style={{ fontSize: "32px", fontWeight: 900, fontFamily: "'Plus Jakarta Sans'", letterSpacing: "-1px", lineHeight: 1 }}>{order.orderCode}</p>
-          <button onClick={() => copy(order.orderCode, "orderCode")} style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "8px", color: "white", cursor: "pointer", padding: "6px 12px", fontSize: "11px", fontWeight: 700, display: "flex", alignItems: "center", gap: "5px" }}>
+          <p style={{ fontSize: "32px", fontWeight: 900, fontFamily: "'Plus Jakarta Sans'", letterSpacing: "-1px", lineHeight: 1 }}>{order.order_no}</p>
+          <button onClick={() => copy(order.order_no, "orderCode")} style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "8px", color: "white", cursor: "pointer", padding: "6px 12px", fontSize: "11px", fontWeight: 700, display: "flex", alignItems: "center", gap: "5px" }}>
             <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>{copiedField === "orderCode" ? "check" : "content_copy"}</span>
             {copiedField === "orderCode" ? "Kopyalandı!" : "Kopyala"}
           </button>
@@ -136,7 +122,7 @@ export default function AdminSiparisler() {
         <p style={{ fontSize: "12px", opacity: 0.6, fontFamily: "monospace", marginBottom: "12px" }}>{order.id}</p>
         <div style={{ display: "flex", alignItems: "center", gap: "8px", paddingTop: "12px", borderTop: "1px solid rgba(255,255,255,0.15)" }}>
           <span style={{ fontSize: "11px", fontWeight: 700, padding: "3px 10px", borderRadius: "999px", background: "rgba(255,255,255,0.2)" }}>{STATUS_LABELS[order.status]}</span>
-          <span style={{ fontSize: "11px", opacity: 0.6 }}>{order.date}</span>
+          <span style={{ fontSize: "11px", opacity: 0.6 }}>{new Date(order.created_at).toLocaleDateString("tr-TR")}</span>
         </div>
       </div>
 
@@ -145,14 +131,14 @@ export default function AdminSiparisler() {
         <SecLabel icon="inventory_2" label="Ürün & Ödeme" />
         <div style={{ background: "#f9fafb", borderRadius: "10px", padding: "14px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px", marginBottom: "8px" }}>
-            <p style={{ fontSize: "13px", fontWeight: 600, color: "#111827", flex: 1, lineHeight: "1.4" }}>{order.product}</p>
-            <p style={{ fontSize: "15px", fontWeight: 800, color: "#111827", whiteSpace: "nowrap" }}>₺{order.amount.toLocaleString("tr-TR")}</p>
+            <p style={{ fontSize: "13px", fontWeight: 600, color: "#111827", flex: 1, lineHeight: "1.4" }}>{order.products}</p>
+            <p style={{ fontSize: "15px", fontWeight: 800, color: "#111827", whiteSpace: "nowrap" }}>₺{order.total_amount.toLocaleString("tr-TR")}</p>
           </div>
-          <p style={{ fontSize: "11px", color: "#6b7280", marginBottom: "12px" }}>Adet: {order.quantity}</p>
+          <p style={{ fontSize: "11px", color: "#6b7280", marginBottom: "12px" }}>Adet: {order.total_qty}</p>
           <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: "10px", display: "flex", gap: "20px", flexWrap: "wrap" }}>
             <div>
               <p style={{ fontSize: "10px", color: "#9ca3af", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "2px" }}>Ödeme</p>
-              <p style={{ fontSize: "12px", color: "#374151", fontWeight: 600 }}>{order.paymentMethod}</p>
+              <p style={{ fontSize: "12px", color: "#374151", fontWeight: 600 }}>{order.pay_method}</p>
             </div>
             {order.installments && order.installments > 1 && (
               <div>
@@ -160,10 +146,10 @@ export default function AdminSiparisler() {
                 <p style={{ fontSize: "12px", color: "#374151", fontWeight: 600 }}>{order.installments}x</p>
               </div>
             )}
-            {order.cardLast4 && (
+            {order.card_last4 && (
               <div>
                 <p style={{ fontSize: "10px", color: "#9ca3af", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "2px" }}>Kart</p>
-                <p style={{ fontSize: "12px", color: "#374151", fontWeight: 600, fontFamily: "monospace" }}>**** {order.cardLast4}</p>
+                <p style={{ fontSize: "12px", color: "#374151", fontWeight: 600, fontFamily: "monospace" }}>**** {order.card_last4}</p>
               </div>
             )}
           </div>
@@ -175,9 +161,9 @@ export default function AdminSiparisler() {
         <SecLabel icon="person" label="Müşteri Bilgileri" />
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           {[
-            { icon: "badge", label: "Ad Soyad", val: order.customer, field: "customer" },
-            { icon: "mail", label: "E-posta", val: order.email, field: "email" },
-            { icon: "phone", label: "Telefon", val: order.phone, field: "phone" },
+            { icon: "badge", label: "Ad Soyad", val: order.customer_name, field: "customer" },
+            { icon: "mail", label: "E-posta", val: order.customer_email, field: "email" },
+            { icon: "phone", label: "Telefon", val: order.customer_phone, field: "phone" },
           ].map(r => (
             <div key={r.field} style={{ display: "flex", gap: "10px", alignItems: "center", background: "#f9fafb", borderRadius: "10px", padding: "10px 12px" }}>
               <div style={{ width: "28px", height: "28px", borderRadius: "7px", background: "#e5e7eb", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -187,7 +173,7 @@ export default function AdminSiparisler() {
                 <p style={{ fontSize: "10px", color: "#9ca3af", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>{r.label}</p>
                 <p style={{ fontSize: "12px", color: "#111827", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.val}</p>
               </div>
-              <button onClick={() => copy(r.val, r.field)} style={{ background: "transparent", border: "none", cursor: "pointer", color: copiedField === r.field ? "#16a34a" : "#d1d5db", padding: "4px", display: "flex", flexShrink: 0 }}>
+              <button onClick={() => copy(r.val ?? "", r.field)} style={{ background: "transparent", border: "none", cursor: "pointer", color: copiedField === r.field ? "#16a34a" : "#d1d5db", padding: "4px", display: "flex", flexShrink: 0 }}>
                 <span className="material-symbols-outlined" style={{ fontSize: "15px" }}>{copiedField === r.field ? "check" : "content_copy"}</span>
               </button>
             </div>
@@ -199,18 +185,18 @@ export default function AdminSiparisler() {
       <div>
         <SecLabel icon="location_on" label="Teslimat Adresi" />
         <div style={{ background: "#f9fafb", borderRadius: "10px", padding: "14px", lineHeight: "1.9" }}>
-          <p style={{ fontSize: "13px", fontWeight: 700, color: "#111827" }}>{order.customer}</p>
-          <p style={{ fontSize: "12px", color: "#374151" }}>{order.address}</p>
-          <p style={{ fontSize: "12px", color: "#374151" }}>{order.neighborhood}, {order.district}</p>
-          <p style={{ fontSize: "12px", color: "#374151" }}>{order.city} / {order.postalCode}</p>
-          <p style={{ fontSize: "12px", color: "#374151" }}>{order.phone}</p>
+          <p style={{ fontSize: "13px", fontWeight: 700, color: "#111827" }}>{order.customer_name}</p>
+          <p style={{ fontSize: "12px", color: "#374151" }}>{order.ship_full_address}</p>
+          <p style={{ fontSize: "12px", color: "#374151" }}>{order.ship_neighborhood}, {order.ship_district}</p>
+          <p style={{ fontSize: "12px", color: "#374151" }}>{order.ship_city} / {order.ship_postal_code}</p>
+          <p style={{ fontSize: "12px", color: "#374151" }}>{order.customer_phone}</p>
         </div>
         <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
-          <button onClick={() => copy(`${order.customer}\n${order.address}\n${order.neighborhood}, ${order.district}\n${order.city} ${order.postalCode}\n${order.phone}`, "address")} style={{ display: "flex", alignItems: "center", gap: "5px", padding: "7px 12px", borderRadius: "8px", border: "1px solid #e5e7eb", background: "white", cursor: "pointer", fontSize: "11px", color: copiedField === "address" ? "#16a34a" : "#374151", fontWeight: 600 }}>
+          <button onClick={() => copy(`${order.customer_name}\n${order.ship_full_address}\n${order.ship_neighborhood}, ${order.ship_district}\n${order.ship_city} ${order.ship_postal_code}\n${order.customer_phone}`, "address")} style={{ display: "flex", alignItems: "center", gap: "5px", padding: "7px 12px", borderRadius: "8px", border: "1px solid #e5e7eb", background: "white", cursor: "pointer", fontSize: "11px", color: copiedField === "address" ? "#16a34a" : "#374151", fontWeight: 600 }}>
             <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>{copiedField === "address" ? "check" : "content_copy"}</span>
             {copiedField === "address" ? "Kopyalandı!" : "Adresi Kopyala"}
           </button>
-          <a href={`https://www.google.com/maps/search/${encodeURIComponent(`${order.address} ${order.district} ${order.city}`)}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: "5px", padding: "7px 12px", borderRadius: "8px", border: "1px solid #e5e7eb", background: "white", cursor: "pointer", fontSize: "11px", color: "#374151", fontWeight: 600, textDecoration: "none" }}>
+          <a href={`https://www.google.com/maps/search/${encodeURIComponent(`${order.ship_full_address} ${order.ship_district} ${order.ship_city}`)}`} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", gap: "5px", padding: "7px 12px", borderRadius: "8px", border: "1px solid #e5e7eb", background: "white", cursor: "pointer", fontSize: "11px", color: "#374151", fontWeight: 600, textDecoration: "none" }}>
             <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>map</span>
             Haritada Gör
           </a>
@@ -232,7 +218,7 @@ export default function AdminSiparisler() {
       */}
 
       {/* Kargo */}
-      {(order.trackingCode || order.carrier) && (
+      {(order.tracking_code || order.carrier) && (
         <div>
           <SecLabel icon="local_shipping" label="Kargo Bilgileri" />
           <div style={{ background: "#f9fafb", borderRadius: "10px", padding: "14px", display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -242,28 +228,28 @@ export default function AdminSiparisler() {
                 <p style={{ fontSize: "12px", fontWeight: 700, color: "#111827" }}>{order.carrier}</p>
               </div>
             )}
-            {order.trackingCode && (
+            {order.tracking_code && (
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
                   <p style={{ fontSize: "11px", color: "#9ca3af", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Takip Kodu</p>
-                  <button onClick={() => copy(order.trackingCode!, "tracking")} style={{ display: "flex", alignItems: "center", gap: "3px", background: "transparent", border: "none", cursor: "pointer", color: copiedField === "tracking" ? "#16a34a" : "#9ca3af", fontSize: "11px", fontWeight: 700 }}>
+                  <button onClick={() => copy(order.tracking_code!, "tracking")} style={{ display: "flex", alignItems: "center", gap: "3px", background: "transparent", border: "none", cursor: "pointer", color: copiedField === "tracking" ? "#16a34a" : "#9ca3af", fontSize: "11px", fontWeight: 700 }}>
                     <span className="material-symbols-outlined" style={{ fontSize: "13px" }}>{copiedField === "tracking" ? "check" : "content_copy"}</span>
                     {copiedField === "tracking" ? "Kopyalandı!" : "Kopyala"}
                   </button>
                 </div>
-                <p style={{ fontSize: "16px", fontWeight: 800, color: "#003d9b", fontFamily: "monospace", letterSpacing: "2px" }}>{order.trackingCode}</p>
+                <p style={{ fontSize: "16px", fontWeight: 800, color: "#003d9b", fontFamily: "monospace", letterSpacing: "2px" }}>{order.tracking_code}</p>
               </div>
             )}
-            {order.shippedAt && (
+            {order.shipped_at && (
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <p style={{ fontSize: "11px", color: "#9ca3af", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Kargoya Verildi</p>
-                <p style={{ fontSize: "12px", color: "#374151" }}>{order.shippedAt}</p>
+                <p style={{ fontSize: "12px", color: "#374151" }}>{order.shipped_at}</p>
               </div>
             )}
-            {order.estimatedDelivery && (
+            {order.estimated_delivery && (
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <p style={{ fontSize: "11px", color: "#9ca3af", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Tahmini Teslimat</p>
-                <p style={{ fontSize: "12px", fontWeight: 700, color: "#166534" }}>{order.estimatedDelivery}</p>
+                <p style={{ fontSize: "12px", fontWeight: 700, color: "#166534" }}>{order.estimated_delivery}</p>
               </div>
             )}
           </div>
@@ -307,7 +293,7 @@ export default function AdminSiparisler() {
       <div>
         <p style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: isMobile ? "18px" : "22px", fontWeight: 800, color: "#111827" }}>Sipariş Yönetimi</p>
         <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginTop: "2px" }}>
-          <p style={{ fontSize: "13px", color: "#6b7280" }}>Toplam {orders.length} sipariş · Bugün {orders.filter(o => o.date.startsWith("2026-05-21")).length} yeni</p>
+          <p style={{ fontSize: "13px", color: "#6b7280" }}>Toplam {orders.length} sipariş · Bugün {orders.filter(o => o.created_at.startsWith("2026-05-21")).length} yeni</p>
           {/* 🔒 REÇETELİ LENS DEVRE DIŞI — reçete bekleme rozeti kaldırıldı
           {pendingPrescCount > 0 && (
             <span style={{ background: "#fffbeb", color: "#92400e", fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "999px", border: "1px solid #fde68a" }}>⚠ {pendingPrescCount} reçete bekliyor</span>
@@ -363,11 +349,11 @@ export default function AdminSiparisler() {
                 >
                   <div>
                     <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                      <span style={{ fontSize: "13px", fontWeight: 800, color: "#111827" }}>{o.orderCode}</span>
+                      <span style={{ fontSize: "13px", fontWeight: 800, color: "#111827" }}>{o.order_no}</span>
                       <span style={{ fontSize: "10px", color: "#9ca3af", fontFamily: "monospace" }}>{o.id}</span>
                       {/* 🔒 REÇETELİ LENS DEVRE DIŞI — {pi && <span className="material-symbols-outlined" style={{ fontSize: "13px", color: pi.text, fontVariationSettings: "'FILL' 1" }}>{pi.icon}</span>} */}
                     </div>
-                    <p style={{ fontSize: "12px", color: "#374151" }}>{o.customer} · <span style={{ color: "#9ca3af" }}>{o.product}</span></p>
+                    <p style={{ fontSize: "12px", color: "#374151" }}>{o.customer_name} · <span style={{ color: "#9ca3af" }}>{o.products}</span></p>
                   </div>
                   <div style={{ marginLeft: "auto", flexShrink: 0 }}>
                     <span style={{ fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "999px", background: sc.bg, color: sc.text }}>{STATUS_LABELS[o.status]}</span>
@@ -398,21 +384,21 @@ export default function AdminSiparisler() {
               <button key={order.id} onClick={() => setSelected(order)} style={{ display: "block", width: "100%", background: "white", borderRadius: "14px", border: "1px solid #e5e7eb", padding: "14px 16px", cursor: "pointer", textAlign: "left" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span style={{ fontSize: "16px", fontWeight: 900, color: "#111827", fontFamily: "'Plus Jakarta Sans'" }}>{order.orderCode}</span>
+                    <span style={{ fontSize: "16px", fontWeight: 900, color: "#111827", fontFamily: "'Plus Jakarta Sans'" }}>{order.order_no}</span>
                     <span style={{ fontSize: "11px", color: "#9ca3af", fontFamily: "monospace" }}>{order.id}</span>
                     {/* 🔒 REÇETELİ LENS DEVRE DIŞI — {pi && <span className="material-symbols-outlined" style={{ fontSize: "14px", color: pi.text, fontVariationSettings: "'FILL' 1" }}>{pi.icon}</span>} */}
                   </div>
                   <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", borderRadius: "999px", background: sc.bg, color: sc.text, whiteSpace: "nowrap" }}>{STATUS_LABELS[order.status]}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                  <p style={{ fontSize: "13px", fontWeight: 700, color: "#111827" }}>{order.customer}</p>
-                  <p style={{ fontSize: "14px", fontWeight: 800, color: "#111827" }}>₺{order.amount.toLocaleString("tr-TR")}</p>
+                  <p style={{ fontSize: "13px", fontWeight: 700, color: "#111827" }}>{order.customer_name}</p>
+                  <p style={{ fontSize: "14px", fontWeight: 800, color: "#111827" }}>₺{order.total_amount.toLocaleString("tr-TR")}</p>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <p style={{ fontSize: "12px", color: "#6b7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, marginRight: "8px" }}>{order.product} · {order.quantity} adet</p>
-                  <p style={{ fontSize: "11px", color: "#9ca3af", whiteSpace: "nowrap" }}>{order.district}, {order.city}</p>
+                  <p style={{ fontSize: "12px", color: "#6b7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, marginRight: "8px" }}>{order.products} · {order.total_qty} adet</p>
+                  <p style={{ fontSize: "11px", color: "#9ca3af", whiteSpace: "nowrap" }}>{order.ship_district}, {order.ship_city}</p>
                 </div>
-                <p style={{ fontSize: "11px", color: "#9ca3af", marginTop: "6px" }}>{order.date}</p>
+                <p style={{ fontSize: "11px", color: "#9ca3af", marginTop: "6px" }}>{new Date(order.created_at).toLocaleDateString("tr-TR")}</p>
               </button>
             );
           })}
@@ -429,7 +415,7 @@ export default function AdminSiparisler() {
               {/* Modal header */}
               <div style={{ padding: "14px 20px", borderBottom: "1px solid #f3f4f6", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <p style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "15px", fontWeight: 800, color: "#111827" }}>{selected.orderCode}</p>
+                  <p style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "15px", fontWeight: 800, color: "#111827" }}>{selected.order_no}</p>
                   <span style={{ fontSize: "11px", color: "#9ca3af", fontFamily: "monospace" }}>{selected.id}</span>
                 </div>
                 <button onClick={() => setSelected(null)} style={{ background: "#f3f4f6", border: "none", cursor: "pointer", color: "#374151", display: "flex", padding: "6px", borderRadius: "999px" }}>
@@ -484,21 +470,21 @@ export default function AdminSiparisler() {
                         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                           <div>
                             <p style={{ fontSize: "11px", color: "#9ca3af", fontFamily: "monospace" }}>{order.id}</p>
-                            <p style={{ fontSize: "13px", fontWeight: 800, color: "#111827" }}>{order.orderCode}</p>
+                            <p style={{ fontSize: "13px", fontWeight: 800, color: "#111827" }}>{order.order_no}</p>
                           </div>
                           {/* 🔒 REÇETELİ LENS DEVRE DIŞI — {pi && <span className="material-symbols-outlined" style={{ fontSize: "14px", color: pi.text, fontVariationSettings: "'FILL' 1" }} title={order.prescriptionStatus}>{pi.icon}</span>} */}
                         </div>
                       </td>
                       <td style={{ padding: "11px 14px" }}>
-                        <p style={{ fontSize: "12px", fontWeight: 600, color: "#111827" }}>{order.customer}</p>
-                        <p style={{ fontSize: "11px", color: "#9ca3af" }}>{order.district}, {order.city}</p>
+                        <p style={{ fontSize: "12px", fontWeight: 600, color: "#111827" }}>{order.customer_name}</p>
+                        <p style={{ fontSize: "11px", color: "#9ca3af" }}>{order.ship_district}, {order.ship_city}</p>
                       </td>
                       <td style={{ padding: "11px 14px" }}>
-                        <p style={{ fontSize: "12px", color: "#374151", maxWidth: "180px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.product}</p>
-                        <p style={{ fontSize: "11px", color: "#9ca3af" }}>{order.quantity} adet</p>
+                        <p style={{ fontSize: "12px", color: "#374151", maxWidth: "180px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.products}</p>
+                        <p style={{ fontSize: "11px", color: "#9ca3af" }}>{order.total_qty} adet</p>
                       </td>
-                      <td style={{ padding: "11px 14px", fontSize: "13px", fontWeight: 700, color: "#111827", whiteSpace: "nowrap" }}>₺{order.amount.toLocaleString("tr-TR")}</td>
-                      <td style={{ padding: "11px 14px", fontSize: "11px", color: "#6b7280", whiteSpace: "nowrap" }}>{order.date}</td>
+                      <td style={{ padding: "11px 14px", fontSize: "13px", fontWeight: 700, color: "#111827", whiteSpace: "nowrap" }}>₺{order.total_amount.toLocaleString("tr-TR")}</td>
+                      <td style={{ padding: "11px 14px", fontSize: "11px", color: "#6b7280", whiteSpace: "nowrap" }}>{new Date(order.created_at).toLocaleDateString("tr-TR")}</td>
                       <td style={{ padding: "11px 14px" }}>
                         <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", borderRadius: "999px", background: sc.bg, color: sc.text, whiteSpace: "nowrap" }}>{STATUS_LABELS[order.status]}</span>
                       </td>

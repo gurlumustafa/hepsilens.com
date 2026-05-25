@@ -4,42 +4,66 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 
+const GOOGLE_ERRORS: Record<string, string> = {
+  google_denied:  "Google girişi iptal edildi.",
+  state_mismatch: "Güvenlik hatası, lütfen tekrar deneyin.",
+  token_exchange: "Google ile bağlantı kurulamadı.",
+  no_email:       "Google hesabınızdan e-posta alınamadı.",
+  server_error:   "Sunucu hatası, lütfen tekrar deneyin.",
+};
+
+function GoogleIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 48 48" fill="none">
+      <path d="M47.5 24.5c0-1.6-.1-3.2-.4-4.7H24v9h13.1c-.6 3-2.3 5.5-4.9 7.2v6h7.9c4.6-4.2 7.4-10.5 7.4-17.5z" fill="#4285F4"/>
+      <path d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.9-6c-2.2 1.5-5 2.3-8 2.3-6.1 0-11.3-4.1-13.1-9.7H2.7v6.2C6.7 42.8 14.8 48 24 48z" fill="#34A853"/>
+      <path d="M10.9 28.8A14.8 14.8 0 0 1 10 24c0-1.7.3-3.3.8-4.8v-6.2H2.7A24 24 0 0 0 0 24c0 3.9.9 7.5 2.7 10.8l8.2-6z" fill="#FBBC05"/>
+      <path d="M24 9.5c3.4 0 6.5 1.2 8.9 3.5l6.6-6.6C35.8 2.4 30.5 0 24 0 14.8 0 6.7 5.2 2.7 13.2l8.2 6.2C12.7 13.6 17.9 9.5 24 9.5z" fill="#EA4335"/>
+    </svg>
+  );
+}
+
 function GirisContent() {
-  const { register } = useAuth();
+  const { register, login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const prefillEmail = searchParams.get("email") ?? "";
+  const prefillEmail  = searchParams.get("email") ?? "";
+  const googleError   = searchParams.get("error");
 
-  const [mode, setMode] = useState<"login" | "register">("register");
-  const [name, setName]         = useState("");
-  const [email, setEmail]       = useState(prefillEmail);
+  const [mode, setMode]       = useState<"login" | "register">("register");
+  const [name, setName]       = useState("");
+  const [email, setEmail]     = useState(prefillEmail);
   const [password, setPassword] = useState("");
-  const [confirm, setConfirm]   = useState("");
-  const [error, setError]       = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [error, setError]     = useState(googleError ? (GOOGLE_ERRORS[googleError] ?? "Bir hata oluştu.") : "");
   const [showPass, setShowPass] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  function handleRegister(e: React.FormEvent) {
+  async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    if (!name.trim()) return setError("Ad Soyad gereklidir.");
+    if (!name.trim())       return setError("Ad Soyad gereklidir.");
     if (!email.includes("@")) return setError("Geçerli bir e-posta girin.");
-    if (password.length < 6) return setError("Şifre en az 6 karakter olmalıdır.");
-    if (password !== confirm) return setError("Şifreler eşleşmiyor.");
-    register(name.trim(), email.trim());
+    if (password.length < 6)  return setError("Şifre en az 6 karakter olmalıdır.");
+    if (password !== confirm)  return setError("Şifreler eşleşmiyor.");
+    setLoading(true);
+    const res = await register(name.trim(), email.trim(), password);
+    setLoading(false);
+    if (res?.error) return setError(res.error);
     router.push("/hesap");
   }
 
-  function handleLogin(e: React.FormEvent) {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     if (!email.includes("@")) return setError("Geçerli bir e-posta girin.");
-    if (!password) return setError("Şifre gereklidir.");
-    // Mock: demo amaçlı her credentials kabul edilir
-    register(email.split("@")[0], email.trim());
+    if (!password)             return setError("Şifre gereklidir.");
+    setLoading(true);
+    const res = await login(email.trim(), password);
+    setLoading(false);
+    if (res?.error) return setError(res.error);
     router.push("/hesap");
   }
-
-
 
   return (
     <div className="min-h-screen pt-[72px] flex items-center justify-center px-4" style={{ background: "#f8f9fb" }}>
@@ -81,6 +105,25 @@ function GirisContent() {
           </div>
 
           <div className="p-6">
+
+            {/* ── Google butonu ────────────────────────────────── */}
+            <a
+              href="/api/auth/google"
+              className="flex items-center justify-center gap-3 w-full py-3 rounded-xl border-2 border-[#e5e7eb] bg-white hover:bg-[#f8f9fb] hover:border-[#c3c6d6] active:scale-[0.98] transition-all font-semibold text-[#374151] mb-4"
+              style={{ fontSize: "14px", fontFamily: "'Inter'" }}
+            >
+              <GoogleIcon />
+              Google ile {mode === "register" ? "Kayıt Ol" : "Giriş Yap"}
+            </a>
+
+            {/* Ayraç */}
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex-1 h-px bg-[#edeef3]" />
+              <span className="text-[#9ca3af] font-medium" style={{ fontSize: "11px" }}>veya e-posta ile</span>
+              <div className="flex-1 h-px bg-[#edeef3]" />
+            </div>
+
+            {/* ── E-posta / Şifre formu ─────────────────────── */}
             <form onSubmit={mode === "register" ? handleRegister : handleLogin} className="flex flex-col gap-4">
 
               {mode === "register" && (
@@ -148,10 +191,11 @@ function GirisContent() {
 
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-xl font-bold text-white transition-all hover:opacity-90 active:scale-95"
+                disabled={loading}
+                className="w-full py-3.5 rounded-xl font-bold text-white transition-all hover:opacity-90 active:scale-95 disabled:opacity-60"
                 style={{ background: "#003d9b", fontSize: "14px", fontFamily: "'Inter'", letterSpacing: "0.03em" }}
               >
-                {mode === "register" ? "Hesap Oluştur" : "Giriş Yap"}
+                {loading ? "Yükleniyor…" : (mode === "register" ? "Hesap Oluştur" : "Giriş Yap")}
               </button>
             </form>
 

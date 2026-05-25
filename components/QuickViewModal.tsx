@@ -16,8 +16,8 @@ export default function QuickViewModal({ product, onClose }: Props) {
   // 🔒 REÇETELİ LENS DEVRE DIŞI — needsPrescription her zaman false
   // const needsPrescription = isLens && (product as Lens).requiresPrescription;
   const needsPrescription = false;
-  const discount = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+  const discount = product.original_price
+    ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
     : 0;
 
   useEffect(() => {
@@ -61,7 +61,7 @@ export default function QuickViewModal({ product, onClose }: Props) {
           )}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={product.imageUrl || "/placeholder-lens.jpg"}
+            src={product.image_url || "/placeholder-lens.jpg"}
             alt={product.name}
             className="object-contain mix-blend-multiply"
             style={{ maxHeight: "240px", width: "100%" }}
@@ -106,7 +106,7 @@ export default function QuickViewModal({ product, onClose }: Props) {
               ))}
             </div>
             <span className="text-[#737685]" style={{ fontSize: "12px", fontWeight: 600, fontFamily: "'Inter'" }}>
-              ({product.reviewCount} değerlendirme)
+              ({product.review_count} değerlendirme)
             </span>
           </div>
 
@@ -117,9 +117,9 @@ export default function QuickViewModal({ product, onClose }: Props) {
             >
               {product.price.toLocaleString("tr-TR")} ₺
             </span>
-            {product.originalPrice && (
+            {product.original_price && (
               <span className="text-[#737685] line-through" style={{ fontSize: "13px", fontWeight: 600, fontFamily: "'Inter'" }}>
-                {product.originalPrice.toLocaleString("tr-TR")} ₺
+                {product.original_price.toLocaleString("tr-TR")} ₺
               </span>
             )}
           </div>
@@ -132,9 +132,9 @@ export default function QuickViewModal({ product, onClose }: Props) {
             <div className="grid grid-cols-3 gap-2 mb-5">
               {[
                 { label: "Malzeme", value: (product as Lens).material },
-                { label: "Su İçeriği", value: `%${(product as Lens).waterContent}` },
-                { label: "O₂ Geçirgenliği", value: `${(product as Lens).oxygenPermeability} Dk` },
-                { label: "UV Koruma", value: (product as Lens).uvProtection ? "Var ✓" : "Yok" },
+                { label: "Su İçeriği", value: `%${(product as Lens).water_content}` },
+                { label: "O₂ Geçirgenliği", value: `${(product as Lens).oxygen_permeability} Dk` },
+                { label: "UV Koruma", value: (product as Lens).uv_protection ? "Var ✓" : "Yok" },
                 { label: "Çap (DIA)", value: `${(product as Lens).dia} mm` },
                 { label: "Eğrilik (BC)", value: `${(product as Lens).bc} mm` },
               ].map(({ label, value }) => (
@@ -168,7 +168,7 @@ export default function QuickViewModal({ product, onClose }: Props) {
             {/* 🔒 REÇETELİ LENS DEVRE DIŞI — needsPrescription her zaman false olduğundan
                 "Reçete Gerekli" butonu hiç gösterilmez; Sepete Ekle her zaman görünür */}
             <button
-              onClick={() => { addItem({ id: product.id, name: product.name, brand: product.brand, price: product.price, imageUrl: product.imageUrl }); onClose(); }}
+              onClick={() => { addItem({ id: product.id, name: product.name, brand: product.brand, price: product.price, imageUrl: product.image_url }); onClose(); }}
               className="flex-1 bg-[#d97706] text-white font-bold py-3 rounded-xl hover:bg-[#b45309] active:scale-95 transition-all flex items-center justify-center gap-2"
               style={{ fontSize: "13px", fontFamily: "'Inter'", letterSpacing: "0.04em" }}
             >

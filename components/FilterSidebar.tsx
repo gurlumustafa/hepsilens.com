@@ -1,5 +1,7 @@
 "use client";
-import { brands, accessoryBrands } from "@/lib/data";
+import { useState, useEffect } from "react";
+
+type Brand = { id: string; name: string };
 
 export type Filters = {
   brands: string[];
@@ -141,6 +143,15 @@ function CheckRow({
 }
 
 export default function FilterSidebar({ filters, onChange, mode = "lens" }: Props) {
+  const [brands, setBrands] = useState<Brand[]>([]);
+
+  useEffect(() => {
+    fetch("/api/brands")
+      .then((r) => r.json())
+      .then((d) => setBrands(d.brands || []))
+      .catch(console.error);
+  }, []);
+
   const activeCount =
     filters.brands.length +
     (mode === "lens" ? filters.usage.length + (filters.color !== "all" ? 1 : 0) : 0) +
@@ -227,7 +238,7 @@ export default function FilterSidebar({ filters, onChange, mode = "lens" }: Prop
         <div className="px-4 py-5">
           <SectionLabel icon="sell" label="Marka" />
           <div className="flex flex-col gap-1">
-            {(mode === "accessories" ? accessoryBrands : brands).map((b) => (
+            {brands.map((b) => (
               <CheckRow
                 key={b.id}
                 checked={filters.brands.includes(b.id)}

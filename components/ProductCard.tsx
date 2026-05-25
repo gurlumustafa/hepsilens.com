@@ -18,10 +18,10 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-    addItem({ id: lens.id, name: lens.name, brand: lens.brand, price: lens.price, imageUrl: lens.imageUrl });
+    addItem({ id: lens.id, name: lens.name, brand: lens.brand, price: lens.price, imageUrl: lens.image_url });
   }
-  const discount = lens.originalPrice
-    ? Math.round(((lens.originalPrice - lens.price) / lens.originalPrice) * 100)
+  const discount = lens.original_price
+    ? Math.round(((lens.original_price - lens.price) / lens.original_price) * 100)
     : 0;
 
   const quickViewOverlay = (
@@ -55,7 +55,7 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
             )}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={lens.imageUrl || "/placeholder-lens.jpg"}
+              src={lens.image_url || "/placeholder-lens.jpg"}
               alt={lens.name}
               className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-300"
             />
@@ -81,7 +81,7 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
                 </span>
               ))}
               <span className="text-[#434654] ml-2" style={{ fontSize: "13.5px", letterSpacing: "0.05em", fontWeight: 600 }}>
-                ({lens.reviewCount})
+                ({lens.review_count})
               </span>
             </div>
             <div className="mt-auto flex items-center justify-between">
@@ -114,7 +114,7 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
         <div className="relative mb-4 aspect-square bg-white rounded-[0.25rem] overflow-hidden flex items-center justify-center p-4 border border-[#edeef0]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={lens.imageUrl || "/placeholder-lens.jpg"}
+            src={lens.image_url || "/placeholder-lens.jpg"}
             alt={lens.name}
             className="object-contain w-full h-full group-hover:scale-105 transition-transform duration-500"
           />
@@ -163,9 +163,9 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
           </p>
           <div className="pt-4 flex items-center justify-between mt-auto">
             <div className="flex flex-col">
-              {lens.originalPrice && (
+              {lens.original_price && (
                 <span className="text-[#737685] line-through" style={{ fontSize: "11px", fontWeight: 600, fontFamily: "'Inter'" }}>
-                  {lens.originalPrice.toLocaleString("tr-TR")} ₺
+                  {lens.original_price.toLocaleString("tr-TR")} ₺
                 </span>
               )}
               <span className="text-[#003d9b]" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "24px", lineHeight: "32px", fontWeight: 600 }}>

@@ -1,237 +1,223 @@
 "use client";
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 
-export type Prescription = {
-  id: string;
-  fileName: string;
-  doctorName: string;
-  issueDate: string;   // YYYY-MM-DD
-  uploadDate: string;  // YYYY-MM-DD
-  expiryDate: string;  // issueDate + 6 months
-  notes: string;
-};
+// ── Tipler ────────────────────────────────────────────────────
 
 export type Address = {
-  id: string;
+  id: number;
   title: string;
-  fullName: string;
-  phone: string;
+  full_name: string;
+  phone?: string;
   city: string;
   district: string;
-  postalCode: string;
-  fullAddress: string;
-  isDefault: boolean;
+  neighborhood?: string;
+  postal_code?: string;
+  full_address: string;
+  is_default: boolean;
+};
+
+export type OrderItem = {
+  product_name: string;
+  product_brand?: string;
+  unit_price: number;
+  quantity: number;
+  subtotal: number;
 };
 
 export type Order = {
-  id: string;
-  date: string;
-  status: "preparing" | "shipped" | "delivered" | "cancelled";
-  total: number;
-  items: { name: string; qty: number; price: number }[];
-  trackingNo?: string;
-};
-
-export type EmailPreferences = {
-  campaigns: boolean;
-  orderUpdates: boolean;
-  newsletter: boolean;
-  stockAlerts: boolean;
-  smsNotifications: boolean;
+  id: number;
+  order_no: string;
+  status: "yeni" | "isleniyor" | "kargoda" | "teslim" | "iptal";
+  total_amount: number;
+  created_at: string;
+  tracking_code?: string;
+  carrier?: string;
+  items?: OrderItem[];
 };
 
 export type User = {
-  id: string;
+  id: number;
   name: string;
-  email: string;
-  phone: string;
-  isAnonymous: boolean;
-  avatar?: string;
-  memberSince: string;
+  email: string | null;
+  phone: string | null;
+  is_anonymous: boolean;
+  notif_email: boolean;
+  notif_sms: boolean;
+  member_since: string;
 };
 
-type AuthState = {
-  user: User | null;
-  prescriptions: Prescription[];
+// ── Context tipi ──────────────────────────────────────────────
+
+type AuthContextType = {
+  user:      User | null;
   addresses: Address[];
-  orders: Order[];
-  emailPreferences: EmailPreferences;
-  favorites: number[]; // product ids
+  orders:    Order[];
+  favorites: number[];
+  loaded:    boolean;
+
+  login:    (email: string, password: string) => Promise<{ error?: string }>;
+  register: (name: string, email: string, password: string) => Promise<{ error?: string }>;
+  logout:   () => Promise<void>;
+  refresh:  () => Promise<void>;
+
+  updateUser:        (data: Partial<Pick<User, "name" | "email" | "phone" | "notif_email" | "notif_sms">>) => Promise<void>;
+  addAddress:        (a: Omit<Address, "id">) => Promise<void>;
+  removeAddress:     (id: number) => Promise<void>;
+  setDefaultAddress: (id: number) => Promise<void>;
+  toggleFavorite:    (id: number) => Promise<void>;
+  isFavorite:        (id: number) => boolean;
 };
-
-type AuthContextType = AuthState & {
-  loaded: boolean;
-  register: (name: string, email: string) => void;
-  loginAnonymous: () => void;
-  logout: () => void;
-  updateUser: (data: Partial<User>) => void;
-  addPrescription: (p: Omit<Prescription, "id" | "uploadDate" | "expiryDate">) => void;
-  removePrescription: (id: string) => void;
-  addAddress: (a: Omit<Address, "id">) => void;
-  removeAddress: (id: string) => void;
-  setDefaultAddress: (id: string) => void;
-  updateEmailPreferences: (prefs: Partial<EmailPreferences>) => void;
-  toggleFavorite: (id: number) => void;
-  isFavorite: (id: number) => boolean;
-};
-
-const defaultPreferences: EmailPreferences = {
-  campaigns: true,
-  orderUpdates: true,
-  newsletter: false,
-  stockAlerts: false,
-  smsNotifications: false,
-};
-
-const mockOrders: Order[] = [
-  {
-    id: "HL-2026-4821",
-    date: "2026-05-18",
-    status: "shipped",
-    total: 389,
-    trackingNo: "TR1234567890",
-    items: [{ name: "Acuvue Oasys for Astigmatism", qty: 1, price: 389 }],
-  },
-  {
-    id: "HL-2026-3174",
-    date: "2026-05-13",
-    status: "delivered",
-    total: 558,
-    trackingNo: "TR9876543210",
-    items: [
-      { name: "Dailies Total1", qty: 2, price: 249 },
-      { name: "Renu MultiPlus", qty: 1, price: 89 },
-    ],
-  },
-  {
-    id: "HL-2026-2201",
-    date: "2026-04-29",
-    status: "delivered",
-    total: 245,
-    trackingNo: "TR5555000111",
-    items: [{ name: "FreshLook Colorblends - Mavi", qty: 1, price: 245 }],
-  },
-];
-
-const STORAGE_KEY = "hepsilens_auth";
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-function addMonths(dateStr: string, months: number): string {
-  const d = new Date(dateStr);
-  d.setMonth(d.getMonth() + months);
-  return d.toISOString().split("T")[0];
-}
-
-function uuid() {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
-}
+// ── Provider ──────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AuthState>({
-    favorites: [],
-    user: null,
-    prescriptions: [],
-    addresses: [],
-    orders: mockOrders,
-    emailPreferences: defaultPreferences,
-  });
-  const [loaded, setLoaded] = useState(false);
+  const [user,      setUser]      = useState<User | null>(null);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [orders,    setOrders]    = useState<Order[]>([]);
+  const [favorites, setFavorites] = useState<number[]>([]);
+  const [loaded,    setLoaded]    = useState(false);
 
-  useEffect(() => {
+  /** Sunucudan oturum verisini çek */
+  const refresh = useCallback(async () => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setState(JSON.parse(raw));
-    } catch {}
-    setLoaded(true);
+      const res = await fetch("/api/auth/me");
+      if (!res.ok) {
+        setUser(null); setAddresses([]); setOrders([]); setFavorites([]);
+        return;
+      }
+      const data = await res.json();
+      const u = data.user;
+      setUser({
+        id:          u.id,
+        name:        u.name,
+        email:       u.email ?? null,
+        phone:       u.phone ?? null,
+        is_anonymous: !!u.is_anonymous,
+        notif_email: !!u.notif_email,
+        notif_sms:   !!u.notif_sms,
+        member_since: u.member_since,
+      });
+      setAddresses(data.addresses || []);
+      setOrders(data.orders   || []);
+      setFavorites(data.favorites || []);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoaded(true);
+    }
   }, []);
 
-  function persist(next: AuthState) {
-    setState(next);
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch {}
-  }
+  useEffect(() => { refresh(); }, [refresh]);
 
-  function register(name: string, email: string) {
-    const user: User = {
-      id: uuid(),
-      name,
-      email,
-      phone: "",
-      isAnonymous: false,
-      memberSince: new Date().toISOString().split("T")[0],
-    };
-    persist({ ...state, user });
-  }
+  // ── Auth ──────────────────────────────────────────────────
 
-  function loginAnonymous() {
-    const user: User = {
-      id: uuid(),
-      name: "Misafir Kullanıcı",
-      email: "",
-      phone: "",
-      isAnonymous: true,
-      memberSince: new Date().toISOString().split("T")[0],
-    };
-    persist({ ...state, user });
-  }
+  const login = async (email: string, password: string) => {
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      return { error: d.error || "Giriş başarısız" };
+    }
+    await refresh();
+    return {};
+  };
 
-  function logout() {
-    const next: AuthState = { user: null, prescriptions: [], addresses: [], orders: mockOrders, emailPreferences: defaultPreferences, favorites: [] };
-    persist(next);
-  }
+  const register = async (name: string, email: string, password: string) => {
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password }),
+    });
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      return { error: d.error || "Kayıt başarısız" };
+    }
+    await refresh();
+    return {};
+  };
 
-  function updateUser(data: Partial<User>) {
-    if (!state.user) return;
-    persist({ ...state, user: { ...state.user, ...data } });
-  }
+  const logout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    setUser(null); setAddresses([]); setOrders([]); setFavorites([]);
+  };
 
-  function addPrescription(p: Omit<Prescription, "id" | "uploadDate" | "expiryDate">) {
-    const today = new Date().toISOString().split("T")[0];
-    const prescription: Prescription = {
-      ...p,
-      id: uuid(),
-      uploadDate: today,
-      expiryDate: addMonths(p.issueDate, 6),
-    };
-    persist({ ...state, prescriptions: [...state.prescriptions, prescription] });
-  }
+  // ── Kullanıcı güncelle ────────────────────────────────────
 
-  function removePrescription(id: string) {
-    persist({ ...state, prescriptions: state.prescriptions.filter((p) => p.id !== id) });
-  }
+  const updateUser = async (data: Partial<Pick<User, "name" | "email" | "phone" | "notif_email" | "notif_sms">>) => {
+    await fetch("/api/auth/me", {
+      method:  "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify(data),
+    });
+    setUser((u) => (u ? { ...u, ...data } : u));
+  };
 
-  function addAddress(a: Omit<Address, "id">) {
-    const address: Address = { ...a, id: uuid() };
-    const addresses = a.isDefault
-      ? [...state.addresses.map((x) => ({ ...x, isDefault: false })), address]
-      : [...state.addresses, address];
-    persist({ ...state, addresses });
-  }
+  // ── Adresler ──────────────────────────────────────────────
 
-  function removeAddress(id: string) {
-    persist({ ...state, addresses: state.addresses.filter((a) => a.id !== id) });
-  }
+  const addAddress = async (a: Omit<Address, "id">) => {
+    const res = await fetch("/api/addresses", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify(a),
+    });
+    if (res.ok) {
+      const { id } = await res.json();
+      const newAddr: Address = { ...a, id };
+      setAddresses((prev) => {
+        const next = a.is_default
+          ? prev.map((x) => ({ ...x, is_default: false }))
+          : [...prev];
+        return [...next, newAddr];
+      });
+    }
+  };
 
-  function setDefaultAddress(id: string) {
-    persist({ ...state, addresses: state.addresses.map((a) => ({ ...a, isDefault: a.id === id })) });
-  }
+  const removeAddress = async (id: number) => {
+    await fetch(`/api/addresses/${id}`, { method: "DELETE" });
+    setAddresses((prev) => prev.filter((a) => a.id !== id));
+  };
 
-  function updateEmailPreferences(prefs: Partial<EmailPreferences>) {
-    persist({ ...state, emailPreferences: { ...state.emailPreferences, ...prefs } });
-  }
+  const setDefaultAddress = async (id: number) => {
+    await fetch(`/api/addresses/${id}`, {
+      method:  "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ is_default: true }),
+    });
+    setAddresses((prev) =>
+      prev.map((a) => ({ ...a, is_default: a.id === id }))
+    );
+  };
 
-  function toggleFavorite(id: number) {
-    const favs = state.favorites ?? [];
-    const next = favs.includes(id) ? favs.filter((f) => f !== id) : [...favs, id];
-    persist({ ...state, favorites: next });
-  }
+  // ── Favoriler ─────────────────────────────────────────────
 
-  function isFavorite(id: number) {
-    return (state.favorites ?? []).includes(id);
-  }
+  const toggleFavorite = async (id: number) => {
+    setFavorites((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+    await fetch("/api/favorites", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ productId: id }),
+    });
+  };
+
+  const isFavorite = (id: number) => favorites.includes(id);
 
   return (
-    <AuthContext.Provider value={{ ...state, loaded, register, loginAnonymous, logout, updateUser, addPrescription, removePrescription, addAddress, removeAddress, setDefaultAddress, updateEmailPreferences, toggleFavorite, isFavorite }}>
+    <AuthContext.Provider
+      value={{
+        user, addresses, orders, favorites, loaded,
+        login, register, logout, refresh,
+        updateUser,
+        addAddress, removeAddress, setDefaultAddress,
+        toggleFavorite, isFavorite,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -239,15 +225,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
   return ctx;
-}
-
-export function isExpired(expiryDate: string) {
-  return new Date(expiryDate) < new Date();
-}
-
-export function isNearExpiry(expiryDate: string) {
-  const diff = new Date(expiryDate).getTime() - Date.now();
-  return diff > 0 && diff < 30 * 24 * 60 * 60 * 1000;
 }

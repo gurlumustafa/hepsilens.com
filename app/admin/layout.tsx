@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
-import { mockOrders, Order } from "@/lib/adminData";
+import { Order } from "@/lib/adminData";
 
 const navItems = [
   { href: "/admin",            icon: "dashboard",     label: "Genel Bakış" },
@@ -24,8 +24,15 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const [newOrders, setNewOrders]       = useState(2);
   const [openTickets]                   = useState(4);
   const [notifOpen, setNotifOpen]       = useState(false);
-  const [recentOrders, setRecentOrders] = useState<Order[]>(mockOrders.filter(o => o.status === "yeni"));
-  const [readIds, setReadIds]           = useState<string[]>([]);
+  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
+  const [readIds, setReadIds]           = useState<number[]>([]);
+
+  useEffect(() => {
+    fetch("/api/admin/orders?status=yeni")
+      .then(r => r.json())
+      .then(d => setRecentOrders((d.orders || []).slice(0, 5)))
+      .catch(console.error);
+  }, []);
 
   /* ── Mobile detection ── */
   useEffect(() => {
@@ -48,20 +55,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   /* ── Yeni sipariş simülasyonu ── */
   useEffect(() => {
     const t = setTimeout(() => {
-      const fake: Order = {
-        id: "HL-2026-0092", orderCode: "#2092",
-        customer: "Burak Şahin", email: "burak@gmail.com", phone: "0536 000 1122",
-        product: "Acuvue Oasys 1-Day (90'lı)", quantity: 1, amount: 899.90,
-        status: "yeni", date: "2026-05-21 09:35",
-        address: "Bağdat Cad. No: 120 D: 5", neighborhood: "Caddebostan Mah.",
-        district: "Kadıköy", city: "İstanbul", postalCode: "34728",
-        requiresPrescription: true, prescriptionStatus: "bekleniyor",
-        paymentMethod: "Kredi Kartı", installments: 3, cardLast4: "1234",
-      };
-      setRecentOrders(prev => {
-        if (prev.find(o => o.id === fake.id)) return prev;
-        return [fake, ...prev];
-      });
+      // Yeni siparişleri API'dan çek
+    fetch("/api/admin/orders?status=yeni")
+      .then(r => r.json())
+      .then(d => setRecentOrders((d.orders || []).slice(0, 5)))
+      .catch(console.error);
       setNewOrders(n => n + 1);
     }, 12000);
     return () => clearTimeout(t);
@@ -73,7 +71,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     setNotifOpen(false);
   };
 
-  const unreadCount = recentOrders.filter(o => !readIds.includes(o.id)).length;
+  const unreadCount = recentOrders.filter(o => !readIds.includes(o.id as number)).length;
 
   const handleLogout = () => {
     localStorage.removeItem("hl_admin_auth");
@@ -129,8 +127,8 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                             <span className="material-symbols-outlined" style={{ fontSize: "16px", color: isRead ? "#9ca3af" : "#003d9b", fontVariationSettings: "'FILL' 1" }}>shopping_bag</span>
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{ fontSize: "12px", fontWeight: 700, color: "#111827" }}>{o.id}</p>
-                            <p style={{ fontSize: "11px", color: "#6b7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.customer} · ₺{o.amount.toLocaleString("tr-TR")}</p>
+                            <p style={{ fontSize: "12px", fontWeight: 700, color: "#111827" }}>{o.order_no}</p>
+                            <p style={{ fontSize: "11px", color: "#6b7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.customer_name} · ₺{o.total_amount.toLocaleString("tr-TR")}</p>
                           </div>
                           {!isRead && <div style={{ width: "8px", height: "8px", borderRadius: "999px", background: "#003d9b", marginTop: "4px", flexShrink: 0 }} />}
                         </Link>
@@ -298,9 +296,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                             <span className="material-symbols-outlined" style={{ fontSize: "18px", color: isRead ? "#9ca3af" : "#003d9b", fontVariationSettings: "'FILL' 1" }}>shopping_bag</span>
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{ fontSize: "12px", fontWeight: 700, color: "#111827" }}>Yeni sipariş: {o.id}</p>
-                            <p style={{ fontSize: "11px", color: "#6b7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.customer} · ₺{o.amount.toLocaleString("tr-TR")}</p>
-                            <p style={{ fontSize: "10px", color: "#9ca3af", marginTop: "2px" }}>{o.date}</p>
+                            <p style={{ fontSize: "12px", fontWeight: 700, color: "#111827" }}>Yeni sipariş: {o.order_no}</p>
+                            <p style={{ fontSize: "11px", color: "#6b7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.customer_name} · ₺{o.total_amount.toLocaleString("tr-TR")}</p>
+                            <p style={{ fontSize: "10px", color: "#9ca3af", marginTop: "2px" }}>{new Date(o.created_at).toLocaleDateString("tr-TR")}</p>
                           </div>
                           {!isRead && <div style={{ width: "8px", height: "8px", borderRadius: "999px", background: "#003d9b", marginTop: "6px", flexShrink: 0 }} />}
                         </Link>

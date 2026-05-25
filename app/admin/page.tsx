@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { mockOrders, mockTickets, Order, STATUS_LABELS, STATUS_COLORS, TICKET_PRIORITY_COLORS, TICKET_PRIORITY_LABELS } from "@/lib/adminData";
+import { Order, SupportTicket, STATUS_LABELS, STATUS_COLORS, TICKET_PRIORITY_COLORS, TICKET_PRIORITY_LABELS } from "@/lib/adminData";
 
 const StatCard = ({ icon, label, value, sub, color, bg }: { icon: string; label: string; value: string | number; sub?: string; color: string; bg: string }) => (
   <div style={{ background: "white", borderRadius: "16px", padding: "20px 24px", border: "1px solid #e5e7eb", display: "flex", alignItems: "flex-start", gap: "16px" }}>
@@ -19,7 +19,8 @@ const StatCard = ({ icon, label, value, sub, color, bg }: { icon: string; label:
 export default function AdminDashboard() {
   const [activeUsers, setActiveUsers] = useState(47);
   const [newOrderAlert, setNewOrderAlert] = useState<string | null>(null);
-  const [orders, setOrders] = useState(mockOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -29,10 +30,16 @@ export default function AdminDashboard() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
+  useEffect(() => {
+    fetch("/api/admin/orders").then(r => r.json()).then(d => setOrders(d.orders || [])).catch(console.error);
+    fetch("/api/admin/tickets").then(r => r.json()).then(d => setTickets(d.tickets || [])).catch(console.error);
+  }, []);
+
   const newOrders = orders.filter(o => o.status === "yeni").length;
   const totalOrders = orders.length;
-  const openTickets = mockTickets.filter(t => t.status === "acik").length;
-  const todayRevenue = orders.filter(o => o.date.startsWith("2026-05-21") && o.status !== "iptal").reduce((s, o) => s + o.amount, 0);
+  const openTickets = tickets.filter(t => t.status === "acik").length;
+  const today = new Date().toISOString().slice(0, 10);
+  const todayRevenue = orders.filter(o => o.created_at.startsWith(today) && o.status !== "iptal").reduce((s, o) => s + o.total_amount, 0);
 
   // Simulate real-time active users
   useEffect(() => {
@@ -42,24 +49,12 @@ export default function AdminDashboard() {
     return () => clearInterval(id);
   }, []);
 
-  // Simulate incoming new order
+  // Polling for new orders
   useEffect(() => {
-    const id = setTimeout(() => {
-      const fakeOrder: Order = {
-        id: "HL-2026-0092", orderCode: "#2092",
-        customer: "Burak Şahin", email: "burak@gmail.com", phone: "0536 000 1122",
-        product: "Acuvue Oasys 1-Day (90'lı)", quantity: 1, amount: 899.90,
-        status: "yeni", date: "2026-05-21 09:35",
-        address: "Bağdat Cad. No: 120 D: 5", neighborhood: "Caddebostan Mah.",
-        district: "Kadıköy", city: "İstanbul", postalCode: "34728",
-        requiresPrescription: false, // 🔒 REÇETELİ LENS DEVRE DIŞI — eskiden: true, prescriptionStatus: "bekleniyor"
-        paymentMethod: "Kredi Kartı", installments: 3, cardLast4: "1234",
-      };
-      setOrders(prev => [fakeOrder, ...prev]);
-      setNewOrderAlert(fakeOrder.id);
-      setTimeout(() => setNewOrderAlert(null), 5000);
-    }, 8000);
-    return () => clearTimeout(id);
+    const id = setInterval(() => {
+      fetch("/api/admin/orders").then(r => r.json()).then(d => setOrders(d.orders || [])).catch(console.error);
+    }, 30000);
+    return () => clearInterval(id);
   }, []);
 
   return (
@@ -103,10 +98,10 @@ export default function AdminDashboard() {
               return (
                 <div key={order.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px 20px", borderBottom: "1px solid #f9fafb" }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: "13px", fontWeight: 600, color: "#111827", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.customer}</p>
-                    <p style={{ fontSize: "11px", color: "#6b7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.id} · {order.product.slice(0, 24)}…</p>
+                    <p style={{ fontSize: "13px", fontWeight: 600, color: "#111827", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.customer_name}</p>
+                    <p style={{ fontSize: "11px", color: "#6b7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{order.order_no} · {(order.products ?? "").slice(0, 24)}…</p>
                   </div>
-                  <p style={{ fontSize: "13px", fontWeight: 700, color: "#111827", whiteSpace: "nowrap" }}>₺{order.amount.toLocaleString("tr-TR")}</p>
+                  <p style={{ fontSize: "13px", fontWeight: 700, color: "#111827", whiteSpace: "nowrap" }}>₺{order.total_amount.toLocaleString("tr-TR")}</p>
                   <span style={{ fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "999px", background: sc.bg, color: sc.text, whiteSpace: "nowrap" }}>{STATUS_LABELS[order.status]}</span>
                 </div>
               );
@@ -121,7 +116,7 @@ export default function AdminDashboard() {
             <Link href="/admin/destek" style={{ fontSize: "12px", color: "#003d9b", fontWeight: 600, textDecoration: "none" }}>Tümü →</Link>
           </div>
           <div>
-            {mockTickets.slice(0, 5).map((t) => (
+            {tickets.slice(0, 5).map((t) => (
               <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px 20px", borderBottom: "1px solid #f9fafb" }}>
                 <span className="material-symbols-outlined" style={{ fontSize: "16px", color: TICKET_PRIORITY_COLORS[t.priority], flexShrink: 0, fontVariationSettings: "'FILL' 1" }}>
                   {t.status === "acik" ? "error" : t.status === "yanitlandi" ? "schedule" : "check_circle"}

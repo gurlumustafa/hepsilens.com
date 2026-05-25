@@ -3,7 +3,7 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { lenses, accessories, Lens, Accessory } from "@/lib/data";
+import { Lens, Accessory, Product } from "@/lib/data";
 import ProductCard from "@/components/ProductCard";
 import FilterSidebar, { Filters } from "@/components/FilterSidebar";
 
@@ -33,10 +33,21 @@ const SORT_OPTIONS = [
  */
 function UrunlerContent() {
   const searchParams = useSearchParams();
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
+  useEffect(() => {
+    setLoadingProducts(true);
+    fetch("/api/products")
+      .then((r) => r.json())
+      .then((d) => setAllProducts(d.products || []))
+      .catch(console.error)
+      .finally(() => setLoadingProducts(false));
+  }, []);
+
   const [filters, setFilters] = useState<Filters>(() => {
     const base = { ...defaultFilters };
     const tur    = searchParams.get("tur");
-    const recete = searchParams.get("recete");
     const renk   = searchParams.get("renk");
     if (tur === "gunluk")        base.usage = ["daily"];
     else if (tur === "haftalik") base.usage = ["biweekly"];
@@ -44,7 +55,6 @@ function UrunlerContent() {
     if (tur === "toric")         base.lensTypes = ["toric"];
     if (renk === "renkli")       base.color = "colored";
     else if (renk === "seffaf")  base.color = "clear";
-    // 🔒 REÇETELİ LENS DEVRE DIŞI — if (recete === "gerekli") { /* ... */ }
     return base;
   });
   const [page, setPage] = useState(1);
@@ -75,18 +85,17 @@ function UrunlerContent() {
 
   const filtered = useMemo(() => {
     // Sayfa moduna göre başlangıç listesi
-    let list: (Lens | Accessory)[] = isDigerUrunler
-      ? [...accessories]
+    let list: Product[] = isDigerUrunler
+      ? allProducts.filter((p) => p.product_type === "accessory")
       : isAllLenses
-      ? [...lenses]
-      : [...lenses, ...accessories];
+      ? allProducts.filter((p) => p.product_type === "lens")
+      : [...allProducts];
 
     if (filters.brands.length) {
       list = list.filter((l) => {
-        if (!("brandId" in l)) return false;
-        const bId = (l as { brandId?: string }).brandId;
+        const bId = l.brand_id;
         if (!bId) return false;
-        // Aksesuar modunda: doğrudan brandId eşleşmesi
+        // Aksesuar modunda: doğrudan brand_id eşleşmesi
         if (isDigerUrunler) return filters.brands.includes(bId);
         // Lens modunda: markanın alt markaları da dahil
         if (filters.brands.includes(bId)) return true;
@@ -100,32 +109,32 @@ function UrunlerContent() {
     // Aksesuar modunda: kategori filtresi (solüsyon / göz damlası)
     if (isDigerUrunler) {
       if (filters.category.length > 0) {
-        list = list.filter((l) => "category" in l && filters.category.includes((l as Accessory).category));
+        list = list.filter((l) => l.product_type === "accessory" && filters.category.includes(l.accessory_category));
       }
     } else {
       // Lens moduna özgü filtreler
       if (filters.lensTypes.length > 0) {
         list = list.filter((l) => {
-          if (!("color" in l)) return false;
+          if (l.product_type !== "lens") return false;
           if (filters.lensTypes.includes("saydam") && l.color === "clear") return true;
           if (filters.lensTypes.includes("renkli") && l.color === "colored") return true;
-          if (filters.lensTypes.includes("toric") && (l.name.toLowerCase().includes("toric") || l.name.toLowerCase().includes("astigmat") || (l as Lens).tags?.includes("astigmat uyumlu"))) return true;
+          if (filters.lensTypes.includes("toric") && (l.name.toLowerCase().includes("toric") || l.name.toLowerCase().includes("astigmat") || l.tags?.includes("astigmat uyumlu"))) return true;
           if (filters.lensTypes.includes("multifocal") && (l.name.toLowerCase().includes("multifocal") || l.name.toLowerCase().includes("presbyopia"))) return true;
-          if (filters.lensTypes.includes("indirimli") && l.originalPrice) return true;
+          if (filters.lensTypes.includes("indirimli") && l.original_price) return true;
           return false;
         });
       }
 
       if (filters.color !== "all") {
-        list = list.filter((l) => "color" in l && l.color === filters.color);
+        list = list.filter((l) => l.product_type === "lens" && l.color === filters.color);
       }
 
       if (filters.usage.length > 0) {
-        list = list.filter((l) => "usagePeriod" in l && filters.usage.includes((l as Lens).usagePeriod));
+        list = list.filter((l) => l.product_type === "lens" && filters.usage.includes(l.usage_period));
       }
 
       if (requiresPrescription !== null) {
-        list = list.filter((l) => "requiresPrescription" in l && (l as Lens).requiresPrescription === requiresPrescription);
+        list = list.filter((l) => l.product_type === "lens" && l.requires_prescription === requiresPrescription);
       }
     }
 
@@ -134,10 +143,10 @@ function UrunlerContent() {
     if (filters.sortBy === "price-asc")       list.sort((a, b) => a.price - b.price);
     else if (filters.sortBy === "price-desc") list.sort((a, b) => b.price - a.price);
     else if (filters.sortBy === "rating")     list.sort((a, b) => b.rating - a.rating);
-    else                                      list.sort((a, b) => b.reviewCount - a.reviewCount);
+    else                                      list.sort((a, b) => b.review_count - a.review_count);
 
     return list;
-  }, [filters, requiresPrescription, isDigerUrunler, isAllLenses]);
+  }, [allProducts, filters, requiresPrescription, isDigerUrunler, isAllLenses]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated  = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);

@@ -1,12 +1,23 @@
 "use client";
 import { useEffect, useState } from "react";
-import { lenses } from "@/lib/data";
+import { Lens } from "@/lib/data";
 
 export default function AdminPopuler() {
-  const sorted = [...lenses].sort((a, b) => b.reviewCount - a.reviewCount);
-  const [selected, setSelected] = useState<number[]>(sorted.slice(0, 4).map(l => l.id));
+  const [lenses, setLenses] = useState<Lens[]>([]);
+  const [selected, setSelected] = useState<number[]>([]);
   const [saved, setSaved] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/products?type=lens")
+      .then(r => r.json())
+      .then(d => {
+        const sorted: Lens[] = [...(d.products || [])].sort((a: Lens, b: Lens) => b.review_count - a.review_count);
+        setLenses(sorted);
+        setSelected(sorted.slice(0, 4).map((l: Lens) => l.id));
+      })
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -69,9 +80,9 @@ export default function AdminPopuler() {
             {selectedLenses.map((lens, i) => (
               <div key={lens.id} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 10px", borderRadius: "10px", background: "#f9fafb", marginBottom: "6px" }}>
                 <span style={{ fontSize: "12px", fontWeight: 800, color: "#003d9b", width: "20px", flexShrink: 0 }}>#{i + 1}</span>
-                {lens.imageUrl
+                {lens.image_url
                   // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={lens.imageUrl} alt="" style={{ width: "36px", height: "36px", objectFit: "contain", borderRadius: "6px", background: "white" }} />
+                  ? <img src={lens.image_url} alt="" style={{ width: "36px", height: "36px", objectFit: "contain", borderRadius: "6px", background: "white" }} />
                   : <div style={{ width: "36px", height: "36px", borderRadius: "6px", background: "#e5e7eb", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px" }}>👁️</div>
                 }
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -109,9 +120,9 @@ export default function AdminPopuler() {
                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#f9fafb"}
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
               >
-                {lens.imageUrl
+                {lens.image_url
                   // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={lens.imageUrl} alt="" style={{ width: "32px", height: "32px", objectFit: "contain", borderRadius: "6px", background: "#f3f4f6" }} />
+                  ? <img src={lens.image_url} alt="" style={{ width: "32px", height: "32px", objectFit: "contain", borderRadius: "6px", background: "#f3f4f6" }} />
                   : <div style={{ width: "32px", height: "32px", borderRadius: "6px", background: "#e5e7eb", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px" }}>👁️</div>
                 }
                 <div style={{ flex: 1, minWidth: 0 }}>

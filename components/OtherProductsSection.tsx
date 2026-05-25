@@ -1,61 +1,67 @@
 "use client";
 import Link from "next/link";
-import { accessories, Accessory } from "@/lib/data";
+import { Accessory } from "@/lib/data";
+import { useState, useEffect } from "react";
 
 function AccessoryCard({ item }: { item: Accessory }) {
-  const discount = item.originalPrice
-    ? Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)
+  const discount = item.original_price
+    ? Math.round(((item.original_price - item.price) / item.original_price) * 100)
     : 0;
 
-  const emoji = item.category === "solution" ? "💧" : "👁️";
+  const emoji = item.accessory_category === "solution" ? "💧" : "👁️";
 
   return (
-    <div className="group bg-white rounded-[0.75rem] border border-[#c3c6d6] p-4 flex gap-4 items-start hover:shadow-lg hover:-translate-y-0.5 hover:border-[#003d9b]/30 transition-all duration-250 cursor-pointer">
+    <div className="group bg-white rounded-[0.75rem] border border-[#c3c6d6] p-4 flex gap-4 items-stretch hover:shadow-lg hover:-translate-y-0.5 hover:border-[#003d9b]/30 transition-all duration-250 cursor-pointer min-h-[175px] h-[175px]">
       {/* Görsel */}
-      <div className="w-20 h-20 flex-shrink-0 bg-[#f3f4f6] rounded-[0.5rem] flex items-center justify-center text-4xl group-hover:scale-105 transition-transform duration-200">
+      <div className="w-20 h-20 flex-shrink-0 bg-[#f3f4f6] rounded-[0.5rem] flex items-center justify-center text-4xl group-hover:scale-105 transition-transform duration-200 self-center">
         {emoji}
       </div>
 
       {/* Bilgi */}
-      <div className="flex-1 min-w-0">
-        <p className="text-[#737685] uppercase" style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em" }}>
-          {item.brand}
-        </p>
-        <h3
-          className="text-[#191c1e] group-hover:text-[#003d9b] transition-colors duration-200 leading-snug mt-0.5"
-          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "15px", fontWeight: 700 }}
-        >
-          {item.name}
-        </h3>
-        <p className="text-[#737685] mt-1 line-clamp-2" style={{ fontSize: "12px", lineHeight: "16px" }}>
-          {item.description}
-        </p>
-        <div className="flex items-center justify-between mt-2">
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-[#003d9b]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "17px", fontWeight: 700 }}>
-              {item.price.toLocaleString("tr-TR")} ₺
-            </span>
-            {item.originalPrice && (
-              <span className="text-[#737685] line-through" style={{ fontSize: "11px" }}>
-                {item.originalPrice.toLocaleString("tr-TR")} ₺
+      <div className="flex-1 min-w-0 flex flex-col justify-between h-full">
+        <div>
+          <p className="text-[#737685] uppercase" style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.08em" }}>
+            {item.brand}
+          </p>
+          <h3
+            className="text-[#191c1e] group-hover:text-[#003d9b] transition-colors duration-200 leading-snug mt-0.5 line-clamp-1"
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "15px", fontWeight: 700 }}
+          >
+            {item.name}
+          </h3>
+          <p className="text-[#737685] mt-1 line-clamp-2 h-[32px] overflow-hidden" style={{ fontSize: "12px", lineHeight: "16px" }}>
+            {item.description}
+          </p>
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mt-1">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[#003d9b]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "16px", fontWeight: 700 }}>
+                {item.price.toLocaleString("tr-TR")} ₺
+              </span>
+              {item.original_price && (
+                <span className="text-[#737685] line-through" style={{ fontSize: "11px" }}>
+                  {item.original_price.toLocaleString("tr-TR")} ₺
+                </span>
+              )}
+            </div>
+            {item.badge && (
+              <span
+                className="bg-[#50dcff] text-[#005f71] px-2 py-0.5 rounded-full whitespace-nowrap"
+                style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.04em" }}
+              >
+                {item.badge}
               </span>
             )}
           </div>
-          {item.badge && (
-            <span
-              className="bg-[#50dcff] text-[#005f71] px-2 py-0.5 rounded-full whitespace-nowrap"
-              style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.04em" }}
-            >
-              {item.badge}
-            </span>
-          )}
-        </div>
-        {/* Yıldız + yorum */}
-        <div className="flex items-center gap-1 mt-1">
-          {[1, 2, 3, 4, 5].map((s) => (
-            <span key={s} style={{ fontSize: "11px", color: s <= Math.round(item.rating) ? "#6a3600" : "#c3c6d6" }}>★</span>
-          ))}
-          <span style={{ fontSize: "11px", color: "#737685" }}>({item.reviewCount})</span>
+          {/* Yıldız + yorum */}
+          <div className="flex items-center gap-1 mt-0.5">
+            {[1, 2, 3, 4, 5].map((s) => (
+              <span key={s} style={{ fontSize: "11px", color: s <= Math.round(item.rating) ? "#6a3600" : "#c3c6d6" }}>★</span>
+            ))}
+            <span style={{ fontSize: "11px", color: "#737685" }}>({item.review_count})</span>
+          </div>
         </div>
       </div>
 
@@ -72,9 +78,18 @@ function AccessoryCard({ item }: { item: Accessory }) {
 
 /* ── section: diger-urunler ── */
 export default function OtherProductsSection() {
+  const [accessories, setAccessories] = useState<Accessory[]>([]);
+
+  useEffect(() => {
+    fetch("/api/products?type=accessory")
+      .then((r) => r.json())
+      .then((d) => setAccessories(d.products || []))
+      .catch(console.error);
+  }, []);
+
   // En çok puan alan 4 solüsyon ve 4 göz damlası
-  const solutions = accessories.filter((a) => a.category === "solution").sort((a, b) => b.rating - a.rating).slice(0, 4);
-  const eyedrops = accessories.filter((a) => a.category === "eyedrop").sort((a, b) => b.rating - a.rating).slice(0, 4);
+  const solutions = accessories.filter((a) => a.accessory_category === "solution").sort((a, b) => b.rating - a.rating).slice(0, 4);
+  const eyedrops  = accessories.filter((a) => a.accessory_category === "eyedrop").sort((a, b) => b.rating - a.rating).slice(0, 4);
 
   return (
     <section id="diger-urunler" className="max-w-[1280px] mx-auto px-8 py-12 border-t border-[#edeef0]">

@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { lenses, accessories, Lens, Accessory } from "@/lib/data";
+import { Product } from "@/lib/data";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import LogoutModal from "@/components/LogoutModal";
@@ -21,8 +21,6 @@ const blogDropdown = [
   { href: "/blog/urun-incelemeleri", label: "Ürün İncelemeleri", icon: "star" },
   { href: "/blog/ipuclari", label: "İpuçları & Rehber", icon: "lightbulb" },
 ];
-
-const allProducts: (Lens | Accessory)[] = [...lenses, ...accessories];
 
 function highlight(text: string, query: string) {
   if (!query) return text;
@@ -46,6 +44,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
 
   const blogRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -53,22 +52,29 @@ export default function Navbar() {
   const [accountOpen, setAccountOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    fetch("/api/products")
+      .then((r) => r.json())
+      .then((d) => setAllProducts(d.products || []))
+      .catch(console.error);
+  }, []);
+
   // En yakın 3 sonuç
-  const results = useCallback((): (Lens | Accessory)[] => {
+  const results = useCallback((): Product[] => {
     const q = query.trim().toLowerCase();
     if (q.length < 1) return [];
     return allProducts
       .filter((p) =>
         p.name.toLowerCase().includes(q) ||
         p.brand.toLowerCase().includes(q) ||
-        p.description.toLowerCase().includes(q)
+        (p.description ?? "").toLowerCase().includes(q)
       )
       .slice(0, 3);
-  }, [query])();
+  }, [query, allProducts])();
 
-  // Boş arama için en popüler 3 ürün (reviewCount'a göre)
+  // Boş arama için en popüler 3 ürün (review_count'a göre)
   const popularProducts = [...allProducts]
-    .sort((a, b) => b.reviewCount - a.reviewCount)
+    .sort((a, b) => b.review_count - a.review_count)
     .slice(0, 3);
 
   // Dışarı tıklanınca kapat
@@ -174,7 +180,7 @@ export default function Navbar() {
             <div className="relative hidden md:block" ref={searchRef}>
               <form onSubmit={handleSubmit}>
                 <div
-                  className="flex items-center bg-[#f3f4f6] px-3 xl:px-4 py-2 rounded-[0.75rem] border transition-all duration-200 group mr-1.5 xl:mr-6"
+                  className="flex items-center bg-[#f3f4f6] px-3 xl:px-4 py-2 rounded-[0.75rem] border transition-all duration-200 group mr-1.5 xl:mr-6 "
                   style={{
                     borderColor: searchOpen ? "#003d9b" : "#c3c6d6",
                     boxShadow: searchOpen ? "0 0 0 3px rgba(0,61,155,0.12)" : "none",
@@ -228,7 +234,7 @@ export default function Navbar() {
                         >
                           <div className="w-12 h-12 rounded-lg bg-[#f4f5f9] flex items-center justify-center shrink-0 overflow-hidden border border-[#edeef3]">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={product.imageUrl || "/placeholder-lens.jpg"} alt={product.name} className="w-10 h-10 object-contain mix-blend-multiply" />
+                            <img src={product.image_url || "/placeholder-lens.jpg"} alt={product.name} className="w-10 h-10 object-contain mix-blend-multiply" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-[#737685] uppercase truncate" style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.06em" }}>{product.brand}</p>
@@ -238,7 +244,7 @@ export default function Navbar() {
                             <p className="text-[#003d9b] font-bold" style={{ fontSize: "13px", fontFamily: "'Plus Jakarta Sans'" }}>
                               {product.price.toLocaleString("tr-TR")} ₺
                             </p>
-                            <p className="text-[#737685]" style={{ fontSize: "10px" }}>{product.reviewCount} değerlendirme</p>
+                            <p className="text-[#737685]" style={{ fontSize: "10px" }}>{product.review_count} değerlendirme</p>
                           </div>
                         </button>
                       ))}
@@ -258,8 +264,8 @@ export default function Navbar() {
                         En İyi Eşleşmeler
                       </p>
                       {results.map((product) => {
-                        const discount = product.originalPrice
-                          ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+                        const discount = product.original_price
+                          ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
                           : 0;
                         return (
                           <button
@@ -269,7 +275,7 @@ export default function Navbar() {
                           >
                             <div className="w-12 h-12 rounded-lg bg-[#f4f5f9] flex items-center justify-center shrink-0 overflow-hidden border border-[#edeef3]">
                               {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={product.imageUrl || "/placeholder-lens.jpg"} alt={product.name} className="w-10 h-10 object-contain mix-blend-multiply" />
+                              <img src={product.image_url || "/placeholder-lens.jpg"} alt={product.name} className="w-10 h-10 object-contain mix-blend-multiply" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-[#737685] uppercase truncate" style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.06em" }}>{product.brand}</p>
@@ -303,15 +309,15 @@ export default function Navbar() {
             >
               <button
                 onClick={() => setAccountOpen((o) => !o)}
-                className="relative p-2 rounded-[0.5rem] text-[#434654] hover:text-[#003d9b] hover:bg-[#f3f4f6] transition-all duration-200 flex items-center justify-center"
+                className="relative p-4 rounded-[0.5rem] text-[#434654] hover:text-[#003d9b] hover:bg-[#f3f4f6] transition-all duration-200 hover:scale-110 group flex items-center justify-center"
                 title={user ? user.name : "Hesap"}
               >
                 {user ? (
-                  <div className="w-8 h-8 rounded-full bg-[#dae2ff] flex items-center justify-center ring-2 ring-[#003d9b]/20">
-                    <span className="material-symbols-outlined text-[#003d9b]" style={{ fontSize: "18px", fontVariationSettings: "'FILL' 1" }}>person</span>
+                  <div className="w-[22px] h-[22px] rounded-full bg-[#dae2ff] flex items-center justify-center ring-2 ring-[#003d9b]/20 transition-transform duration-200 group-hover:scale-110">
+                    <span className="material-symbols-outlined text-[#003d9b]" style={{ fontSize: "14px", fontVariationSettings: "'FILL' 1" }}>person</span>
                   </div>
                 ) : (
-                  <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>person</span>
+                  <span className="material-symbols-outlined transition-transform duration-200 group-hover:scale-110 block" style={{ fontSize: "22px" }}>person</span>
                 )}
               </button>
 

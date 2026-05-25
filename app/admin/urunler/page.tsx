@@ -1,12 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { lenses } from "@/lib/data";
+import { Lens } from "@/lib/data";
 import { DiscountEntry, getAllDiscounts, setDiscount, removeDiscount } from "@/lib/discountStore";
 
 type DiscountModal = { lensId: number; name: string; currentPrice: number } | null;
 
 export default function AdminUrunler() {
+  const [lenses, setLenses] = useState<Lens[]>([]);
   const [search, setSearch] = useState("");
   const [filterColor, setFilterColor] = useState("all");
   const [filterPeriod, setFilterPeriod] = useState("all");
@@ -19,6 +20,12 @@ export default function AdminUrunler() {
 
   useEffect(() => { setDiscounts(getAllDiscounts()); }, []);
   useEffect(() => {
+    fetch("/api/products?type=lens")
+      .then(r => r.json())
+      .then(d => setLenses(d.products || []))
+      .catch(console.error);
+  }, []);
+  useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
     window.addEventListener("resize", check);
@@ -29,11 +36,11 @@ export default function AdminUrunler() {
     if (deletedIds.includes(l.id)) return false;
     const matchSearch = l.name.toLowerCase().includes(search.toLowerCase()) || l.brand.toLowerCase().includes(search.toLowerCase());
     const matchColor = filterColor === "all" || l.color === filterColor;
-    const matchPeriod = filterPeriod === "all" || l.usagePeriod === filterPeriod;
+    const matchPeriod = filterPeriod === "all" || l.usage_period === filterPeriod;
     return matchSearch && matchColor && matchPeriod;
   });
 
-  const openDiscountModal = (l: typeof lenses[0]) => {
+  const openDiscountModal = (l: Lens) => {
     const existing = discounts.find(d => d.lensId === l.id);
     setDiscountPct(existing ? String(existing.percent) : "10");
     setDiscountModal({ lensId: l.id, name: l.name, currentPrice: l.price });
@@ -154,9 +161,9 @@ export default function AdminUrunler() {
                 >
                   <td style={{ padding: "12px 16px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      {lens.imageUrl
+                      {lens.image_url
                         // eslint-disable-next-line @next/next/no-img-element
-                        ? <img src={lens.imageUrl} alt="" style={{ width: "36px", height: "36px", objectFit: "contain", borderRadius: "8px", background: "#f3f4f6" }} />
+                        ? <img src={lens.image_url} alt="" style={{ width: "36px", height: "36px", objectFit: "contain", borderRadius: "8px", background: "#f3f4f6" }} />
                         : <div style={{ width: "36px", height: "36px", borderRadius: "8px", background: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: "18px" }}>👁️</span></div>
                       }
                       <div>
@@ -198,7 +205,7 @@ export default function AdminUrunler() {
                       {lens.color === "colored" ? "Renkli" : "Şeffaf"}
                     </span>
                   </td>
-                  <td style={{ padding: "12px 16px", fontSize: "12px", color: "#374151" }}>{{ daily: "Günlük", monthly: "Aylık", yearly: "Yıllık" }[lens.usagePeriod]}</td>
+                  <td style={{ padding: "12px 16px", fontSize: "12px", color: "#374151" }}>{{ daily: "Günlük", biweekly: "2 Haftalık", monthly: "Aylık", yearly: "Yıllık" }[lens.usage_period as "daily" | "biweekly" | "monthly" | "yearly"]}</td>
                   <td style={{ padding: "12px 16px" }}>
                     <div style={{ display: "flex", gap: "6px" }}>
                       <Link href={`/urun/${lens.id}`} target="_blank" title="Önizle" style={{ width: "30px", height: "30px", borderRadius: "8px", background: "#f3f4f6", border: "1px solid #e5e7eb", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none", color: "#6b7280" }}>

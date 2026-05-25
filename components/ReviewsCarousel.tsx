@@ -1,6 +1,14 @@
 "use client";
 import { useState } from "react";
-import { testimonials } from "@/lib/data";
+
+const testimonials = [
+  { id: 1, user: "Ayşe K.", initials: "AK", location: "İstanbul", color: "#003d9b", rating: 5, comment: "Renkli lensler inanılmaz doğal görünüyor. Arkadaşlarım gerçek gözüm olduğunu sanıyor! Teslimat da çok hızlıydı.", product: "FreshLook ColorBlends", },
+  { id: 2, user: "Mehmet Y.", initials: "MY", location: "Ankara", color: "#00687b", rating: 5, comment: "Uzun süredir günlük lens kullanıyorum, bu kadar rahat bir lens hiç kullanmamıştım. Sabah takıp gece çıkarıyorum, hiç hissetmiyorum.", product: "Acuvue Oasys 1-Day", },
+  { id: 3, user: "Selin A.", initials: "SA", location: "İzmir", color: "#6a3600", rating: 5, comment: "Solüsyon ve lensimi aynı anda aldım, paket fırsatı gerçekten mantıklı. Kaliteden ödün vermeden uygun fiyat.", product: "Dailies Total1", },
+  { id: 4, user: "Can B.", initials: "CB", location: "Bursa", color: "#003d9b", rating: 4, comment: "Aylık lensler çok ekonomik. Aylık bakım solüsyonunu da buradan alıyorum, pratik ve güvenilir bir site.", product: "Biofinity Toric", },
+  { id: 5, user: "Zeynep M.", initials: "ZM", location: "Antalya", color: "#5e2a84", rating: 5, comment: "İlk kez renkli lens denedim ve çok memnun kaldım. Müşteri hizmetleri de çok yardımcı oldu, teşekkürler!", product: "Air Optix Colors", },
+  { id: 6, user: "Ali R.", initials: "AR", location: "Konya", color: "#00687b", rating: 5, comment: "Yıllardır lens kullanıyorum ama bu kadar hızlı kargo ilk defa görüyorum. Siparişim 1 günde geldi!", product: "Acuvue Moist", },
+];
 
 const ITEMS_PER_VIEW = 3;
 
