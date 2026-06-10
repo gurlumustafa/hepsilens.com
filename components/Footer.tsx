@@ -6,37 +6,36 @@ const siteBrands = ["Acuvue", "Dailies", "Biofinity", "FreshLook", "Air Optix", 
 const siteLinks = [
   {
     section: "Lensler", links: [
-      { label: "Tüm Lensler",       href: "/urunler" },
-      { label: "Numaralı Lensler",  href: "/urunler?recete=gerekli" },
-      { label: "Kozmetik Lensler",  href: "/urunler?recete=serbest" },
-      { label: "Renkli Lensler",    href: "/urunler?renk=renkli" },
-      { label: "Günlük Lensler",    href: "/urunler?tur=gunluk" },
-      { label: "Toric Lensler",     href: "/urunler?tur=toric" },
+      { label: "Tüm Lensler", href: "/urunler" },
+      { label: "Kozmetik Lensler", href: "/urunler?recete=serbest" },
+      { label: "Renkli Lensler", href: "/urunler?renk=renkli" },
+      { label: "Günlük Lensler", href: "/urunler?tur=gunluk" },
+      { label: "Toric Lensler", href: "/urunler?tur=toric" },
     ]
   },
   {
     section: "Müşteri Hizmetleri", links: [
-      { label: "SSS",              href: "/yardim/sss" },
+      { label: "SSS", href: "/yardim/sss" },
       { label: "Kargo Politikası", href: "/yardim/kargo" },
-      { label: "İade & Değişim",  href: "/yardim/iade" },
-      { label: "Sipariş Takibi",  href: "/siparis-takip" },
+      { label: "İade & Değişim", href: "/yardim/iade" },
+      { label: "Sipariş Takibi", href: "/siparis-takip" },
     ]
   },
   {
     section: "Kurumsal", links: [
-      { label: "Hakkımızda",         href: "/hakkimizda" },
-      { label: "Lens Bakımı",         href: "/blog/lens-bakimi" },
-      { label: "Göz Sağlığı",         href: "/blog/goz-sagligi" },
-      { label: "Ürün İncelemeleri",   href: "/blog/urun-incelemeleri" },
-      { label: "İpuçları & Rehber",   href: "/blog/ipuclari" },
+      { label: "Hakkımızda", href: "/hakkimizda" },
+      { label: "Lens Bakımı", href: "/blog/lens-bakimi" },
+      { label: "Göz Sağlığı", href: "/blog/goz-sagligi" },
+      { label: "Ürün İncelemeleri", href: "/blog/urun-incelemeleri" },
+      { label: "İpuçları & Rehber", href: "/blog/ipuclari" },
     ]
   },
   {
     section: "Yasal", links: [
-      { label: "Gizlilik Politikası",       href: "/gizlilik" },
-      { label: "KVKK Aydınlatma Metni",     href: "/kvkk" },
-      { label: "Kullanım Şartları",         href: "/kullanim-sartlari" },
-      { label: "Çerez Politikası",          href: "/cerez-politikasi" },
+      { label: "Gizlilik Politikası", href: "/gizlilik" },
+      { label: "KVKK Aydınlatma Metni", href: "/kvkk" },
+      { label: "Kullanım Şartları", href: "/kullanim-sartlari" },
+      { label: "Çerez Politikası", href: "/cerez-politikasi" },
       { label: "Mesafeli Satış Sözleşmesi", href: "/mesafeli-satis" },
     ]
   },
@@ -64,8 +63,8 @@ export default function Footer() {
             <div className="mt-6 flex flex-col gap-3">
               {[
                 { icon: "location_on", text: "Levent Mah. Büyükdere Cad. No:127 Şişli, İstanbul" },
-                { icon: "phone",       text: "+90 (212) 000 00 00" },
-                { icon: "mail",        text: "info@hepsilens.com" }
+                { icon: "phone", text: "+90 (212) 000 00 00" },
+                { icon: "mail", text: "info@hepsilens.com" }
               ].map((item) => (
                 <div key={item.icon} className="flex items-start gap-3 group">
                   <span className="material-symbols-outlined text-[#50dcff] flex-shrink-0 group-hover:scale-110 transition-transform duration-200" style={{ fontSize: "18px", fontVariationSettings: "'FILL' 1" }}>
@@ -81,10 +80,10 @@ export default function Footer() {
             {/* Sosyal medya */}
             <div className="flex gap-3 mt-6">
               {[
-                { icon: "photo_camera",      label: "Instagram" },
-                { icon: "social_leaderboard",label: "Twitter" },
-                { icon: "brand_awareness",   label: "Facebook" },
-                { icon: "smart_display",     label: "YouTube" },
+                { icon: "photo_camera", label: "Instagram" },
+                { icon: "social_leaderboard", label: "Twitter" },
+                { icon: "brand_awareness", label: "Facebook" },
+                { icon: "smart_display", label: "YouTube" },
               ].map((s) => (
                 <button
                   key={s.icon}
@@ -155,11 +154,11 @@ export default function Footer() {
             {/* Yasal linkler — alt çizgi */}
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
               {[
-                { label: "Gizlilik",            href: "/gizlilik" },
-                { label: "KVKK",               href: "/kvkk" },
-                { label: "Kullanım Şartları",   href: "/kullanim-sartlari" },
-                { label: "Çerez Politikası",   href: "/cerez-politikasi" },
-                { label: "Mesafeli Satış",      href: "/mesafeli-satis" },
+                { label: "Gizlilik", href: "/gizlilik" },
+                { label: "KVKK", href: "/kvkk" },
+                { label: "Kullanım Şartları", href: "/kullanim-sartlari" },
+                { label: "Çerez Politikası", href: "/cerez-politikasi" },
+                { label: "Mesafeli Satış", href: "/mesafeli-satis" },
               ].map((l) => (
                 <Link
                   key={l.href}

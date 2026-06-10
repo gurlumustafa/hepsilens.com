@@ -1,5 +1,5 @@
 "use client";
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
@@ -29,8 +29,19 @@ function GirisContent() {
   const searchParams = useSearchParams();
   const prefillEmail  = searchParams.get("email") ?? "";
   const googleError   = searchParams.get("error");
+  const modeParam     = searchParams.get("mode");
 
-  const [mode, setMode]       = useState<"login" | "register">("register");
+  const [mode, setMode]       = useState<"login" | "register">(
+    modeParam === "login" || modeParam === "register" ? modeParam : "login"
+  );
+
+  useEffect(() => {
+    const currentMode = searchParams.get("mode");
+    if (currentMode === "login" || currentMode === "register") {
+      setMode(currentMode);
+    }
+  }, [searchParams]);
+
   const [name, setName]       = useState("");
   const [email, setEmail]     = useState(prefillEmail);
   const [password, setPassword] = useState("");

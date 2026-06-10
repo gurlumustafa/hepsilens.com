@@ -190,7 +190,7 @@ function HesapContent() {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   useEffect(() => {
-    if (loaded && !user) router.replace("/hesap/giris");
+    if (loaded && !user) router.replace("/hesap/giris?mode=login");
   }, [loaded, user, router]);
 
   if (!loaded) return (

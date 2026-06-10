@@ -45,30 +45,30 @@ export default function CampaignBanner() {
   const slide = slides[current];
 
   return (
-    <section className="relative w-full overflow-hidden bg-white h-[500px] flex items-center">
+    <section className="relative w-full overflow-hidden bg-white h-[260px] sm:h-[400px] md:h-[500px] flex items-center">
       {/* Background image */}
       <div className="absolute inset-0 z-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={slide.img}
           alt=""
-          className="w-full h-full object-cover transition-all duration-700"
+          className="w-full h-full object-cover object-[60%_center] sm:object-center transition-all duration-700"
         />
         <div className="absolute inset-0 bg-white/20" />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-[1280px] mx-auto px-8 grid grid-cols-1 md:grid-cols-2">
+      <div className="relative z-10 w-full max-w-[1280px] mx-auto px-4 sm:px-8 grid grid-cols-1 md:grid-cols-2">
         <div
-          className="p-8 rounded-[0.5rem] border border-white shadow-xl max-w-lg"
-          style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(12px)" }}
+          className="p-4 sm:p-8 rounded-[0.5rem] border border-white/60 shadow-xl w-full sm:max-w-lg bg-white/55 sm:bg-white/85"
+          style={{ backdropFilter: "blur(12px)" }}
         >
           <span
-            className="inline-block px-3 py-1 rounded-[0.75rem] mb-4 text-[#005f71]"
+            className="inline-block px-3 py-1 rounded-[0.75rem] mb-2 sm:mb-4 text-[#005f71]"
             style={{
               background: "#50dcff",
               fontFamily: "'Inter', sans-serif",
-              fontSize: "12px",
+              fontSize: "11px",
               lineHeight: "16px",
               letterSpacing: "0.05em",
               fontWeight: 600,
@@ -77,29 +77,32 @@ export default function CampaignBanner() {
             {slide.badge}
           </span>
           <h1
-            className="text-[#003d9b] mb-4 leading-tight"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "48px", lineHeight: "56px", fontWeight: 700, letterSpacing: "-0.02em" }}
+            className="text-[#003d9b] mb-2 sm:mb-4 leading-tight text-[22px] sm:text-[34px] md:text-[48px]"
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, letterSpacing: "-0.02em" }}
           >
             {slide.title}
           </h1>
-          <p className="text-[#434654] mb-8" style={{ fontSize: "18px", lineHeight: "28px" }}>
+          <p className="text-[#434654] mb-3 sm:mb-8 hidden sm:block" style={{ fontSize: "18px", lineHeight: "28px" }}>
             {slide.desc}
           </p>
-          <div className="flex gap-4">
+          <p className="text-[#434654] mb-3 sm:hidden line-clamp-2" style={{ fontSize: "13px", lineHeight: "20px" }}>
+            {slide.desc}
+          </p>
+          <div className="flex gap-3">
             <Link
               href={slide.link}
-              className="bg-[#003d9b] text-white px-8 py-4 rounded-[0.5rem] hover:bg-[#0052cc] transition-all inline-flex items-center gap-2"
+              className="bg-[#003d9b] text-white px-4 sm:px-8 py-2 sm:py-4 rounded-[0.5rem] hover:bg-[#0052cc] transition-all inline-flex items-center gap-2"
               style={{ fontFamily: "'Inter', sans-serif", fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}
             >
               {slide.btn1}
-              <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>arrow_forward</span>
+              <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>arrow_forward</span>
             </Link>
           </div>
         </div>
       </div>
 
       {/* Slider dots */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+      <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
         {slides.map((_, i) => (
           <button
             key={i}

@@ -57,7 +57,7 @@ export default function PopularProductsCarousel() {
         <div className="flex items-center gap-3">
           <Link
             href="/urunler"
-            className="hidden sm:flex items-center gap-1 text-[#003d9b] hover:text-[#0052cc] hover:underline transition-colors group"
+            className="hidden sm:flex items-center gap-1 text-[#003d9b] hover:text-[#0052cc]  transition-colors group"
             style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 700 }}
           >
             Tümünü Gör

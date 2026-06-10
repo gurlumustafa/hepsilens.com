@@ -699,7 +699,7 @@ export default function ProductDetail() {
                     <p className="font-bold text-[#191c1e] mb-1" style={{ fontFamily: "'Plus Jakarta Sans'" }}>Yorum yapmak için giriş yapın</p>
                     <p className="text-[#737685] mb-4" style={{ fontSize: "14px" }}>Deneyiminizi paylaşmak için hesabınıza giriş yapmanız gerekmektedir.</p>
                     <button
-                      onClick={() => router.push(`/hesap/giris`)}
+                      onClick={() => router.push(`/hesap/giris?mode=login`)}
                       className="bg-[#003d9b] text-white px-6 py-2.5 rounded-xl font-semibold hover:opacity-90 transition-opacity flex items-center gap-2 mx-auto"
                       style={{ fontSize: "13px", letterSpacing: "0.04em" }}
                     >

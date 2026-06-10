@@ -112,7 +112,13 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="fixed top-0 w-full z-50 bg-white border-b border-[#c3c6d6] shadow-sm" style={{ height: "72px" }}>
+      {menuOpen && (
+        <div
+          className="fixed inset-0 z-[90] lg:hidden"
+          onClick={() => setMenuOpen(false)}
+        />
+      )}
+      <header className="fixed top-0 w-full z-[100] bg-white border-b border-[#c3c6d6] shadow-sm" style={{ height: "72px" }}>
         <div className="flex justify-between items-center px-6 h-full max-w-[1280px] mx-auto gap-4">
 
           {/* ── Marka & Navigasyon ── */}
@@ -304,12 +310,12 @@ export default function Navbar() {
             <div
               className="relative"
               ref={accountRef}
-              onMouseEnter={() => setAccountOpen(true)}
-              onMouseLeave={() => setAccountOpen(false)}
+              onPointerEnter={(e) => { if (e.pointerType === "mouse") setAccountOpen(true); }}
+              onPointerLeave={(e) => { if (e.pointerType === "mouse") setAccountOpen(false); }}
             >
               <button
                 onClick={() => setAccountOpen((o) => !o)}
-                className="relative p-4 rounded-[0.5rem] text-[#434654] hover:text-[#003d9b] hover:bg-[#f3f4f6] transition-all duration-200 hover:scale-110 group flex items-center justify-center"
+                className="relative p-2.5 lg:p-4 rounded-[0.5rem] text-[#434654] hover:text-[#003d9b] hover:bg-[#f3f4f6] transition-all duration-200 hover:scale-110 group flex items-center justify-center"
                 title={user ? user.name : "Hesap"}
               >
                 {user ? (
@@ -373,7 +379,7 @@ export default function Navbar() {
                         <p className="text-[#737685]" style={{ fontSize: "12px" }}>Hesabınıza giriş yapın veya kayıt olun.</p>
                       </div>
                       <Link
-                        href="/hesap/giris"
+                        href="/hesap/giris?mode=login"
                         onClick={() => setAccountOpen(false)}
                         className="flex items-center gap-3 px-4 py-3 hover:bg-[#f3f4f6] transition-colors group/item"
                         style={{ fontSize: "13px", fontWeight: 600, color: "#003d9b" }}
@@ -382,7 +388,7 @@ export default function Navbar() {
                         Giriş Yap
                       </Link>
                       <Link
-                        href="/hesap/giris"
+                        href="/hesap/giris?mode=register"
                         onClick={() => setAccountOpen(false)}
                         className="flex items-center gap-3 px-4 py-3 hover:bg-[#f3f4f6] transition-colors group/item"
                         style={{ fontSize: "13px", fontWeight: 600, color: "#434654" }}

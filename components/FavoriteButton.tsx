@@ -23,7 +23,7 @@ export default function FavoriteButton({ productId, size = "md", className = "" 
   function handle(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-    if (!user) { router.push("/hesap/giris"); return; }
+    if (!user) { router.push("/hesap/giris?mode=login"); return; }
     toggleFavorite(productId);
   }
 

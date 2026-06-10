@@ -108,10 +108,10 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
     <>
       <Link
         href={`/urun/${lens.id}`}
-        className="group bg-[#ffffff] rounded-[0.75rem] p-4 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-250 border border-transparent hover:border-[#003d9b]/25 flex flex-col"
+        className="group bg-[#ffffff] rounded-[0.75rem] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-250 border border-transparent hover:border-[#003d9b]/25 flex flex-row sm:flex-col"
       >
-        {/* Image */}
-        <div className="relative mb-4 aspect-square bg-white rounded-[0.25rem] overflow-hidden flex items-center justify-center p-4 border border-[#edeef0]">
+        {/* Image — square on mobile-left, full-width on sm+ */}
+        <div className="relative w-[110px] sm:w-auto flex-shrink-0 sm:flex-shrink-1 sm:aspect-square bg-white flex items-center justify-center p-2 sm:p-4 sm:border-b border-r sm:border-r-0 border-[#edeef0]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={lens.image_url || "/placeholder-lens.jpg"}
@@ -122,60 +122,60 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
           <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
             {lens.badge && (
               <span
-                className="bg-[#50dcff] text-[#005f71] px-2 py-1 rounded-full uppercase whitespace-nowrap"
-                style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.05em" }}
+                className="bg-[#50dcff] text-[#005f71] px-1.5 py-0.5 rounded-full uppercase whitespace-nowrap"
+                style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.05em" }}
               >
                 {lens.badge}
               </span>
             )}
             {discount > 0 && (
               <span
-                className="bg-[#ffdcc3] text-[#2f1500] px-2 py-1 rounded-full whitespace-nowrap"
-                style={{ fontSize: "10px", fontWeight: 700 }}
+                className="bg-[#ffdcc3] text-[#2f1500] px-1.5 py-0.5 rounded-full whitespace-nowrap"
+                style={{ fontSize: "9px", fontWeight: 700 }}
               >
                 -%{discount}
               </span>
             )}
           </div>
-          {quickViewOverlay}
+          <div className="hidden sm:block">{quickViewOverlay}</div>
         </div>
         {/* Info */}
-        <div className="space-y-2 flex flex-col flex-1">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-[#434654] uppercase" style={{ fontSize: "10px", letterSpacing: "0.1em", fontWeight: 600, fontFamily: "'Inter'" }}>
+        <div className="flex flex-col flex-1 p-3 sm:p-4">
+          <div className="flex justify-between items-start gap-1">
+            <div className="min-w-0">
+              <p className="text-[#434654] uppercase truncate" style={{ fontSize: "10px", letterSpacing: "0.1em", fontWeight: 600, fontFamily: "'Inter'" }}>
                 {lens.brand}
               </p>
               <h3
-                className="text-[#191c1e] group-hover:text-[#003d9b] transition-colors"
-                style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "20px", lineHeight: "28px", fontWeight: 600 }}
+                className="text-[#191c1e] group-hover:text-[#003d9b] transition-colors line-clamp-2"
+                style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "15px", lineHeight: "22px", fontWeight: 600 }}
               >
                 {lens.name}
               </h3>
             </div>
-            <div className="flex items-center gap-1 text-[#6a3600] shrink-0">
-              <span className="material-symbols-outlined" style={{ fontSize: "16.5px", fontVariationSettings: "'FILL' 1" }}>star</span>
-              <span style={{ fontSize: "14px", letterSpacing: "0.05em", fontWeight: 600, fontFamily: "'Inter'" }}>{lens.rating}</span>
+            <div className="flex items-center gap-0.5 text-[#6a3600] shrink-0 mt-0.5">
+              <span className="material-symbols-outlined" style={{ fontSize: "14px", fontVariationSettings: "'FILL' 1" }}>star</span>
+              <span style={{ fontSize: "12px", fontWeight: 600, fontFamily: "'Inter'" }}>{lens.rating}</span>
             </div>
           </div>
-          <p className="text-[#434654] line-clamp-2 flex-1" style={{ fontSize: "14px", lineHeight: "20px" }}>
+          <p className="text-[#434654] line-clamp-2 mt-1 hidden sm:block" style={{ fontSize: "13px", lineHeight: "18px" }}>
             {lens.description}
           </p>
-          <div className="pt-4 flex items-center justify-between mt-auto">
+          <div className="flex items-center justify-between mt-auto pt-2 sm:pt-4">
             <div className="flex flex-col">
               {lens.original_price && (
-                <span className="text-[#737685] line-through" style={{ fontSize: "11px", fontWeight: 600, fontFamily: "'Inter'" }}>
+                <span className="text-[#737685] line-through" style={{ fontSize: "10px", fontWeight: 600, fontFamily: "'Inter'" }}>
                   {lens.original_price.toLocaleString("tr-TR")} ₺
                 </span>
               )}
-              <span className="text-[#003d9b]" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "24px", lineHeight: "32px", fontWeight: 600 }}>
+              <span className="text-[#003d9b]" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "18px", lineHeight: "26px", fontWeight: 600 }}>
                 {lens.price.toLocaleString("tr-TR")} ₺
               </span>
             </div>
             <button
-              className="bg-[#d97706] text-white font-bold px-4 py-2 rounded-[0.5rem] hover:bg-[#b45309] hover:scale-105 active:scale-95 transition-all duration-200 whitespace-nowrap shadow-sm hover:shadow-md"
+              className="bg-[#d97706] text-white font-bold px-3 py-1.5 sm:px-4 sm:py-2 rounded-[0.5rem] hover:bg-[#b45309] hover:scale-105 active:scale-95 transition-all duration-200 whitespace-nowrap shadow-sm hover:shadow-md"
               onClick={handleAddToCart}
-              style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600, fontFamily: "'Inter'" }}
+              style={{ fontSize: "11px", letterSpacing: "0.04em", fontWeight: 600, fontFamily: "'Inter'" }}
             >
               Sepete Ekle
             </button>

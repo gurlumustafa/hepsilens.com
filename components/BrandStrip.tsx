@@ -19,7 +19,7 @@ export default function BrandStrip() {
 
       {/* İki özdeş şerit yan yana — her biri kendi genişliğince kayar */}
       <div
-        className="flex items-center opacity-50 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-700 cursor-default"
+        className="flex items-center sm:opacity-50 sm:hover:opacity-100 sm:grayscale sm:hover:grayscale-0 transition-all duration-700 cursor-default"
         style={{ width: "max-content" }}
       >
         {[0, 1].map((copy) => (
@@ -32,12 +32,10 @@ export default function BrandStrip() {
             {brands.map((name, i) => (
               <span
                 key={i}
-                className="text-[#434654] font-extrabold whitespace-nowrap hover:text-[#003d9b] transition-colors duration-200"
+                className="text-[#434654] font-extrabold whitespace-nowrap hover:text-[#003d9b] transition-colors duration-200 text-[18px] md:text-[30px] px-6 md:px-12"
                 style={{
                   fontFamily: "'Plus Jakarta Sans', sans-serif",
-                  fontSize: "30px",
                   lineHeight: "40px",
-                  padding: "0 48px",
                 }}
               >
                 {name}

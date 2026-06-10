@@ -89,7 +89,7 @@ export default function OtherProductsSection() {
 
   // En çok puan alan 4 solüsyon ve 4 göz damlası
   const solutions = accessories.filter((a) => a.accessory_category === "solution").sort((a, b) => b.rating - a.rating).slice(0, 4);
-  const eyedrops  = accessories.filter((a) => a.accessory_category === "eyedrop").sort((a, b) => b.rating - a.rating).slice(0, 4);
+  const eyedrops = accessories.filter((a) => a.accessory_category === "eyedrop").sort((a, b) => b.rating - a.rating).slice(0, 4);
 
   return (
     <section id="diger-urunler" className="max-w-[1280px] mx-auto px-8 py-12 border-t border-[#edeef0]">
@@ -119,7 +119,7 @@ export default function OtherProductsSection() {
             </div>
             <Link
               href="/urunler?kategori=solüsyon"
-              className="text-[#003d9b] hover:underline flex items-center gap-0.5 group"
+              className="text-[#003d9b] flex items-center gap-0.5 group"
               style={{ fontSize: "12px", fontWeight: 700 }}
             >
               Tümü
@@ -144,7 +144,7 @@ export default function OtherProductsSection() {
             </div>
             <Link
               href="/urunler?kategori=goz-damlasi"
-              className="text-[#003d9b] hover:underline flex items-center gap-0.5 group"
+              className="text-[#003d9b]  flex items-center gap-0.5 group"
               style={{ fontSize: "12px", fontWeight: 700 }}
             >
               Tümü

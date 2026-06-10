@@ -1,0 +1,115 @@
+/* ============================================================
+   HepsiLens – Global Design System
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+  --primary: #1B6CA8;
+  --primary-dark: #134f7a;
+  --primary-light: #d0e8f7;
+  --secondary: #00B4D8;
+  --accent: #FF6B35;
+  --accent-dark: #e85520;
+  --success: #2DC653;
+  --warning: #FFC107;
+  --danger: #e53935;
+  --bg: #F0F4FA;
+  --bg-white: #ffffff;
+  --card: #ffffff;
+  --border: #e0e8f0;
+  --text: #1A1A2E;
+  --text-muted: #6b7a99;
+  --text-light: #a0aec0;
+  --shadow-sm: 0 2px 8px rgba(27,108,168,.08);
+  --shadow-md: 0 4px 20px rgba(27,108,168,.13);
+  --shadow-lg: 0 8px 40px rgba(27,108,168,.18);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 20px;
+  --nav-h: 64px;
+  --strip-h: 36px;
+  --transition: .22s cubic-bezier(.4,0,.2,1);
+}
+
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+h1,h2,h3,h4,h5,h6 { font-family: 'Outfit', sans-serif; font-weight: 700; line-height: 1.2; }
+
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; }
+img { display: block; max-width: 100%; }
+ul { list-style: none; }
+
+.container { width: 100%; max-width: 1320px; margin: 0 auto; padding: 0 16px; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 22px; border-radius: var(--radius-sm); font-family: 'Outfit', sans-serif;
+  font-weight: 600; font-size: .9rem; transition: var(--transition); cursor: pointer;
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-accent { background: var(--accent); color: #fff; }
+.btn-accent:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-outline { border: 2px solid var(--primary); color: var(--primary); background: transparent; }
+.btn-outline:hover { background: var(--primary); color: #fff; }
+.btn-sm { padding: 6px 14px; font-size: .8rem; }
+.btn-full { width: 100%; }
+
+/* Badge */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600;
+}
+.badge-accent { background: #fff0eb; color: var(--accent); }
+.badge-primary { background: var(--primary-light); color: var(--primary); }
+.badge-danger { background: #fde8e8; color: var(--danger); }
+.badge-success { background: #e6f9ed; color: var(--success); }
+
+/* Stars */
+.stars { display: inline-flex; gap: 2px; color: #f59e0b; font-size: .85rem; }
+.star-empty { color: #d1d5db; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+/* Page wrapper */
+.page-wrap { padding-top: calc(var(--nav-h) + var(--strip-h) + 48px); }
+
+/* Overlay */
+.overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.45);
+  z-index: 400; opacity: 0; pointer-events: none; transition: var(--transition);
+}
+.overlay.active { opacity: 1; pointer-events: all; }
+
+/* Skeleton */
+.skeleton {
+  background: linear-gradient(90deg,#e8edf5 25%,#f5f7fb 50%,#e8edf5 75%);
+  background-size: 200% 100%; animation: shimmer 1.4s infinite;
+  border-radius: var(--radius-sm);
+}
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* Responsive helpers */
+@media (max-width: 768px) {
+  .hide-mobile { display: none !important; }
+  :root { --nav-h: 56px; }
+}
+@media (min-width: 769px) {
+  .hide-desktop { display: none !important; }
+}

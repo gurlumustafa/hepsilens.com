@@ -59,6 +59,7 @@ function UrunlerContent() {
   });
   const [page, setPage] = useState(1);
   const [isSortOpen, setIsSortOpen] = useState(false);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const sortRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -188,47 +189,45 @@ function UrunlerContent() {
             filters={filters}
             onChange={handleFilterChange}
             mode={isDigerUrunler ? "accessories" : "lens"}
+            mobileOpen={mobileFilterOpen}
+            onMobileClose={() => setMobileFilterOpen(false)}
           />
 
           {/* Ürün Izgarası */}
           <div className="flex-1">
-            {/* Başlık + Sıralama */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-              <div>
+            {/* Başlık + Sıralama (her ekranda tek satır) */}
+            <div className="flex items-start justify-between gap-2 mb-6 lg:mb-8">
+              <div className="flex-1 min-w-0">
                 <h1
-                  className="text-[#191c1e]"
-                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "28px", lineHeight: "36px", fontWeight: 700 }}
+                  className="text-[#191c1e] truncate text-[20px] lg:text-[28px]"
+                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", lineHeight: "1.3", fontWeight: 700 }}
                 >
                   {pageTitle}
                 </h1>
-                <p className="text-[#737685] mt-1" style={{ fontSize: "14px" }}>
+                <p className="text-[#737685] mt-0.5" style={{ fontSize: "13px" }}>
                   {filtered.length} ürün bulundu
                 </p>
               </div>
-              <div className="relative group" ref={sortRef}>
+              <div className="relative shrink-0" ref={sortRef}>
                 <button
                   type="button"
                   onClick={() => setIsSortOpen(!isSortOpen)}
-                  className={`flex items-center justify-between w-full sm:w-[240px] bg-white border-2 rounded-xl px-4 py-2.5 transition-all duration-300 shadow-sm hover:shadow-md outline-none
+                  className={`flex items-center gap-1.5 bg-white border-2 rounded-xl px-3 py-2 lg:px-4 lg:py-2.5 transition-all duration-300 shadow-sm hover:shadow-md outline-none
                     ${isSortOpen ? "border-[#003d9b] ring-4 ring-[#003d9b]/10" : "border-[#e2e4ee] hover:border-[#c8d6f7]"}`}
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[#737685] transition-colors duration-300 group-hover:text-[#003d9b]" style={{ fontSize: "18px" }}>sort</span>
-                    <span style={{ fontSize: "13.5px", fontWeight: 600, fontFamily: "'Inter'", color: "#191c1e" }}>
-                      {SORT_OPTIONS.find(opt => opt.value === filters.sortBy)?.label || "Popülerliğe Göre"}
-                    </span>
-                  </div>
-                  <span 
-                    className={`material-symbols-outlined text-[#737685] transition-transform duration-300 group-hover:text-[#003d9b] ${isSortOpen ? "rotate-180" : ""}`} 
-                    style={{ fontSize: "20px" }}
-                  >
+                  <span className="material-symbols-outlined text-[#737685]" style={{ fontSize: "17px" }}>sort</span>
+                  <span className="hidden sm:inline text-[#191c1e]" style={{ fontSize: "13px", fontWeight: 600, fontFamily: "'Inter'" }}>
+                    {SORT_OPTIONS.find(opt => opt.value === filters.sortBy)?.label || "Sırala"}
+                  </span>
+                  <span className="sm:hidden text-[#191c1e]" style={{ fontSize: "12px", fontWeight: 600, fontFamily: "'Inter'" }}>Sırala</span>
+                  <span className={`material-symbols-outlined text-[#737685] transition-transform duration-300 ${isSortOpen ? "rotate-180" : ""}`} style={{ fontSize: "18px" }}>
                     expand_more
                   </span>
                 </button>
-                
+
                 {/* Dropdown menü */}
-                <div 
-                  className={`absolute top-[calc(100%+8px)] right-0 w-full sm:w-[240px] bg-white border border-[#e2e4ee] rounded-xl shadow-lg overflow-hidden transition-all duration-200 z-50 origin-top
+                <div
+                  className={`absolute top-[calc(100%+6px)] right-0 w-[200px] lg:w-[240px] bg-white border border-[#e2e4ee] rounded-xl shadow-lg overflow-hidden transition-all duration-200 z-50 origin-top
                     ${isSortOpen ? "opacity-100 scale-y-100" : "opacity-0 scale-y-0 pointer-events-none"}`}
                 >
                   {SORT_OPTIONS.map((option) => (
@@ -250,6 +249,23 @@ function UrunlerContent() {
                   ))}
                 </div>
               </div>
+            </div>
+
+            {/* Mobil filtre butonu */}
+            <div className="lg:hidden mb-4">
+              <button
+                onClick={() => setMobileFilterOpen(true)}
+                className="flex items-center justify-center gap-2 w-full py-2.5 bg-white border border-[#e2e4ee] rounded-xl text-[#191c1e] font-semibold hover:border-[#003d9b] transition-colors"
+                style={{ fontSize: "13px", fontFamily: "'Inter'" }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: "17px", color: "#003d9b", fontVariationSettings: "'FILL' 1" }}>tune</span>
+                Filtrele
+                {(filters.brands.length + (isDigerUrunler ? filters.category.length : filters.usage.length + (filters.color !== "all" ? 1 : 0))) > 0 && (
+                  <span className="bg-[#003d9b] text-white rounded-full leading-5 px-1.5 text-[10px] font-bold">
+                    {filters.brands.length + (isDigerUrunler ? filters.category.length : filters.usage.length + (filters.color !== "all" ? 1 : 0))}
+                  </span>
+                )}
+              </button>
             </div>
 
             {/* Izgara */}

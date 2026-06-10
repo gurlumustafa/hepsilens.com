@@ -9,7 +9,9 @@ export default function NewsletterSection() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const params = email.trim() ? `?email=${encodeURIComponent(email.trim())}` : "";
+    const params = email.trim() 
+      ? `?email=${encodeURIComponent(email.trim())}&mode=register` 
+      : "?mode=register";
     router.push(`/hesap/giris${params}`);
   }
 
