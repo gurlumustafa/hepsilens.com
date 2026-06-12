@@ -76,21 +76,16 @@ function UrunlerContent() {
   const isDigerUrunler = tip === "diger";
   const isAllLenses    = tip === "tum";
 
-  // 🔒 REÇETELİ LENS DEVRE DIŞI — recete=gerekli filtresi kaldırıldı
-  // const requiresPrescription = searchParams.get("recete") === "gerekli"
-  //   ? true
-  //   : searchParams.get("recete") === "serbest"
-  //   ? false
-  //   : null;
-  const requiresPrescription = searchParams.get("recete") === "serbest" ? false : null;
+  // Reçete filtresi devre dışı
+  const requiresPrescription: boolean | null = null;
 
   const filtered = useMemo(() => {
     // Sayfa moduna göre başlangıç listesi
     let list: Product[] = isDigerUrunler
       ? allProducts.filter((p) => p.product_type === "accessory")
       : isAllLenses
-      ? allProducts.filter((p) => p.product_type === "lens")
-      : [...allProducts];
+      ? allProducts.filter((p) => p.product_type === "lens")  // ?tip=tum → sadece lensler (Kozmetik Lensler)
+      : [...allProducts];                                       // varsayılan → tüm ürünler (lens + aksesuar)
 
     if (filters.brands.length) {
       list = list.filter((l) => {
@@ -101,7 +96,8 @@ function UrunlerContent() {
         // Lens modunda: markanın alt markaları da dahil
         if (filters.brands.includes(bId)) return true;
         if (filters.brands.includes("johnson") && bId === "acuvue") return true;
-        if (filters.brands.includes("alcon") && ["dailies", "freshlook", "airoptix"].includes(bId)) return true;
+        if (filters.brands.includes("alcon")    && ["dailies", "freshlook", "airoptix"].includes(bId)) return true;
+        if (filters.brands.includes("freshlook") && ["alcon", "dailies", "airoptix"].includes(bId)) return true;
         if (filters.brands.includes("cooper") && bId === "biofinity") return true;
         return false;
       });
@@ -156,14 +152,12 @@ function UrunlerContent() {
 
   const pageTitle =
     isDigerUrunler ? "Diğer Ürünler" :
-    isAllLenses    ? "Tüm Ürünler" :
+    isAllLenses    ? "Kozmetik Lensler" :
     filters.usage.includes("daily")      && filters.usage.length === 1 ? "Günlük Kontakt Lensler"   :
     filters.usage.includes("biweekly")   && filters.usage.length === 1 ? "Haftalık Kontakt Lensler" :
     filters.usage.includes("monthly")    && filters.usage.length === 1 ? "Aylık Kontakt Lensler"    :
     filters.color === "colored"  ? "Renkli Kontakt Lensler" :
     filters.color === "clear"    ? "Saydam Kontakt Lensler"  :
-    // 🔒 REÇETELİ LENS DEVRE DIŞI — requiresPrescription === true  ? "Numaralı Lensler" :
-    requiresPrescription === false ? "Kozmetik Lensler" :
     "Tüm Ürünler";
 
   return (

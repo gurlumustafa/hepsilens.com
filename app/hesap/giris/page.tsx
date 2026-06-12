@@ -128,21 +128,25 @@ function GirisContent() {
           <div className="p-6">
 
             {/* ── Google butonu ────────────────────────────────── */}
-            <a
-              href="/api/auth/google"
-              className="flex items-center justify-center gap-3 w-full py-3 rounded-xl border-2 border-[#e5e7eb] bg-white hover:bg-[#f8f9fb] hover:border-[#c3c6d6] active:scale-[0.98] transition-all font-semibold text-[#374151] mb-4"
-              style={{ fontSize: "14px", fontFamily: "'Inter'" }}
-            >
-              <GoogleIcon />
-              Google ile {mode === "register" ? "Kayıt Ol" : "Giriş Yap"}
-            </a>
+            {mode === "login" && (
+              <>
+                <a
+                  href="/api/auth/google"
+                  className="flex items-center justify-center gap-3 w-full py-3 rounded-xl border-2 border-[#e5e7eb] bg-white hover:bg-[#f8f9fb] hover:border-[#c3c6d6] active:scale-[0.98] transition-all font-semibold text-[#374151] mb-4"
+                  style={{ fontSize: "14px", fontFamily: "'Inter'" }}
+                >
+                  <GoogleIcon />
+                  Google ile Giriş Yap
+                </a>
 
-            {/* Ayraç */}
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex-1 h-px bg-[#edeef3]" />
-              <span className="text-[#9ca3af] font-medium" style={{ fontSize: "11px" }}>veya e-posta ile</span>
-              <div className="flex-1 h-px bg-[#edeef3]" />
-            </div>
+                {/* Ayraç */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex-1 h-px bg-[#edeef3]" />
+                  <span className="text-[#9ca3af] font-medium" style={{ fontSize: "11px" }}>veya e-posta ile</span>
+                  <div className="flex-1 h-px bg-[#edeef3]" />
+                </div>
+              </>
+            )}
 
             {/* ── E-posta / Şifre formu ─────────────────────── */}
             <form onSubmit={mode === "register" ? handleRegister : handleLogin} className="flex flex-col gap-4">

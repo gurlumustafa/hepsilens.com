@@ -7,7 +7,7 @@ const siteLinks = [
   {
     section: "Lensler", links: [
       { label: "Tüm Lensler", href: "/urunler" },
-      { label: "Kozmetik Lensler", href: "/urunler?recete=serbest" },
+      { label: "Kozmetik Lensler", href: "/urunler?tip=tum" },
       { label: "Renkli Lensler", href: "/urunler?renk=renkli" },
       { label: "Günlük Lensler", href: "/urunler?tur=gunluk" },
       { label: "Toric Lensler", href: "/urunler?tur=toric" },

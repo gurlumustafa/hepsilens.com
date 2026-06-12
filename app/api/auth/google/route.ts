@@ -8,7 +8,7 @@ export async function GET() {
     ? "https://hepsilens.com"
     : "http://localhost:3000";
 
-  storeOAuthState(state);
+  await storeOAuthState(state);
 
   const params = new URLSearchParams({
     client_id:     process.env.GOOGLE_CLIENT_ID!,

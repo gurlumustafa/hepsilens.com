@@ -100,21 +100,37 @@ function PrescriptionForm({ onSubmit, onCancel }: {
 
 // ── Adres Formu ──────────────────────────────────────────────────────
 function AddressForm({ onSubmit, onCancel }: {
-  onSubmit: (a: Omit<Address, "id">) => void;
+  onSubmit: (a: Omit<Address, "id">) => Promise<{ error?: string }>;
   onCancel: () => void;
 }) {
   const [form, setForm] = useState({ title: "", full_name: "", phone: "", city: "", district: "", postal_code: "", full_address: "", is_default: false });
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState("");
   const f = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, [k]: e.target.value });
+
+  const canSubmit = !!(form.title && form.full_name && form.city && form.district && form.full_address);
+
+  async function handleSave() {
+    if (!canSubmit) {
+      setFormError("Lütfen zorunlu alanları doldurun: başlık, ad soyad, şehir, ilçe, tam adres.");
+      return;
+    }
+    setSaving(true);
+    setFormError("");
+    const result = await onSubmit(form);
+    setSaving(false);
+    if (result.error) setFormError(result.error);
+  }
 
   return (
     <div className="border border-[#edeef3] rounded-xl p-5 bg-[#fafbff] flex flex-col gap-3">
       <h3 className="font-bold text-[#191c1e]" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "15px" }}>Yeni Adres Ekle</h3>
       <div className="grid grid-cols-2 gap-3">
         {([
-          { label: "Adres Başlığı", key: "title", placeholder: "Ev, İş..." },
-          { label: "Ad Soyad", key: "full_name", placeholder: "Adınız Soyadınız" },
-          { label: "Şehir", key: "city", placeholder: "İstanbul" },
-          { label: "İlçe", key: "district", placeholder: "Kadıköy" },
+          { label: "Adres Başlığı *", key: "title", placeholder: "Ev, İş..." },
+          { label: "Ad Soyad *", key: "full_name", placeholder: "Adınız Soyadınız" },
+          { label: "Şehir *", key: "city", placeholder: "İstanbul" },
+          { label: "İlçe *", key: "district", placeholder: "Kadıköy" },
           { label: "Posta Kodu", key: "postal_code", placeholder: "34000" },
         ] as { label: string; key: keyof typeof form; placeholder: string }[]).map(({ label, key, placeholder }) => (
           <div key={String(key)} className="flex flex-col gap-1.5">
@@ -128,7 +144,7 @@ function AddressForm({ onSubmit, onCancel }: {
         ))}
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="text-[#434654] font-semibold" style={{ fontSize: "11px" }}>Tam Adres</label>
+        <label className="text-[#434654] font-semibold" style={{ fontSize: "11px" }}>Tam Adres *</label>
         <input className="bg-white border border-[#c3c6d6] rounded-lg px-3 py-2 outline-none focus:border-[#003d9b] transition-colors"
           style={{ fontSize: "13px" }} placeholder="Mahalle, cadde, apartman, daire..."
           value={form.full_address} onChange={(e) => setForm({ ...form, full_address: e.target.value })} />
@@ -138,13 +154,17 @@ function AddressForm({ onSubmit, onCancel }: {
           checked={form.is_default} onChange={(e) => setForm({ ...form, is_default: e.target.checked })} />
         <span className="text-[#434654]" style={{ fontSize: "13px" }}>Varsayılan adres olarak ayarla</span>
       </label>
+      {formError && (
+        <p className="text-red-500 font-semibold" style={{ fontSize: "12px" }}>{formError}</p>
+      )}
       <div className="flex gap-2">
         <button
-          onClick={() => { if (form.title && form.full_name && form.city) onSubmit(form); }}
-          className="flex-1 py-2.5 rounded-xl font-bold text-white hover:opacity-90 active:scale-95 transition-all"
+          onClick={handleSave}
+          disabled={saving}
+          className="flex-1 py-2.5 rounded-xl font-bold text-white hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ background: "#003d9b", fontSize: "13px", fontFamily: "'Inter'" }}
         >
-          Kaydet
+          {saving ? "Kaydediliyor..." : "Kaydet"}
         </button>
         <button onClick={onCancel} className="px-5 py-2.5 rounded-xl border border-[#c3c6d6] text-[#434654] hover:bg-[#f3f4f6] transition-colors font-semibold" style={{ fontSize: "13px" }}>
           İptal
@@ -370,7 +390,11 @@ function HesapContent() {
 
       {showAddrForm && (
         <AddressForm
-          onSubmit={(a) => { addAddress(a); setShowAddrForm(false); showSaved("Adres kaydedildi."); }}
+          onSubmit={async (a) => {
+            const result = await addAddress(a);
+            if (!result.error) { setShowAddrForm(false); showSaved("Adres kaydedildi."); }
+            return result;
+          }}
           onCancel={() => setShowAddrForm(false)}
         />
       )}

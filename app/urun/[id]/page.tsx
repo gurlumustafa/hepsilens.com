@@ -1,6 +1,6 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Lens, Accessory } from "@/lib/data";
 // 🔒 REÇETELİ LENS DEVRE DIŞI — modal importları yorum satırında
@@ -121,6 +121,14 @@ export default function ProductDetail() {
   // const [showGuide, setShowGuide] = useState(false);
   // const [showMapModal, setShowMapModal] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const tabsSectionRef = useRef<HTMLDivElement>(null);
+
+  const openInstallments = () => {
+    setActiveTab("installments");
+    setTimeout(() => {
+      tabsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 0);
+  };
 
   if (loading) {
     return (
@@ -173,7 +181,7 @@ export default function ProductDetail() {
 
   const brandBgMap: Record<string, string> = {
     acuvue: "#003d9b", dailies: "#0052cc", biofinity: "#004e5d",
-    freshlook: "#6a3600", airoptix: "#004e5d", bausch: "#003d9b",
+    alcon: "#a40da4ff", airoptix: "#890b6dff", bausch: "#003d9b",
   };
   const bannerBg = !isAccessory ? (brandBgMap[lens.brand_id] ?? "#003d9b") : "#003d9b";
 
@@ -291,12 +299,15 @@ export default function ProductDetail() {
             </div>
 
             {/* Taksit bilgisi */}
-            <p className="flex items-center gap-1.5 self-start hover:opacity-80 transition-opacity">
+            <button
+              onClick={openInstallments}
+              className="flex items-center gap-1 self-start hover:opacity-75 transition-opacity"
+            >
               <span className="material-symbols-outlined" style={{ fontSize: "14px", color: "#00687b" }}>credit_card</span>
               <span style={{ fontSize: "12px", color: "#00687b", fontWeight: 600, fontFamily: "'Inter'" }}>
                 12 aya kadar taksit imkanlarıyla
               </span>
-            </p>
+            </button>
           </div>
 
           {/* Parameters */}
@@ -347,7 +358,7 @@ export default function ProductDetail() {
                 </div>
 
                 {/* CYL + AXIS — sadece toric lenslerde */}
-                {lens.is_toric && (
+                {!!lens.is_toric && (
                   <>
                     {/* CYL */}
                     <div className="flex flex-col gap-2">
@@ -519,7 +530,7 @@ export default function ProductDetail() {
       </div>
 
       {/* ══ Full-width tabs section ══ */}
-      <div className="mt-12 border-t border-[#edeef3] pt-8">
+      <div ref={tabsSectionRef} className="mt-12 border-t border-[#edeef3] pt-8">
 
         {/* Tab nav */}
         <div className="flex w-full justify-between border-b border-[#edeef3] mb-8">
@@ -552,7 +563,7 @@ export default function ProductDetail() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 className="absolute inset-0 w-full h-full object-cover"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4zTqZpGie9ab2vSOSpI40VUOHF2iW48JjAmsqnrdNJgxdwyBGhe4-c1WjyaprB4X8tSnf1bv4UIP49yi4IKgyixzSwfgX-Ucuzy0ihxhRAHRvkEyUN7Au9JW8epRKIj5DsCEOHCS844vpBJReNWvnLmeCw6Pm2VTkoFqlNeeo6vzZ8O7rZf8qUaIMNV0zssoeeqwKJFG_CxnivLdXEVJGFAYG4uXX4qocQEMKap21ga9yCqZ-4beY0jTrixYOAqY_maUtx-oSUKzE"
+                src="/images/banners/freshlook.png"
                 alt=""
               />
               <div

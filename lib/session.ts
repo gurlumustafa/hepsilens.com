@@ -57,10 +57,10 @@ export async function createSession(
     [token, userId, ip ?? null, userAgent ?? null, expires.toISOString().slice(0, 19).replace("T", " ")]
   );
 
-  // Güvenli HTTP-only cookie
+  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
   responseHeaders.append(
     "Set-Cookie",
-    `${COOKIE_NAME}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_DURATION_DAYS * 86400}`
+    `${COOKIE_NAME}=${token}; Path=/; HttpOnly; SameSite=Lax${secure}; Max-Age=${SESSION_DURATION_DAYS * 86400}`
   );
 }
 
@@ -71,8 +71,9 @@ export async function destroySession(responseHeaders: Headers): Promise<void> {
   if (token) {
     await execute("DELETE FROM sessions WHERE session_token = ?", [token]).catch(() => {});
   }
+  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
   responseHeaders.append(
     "Set-Cookie",
-    `${COOKIE_NAME}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`
+    `${COOKIE_NAME}=; Path=/; HttpOnly; SameSite=Lax${secure}; Max-Age=0`
   );
 }

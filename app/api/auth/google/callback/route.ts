@@ -10,18 +10,18 @@ export async function GET(req: NextRequest) {
   const origin = process.env.NODE_ENV === "production"
     ? "https://hepsilens.com"
     : "http://localhost:3000";
-  const code       = searchParams.get("code");
-  const state      = searchParams.get("state");
-  const errorParam = searchParams.get("error");
+  const code        = searchParams.get("code");
+  const state       = searchParams.get("state");
+  const errorParam  = searchParams.get("error");
 
   const fail = (reason: string) =>
     NextResponse.redirect(`${origin}/hesap/giris?error=${reason}`);
 
-  // Kullanıcı erişimi reddetti
   if (errorParam || !code) return fail("google_denied");
 
-  // CSRF: state doğrula (sunucu belleğinden)
-  if (!state || !consumeOAuthState(state)) return fail("state_mismatch");
+  // CSRF: state doğrula (veritabanından)
+  const stateValid = state ? await consumeOAuthState(state) : false;
+  if (!stateValid) return fail("state_mismatch");
 
   /* ── 1. Code → Access Token ───────────────────────────────── */
   let tokens: Record<string, unknown>;
@@ -74,7 +74,6 @@ export async function GET(req: NextRequest) {
       "SELECT id FROM users WHERE email = ?",
       [email]
     );
-
     if (!dbUser) {
       const randomHash = await bcrypt.hash(crypto.randomBytes(32).toString("hex"), 10);
       const result = await execute(
@@ -89,7 +88,10 @@ export async function GET(req: NextRequest) {
     return fail("db_" + encodeURIComponent(msg.slice(0, 80)));
   }
 
-  /* ── 4. Session oluştur ───────────────────────────────────── */
+  /* ── 4. Session oluştur + 200 HTML yanıtı ────────────────── */
+  // ÖNEMLİ: 302 redirect yerine 200 HTML kullanılıyor.
+  // Hostinger proxy'si 302 yanıtlarındaki Set-Cookie başlığını
+  // tarayıcıya iletmiyor; 200 yanıtlarda bu sorun yok.
   try {
     const headers = new Headers();
     await createSession(
@@ -99,9 +101,23 @@ export async function GET(req: NextRequest) {
       req.headers.get("user-agent") || undefined
     );
 
-    headers.set("Location", `${origin}/hesap`);
+    headers.set("Content-Type", "text/html; charset=utf-8");
 
-    return new Response(null, { status: 302, headers });
+    return new Response(
+      `<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="refresh" content="0;url=/hesap">
+  <title>Yönlendiriliyor...</title>
+</head>
+<body>
+  <script>window.location.replace("/hesap");</script>
+  <p>Yönlendiriliyor, lütfen bekleyin...</p>
+</body>
+</html>`,
+      { status: 200, headers }
+    );
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("[Google OAuth] session error", err);

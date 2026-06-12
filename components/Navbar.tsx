@@ -9,9 +9,8 @@ import LogoutModal from "@/components/LogoutModal";
 import Logo from "@/components/Logo";
 
 const navLinks = [
-  { href: "/urunler?tip=tum", label: "Tüm Ürünler" },
-  { href: "/urunler?recete=serbest", label: "Kozmetik Lensler" },
-  // 🔒 REÇETELİ LENS DEVRE DIŞI — { href: "/urunler?recete=gerekli", label: "Numaralı Lensler" },
+  { href: "/urunler", label: "Tüm Ürünler" },
+  { href: "/urunler?tip=tum", label: "Kozmetik Lensler" },
   { href: "/urunler?tip=diger", label: "Diğer Ürünler" },
 ];
 

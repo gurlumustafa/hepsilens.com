@@ -46,12 +46,23 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
           <div className="relative aspect-square bg-[#ffffff] p-4 flex items-center justify-center overflow-hidden">
             <FavoriteButton productId={lens.id} size="sm" className="absolute top-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
             {lens.badge && (
-              <span
-                className="absolute top-3 right-3 text-[#005f71] px-2 py-1 rounded-[0.125rem] whitespace-nowrap z-10"
-                style={{ background: "#50dcff", fontSize: "12px", lineHeight: "16px", letterSpacing: "0.05em", fontWeight: 600 }}
-              >
-                {lens.badge}
-              </span>
+              <div className="absolute top-0 right-0 w-20 h-20 overflow-hidden pointer-events-none z-20">
+                <div
+                  className="absolute text-center py-1.5 shadow-md font-bold uppercase"
+                  style={{
+                    background: "#50dcff",
+                    color: "#005f71",
+                    fontSize: "9.5px",
+                    letterSpacing: "0.05em",
+                    width: "115px",
+                    top: "16px",
+                    right: "-28px",
+                    transform: "rotate(45deg)",
+                  }}
+                >
+                  {lens.badge}
+                </div>
+              </div>
             )}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -111,7 +122,7 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
         className="group bg-[#ffffff] rounded-[0.75rem] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-250 border border-transparent hover:border-[#003d9b]/25 flex flex-row sm:flex-col"
       >
         {/* Image — square on mobile-left, full-width on sm+ */}
-        <div className="relative w-[110px] sm:w-auto flex-shrink-0 sm:flex-shrink-1 sm:aspect-square bg-white flex items-center justify-center p-2 sm:p-4 sm:border-b border-r sm:border-r-0 border-[#edeef0]">
+        <div className="relative w-[110px] sm:w-auto flex-shrink-0 sm:flex-shrink-1 sm:aspect-square bg-white flex items-center justify-center p-2 sm:p-4 sm:border-b border-r sm:border-r-0 border-[#edeef0] overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={lens.image_url || "/placeholder-lens.jpg"}
@@ -119,24 +130,33 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
             className="object-contain w-full h-full group-hover:scale-105 transition-transform duration-500"
           />
           <FavoriteButton productId={lens.id} size="sm" className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-          <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
-            {lens.badge && (
-              <span
-                className="bg-[#50dcff] text-[#005f71] px-1.5 py-0.5 rounded-full uppercase whitespace-nowrap"
-                style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.05em" }}
+          {lens.badge && (
+            <div className="absolute top-0 right-0 w-16 h-16 overflow-hidden pointer-events-none z-20">
+              <div
+                className="absolute text-center py-1 shadow-sm font-bold uppercase"
+                style={{
+                  background: "#50dcff",
+                  color: "#005f71",
+                  fontSize: "8.5px",
+                  letterSpacing: "0.05em",
+                  width: "95px",
+                  top: "13px",
+                  right: "-24px",
+                  transform: "rotate(45deg)",
+                }}
               >
                 {lens.badge}
-              </span>
-            )}
-            {discount > 0 && (
-              <span
-                className="bg-[#ffdcc3] text-[#2f1500] px-1.5 py-0.5 rounded-full whitespace-nowrap"
-                style={{ fontSize: "9px", fontWeight: 700 }}
-              >
-                -%{discount}
-              </span>
-            )}
-          </div>
+              </div>
+            </div>
+          )}
+          {discount > 0 && (
+            <span
+              className="absolute bottom-2 left-2 bg-[#ffdcc3] text-[#2f1500] px-1.5 py-0.5 rounded-full whitespace-nowrap z-10"
+              style={{ fontSize: "9px", fontWeight: 700 }}
+            >
+              -%{discount}
+            </span>
+          )}
           <div className="hidden sm:block">{quickViewOverlay}</div>
         </div>
         {/* Info */}
@@ -158,9 +178,11 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
               <span style={{ fontSize: "12px", fontWeight: 600, fontFamily: "'Inter'" }}>{lens.rating}</span>
             </div>
           </div>
-          <p className="text-[#434654] line-clamp-2 mt-1 hidden sm:block" style={{ fontSize: "13px", lineHeight: "18px" }}>
-            {lens.description}
-          </p>
+          {lens.description && (
+            <p className="text-[#434654] line-clamp-2 mt-1 hidden sm:block" style={{ fontSize: "13px", lineHeight: "18px" }}>
+              {lens.description.length > 100 ? lens.description.slice(0, 100) + "…" : lens.description}
+            </p>
+          )}
           <div className="flex items-center justify-between mt-auto pt-2 sm:pt-4">
             <div className="flex flex-col">
               {lens.original_price && (

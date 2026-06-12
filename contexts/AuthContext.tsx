@@ -61,7 +61,7 @@ type AuthContextType = {
   refresh:  () => Promise<void>;
 
   updateUser:        (data: Partial<Pick<User, "name" | "email" | "phone" | "notif_email" | "notif_sms">>) => Promise<void>;
-  addAddress:        (a: Omit<Address, "id">) => Promise<void>;
+  addAddress:        (a: Omit<Address, "id">) => Promise<{ error?: string }>;
   removeAddress:     (id: number) => Promise<void>;
   setDefaultAddress: (id: number) => Promise<void>;
   toggleFavorite:    (id: number) => Promise<void>;
@@ -159,21 +159,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── Adresler ──────────────────────────────────────────────
 
-  const addAddress = async (a: Omit<Address, "id">) => {
-    const res = await fetch("/api/addresses", {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify(a),
-    });
-    if (res.ok) {
-      const { id } = await res.json();
-      const newAddr: Address = { ...a, id };
-      setAddresses((prev) => {
-        const next = a.is_default
-          ? prev.map((x) => ({ ...x, is_default: false }))
-          : [...prev];
-        return [...next, newAddr];
+  const addAddress = async (a: Omit<Address, "id">): Promise<{ error?: string }> => {
+    try {
+      const res = await fetch("/api/addresses", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify(a),
       });
+      if (res.ok) {
+        const { id } = await res.json();
+        const newAddr: Address = { ...a, id };
+        setAddresses((prev) => {
+          const next = a.is_default
+            ? prev.map((x) => ({ ...x, is_default: false }))
+            : [...prev];
+          return [...next, newAddr];
+        });
+        return {};
+      }
+      const d = await res.json().catch(() => ({}));
+      return { error: d.error || `Hata (${res.status})` };
+    } catch {
+      return { error: "Bağlantı hatası" };
     }
   };
 

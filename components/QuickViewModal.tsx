@@ -1,9 +1,11 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Lens, Accessory } from "@/lib/data";
 import { useCart } from "@/contexts/CartContext";
+
+const DESC_LIMIT = 200;
 
 type Props = {
   product: Lens | Accessory;
@@ -12,6 +14,7 @@ type Props = {
 
 export default function QuickViewModal({ product, onClose }: Props) {
   const { addItem } = useCart();
+  const [descExpanded, setDescExpanded] = useState(false);
   const isLens = "color" in product;
   // 🔒 REÇETELİ LENS DEVRE DIŞI — needsPrescription her zaman false
   // const needsPrescription = isLens && (product as Lens).requiresPrescription;
@@ -124,9 +127,24 @@ export default function QuickViewModal({ product, onClose }: Props) {
             )}
           </div>
 
-          <p className="text-[#434654] leading-relaxed mb-5" style={{ fontSize: "13px", lineHeight: "20px" }}>
-            {product.description}
-          </p>
+          {product.description && (
+            <div className="mb-5">
+              <p className="text-[#434654] leading-relaxed" style={{ fontSize: "13px", lineHeight: "20px" }}>
+                {descExpanded || product.description.length <= DESC_LIMIT
+                  ? product.description
+                  : product.description.slice(0, DESC_LIMIT) + "…"}
+              </p>
+              {product.description.length > DESC_LIMIT && (
+                <button
+                  onClick={() => setDescExpanded((v) => !v)}
+                  className="text-[#003d9b] font-semibold mt-1 hover:underline"
+                  style={{ fontSize: "12px", fontFamily: "'Inter'" }}
+                >
+                  {descExpanded ? "Daha Az" : "Daha Fazla"}
+                </button>
+              )}
+            </div>
+          )}
 
           {isLens && (
             <div className="grid grid-cols-3 gap-2 mb-5">
