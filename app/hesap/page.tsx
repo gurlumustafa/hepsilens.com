@@ -460,7 +460,7 @@ function HesapContent() {
   const EmailPrefs = () => (
     <div className="flex flex-col gap-4">
       <h2 style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "20px", fontWeight: 700, color: "var(--ds-text-1)" }}>Bildirim Tercihleri</h2>
-      <div className="rounded-xl border divide-y" style={{ background: "var(--ds-surface)", borderColor: "var(--ds-border-subtle)", divideColor: "var(--ds-border-subtle)" }}>
+      <div className="rounded-xl border divide-y" style={{ background: "var(--ds-surface)", borderColor: "var(--ds-border-subtle)" }}>
         {([
           { key: "notif_email" as const, icon: "mail", label: "E-posta Bildirimleri", desc: "Kampanya, indirim, sipariş güncellemeleri ve bülten e-postaları" },
           { key: "notif_sms" as const, icon: "sms", label: "SMS Bildirimleri", desc: "Kargo takibi ve sipariş güncellemelerini SMS ile alın" },

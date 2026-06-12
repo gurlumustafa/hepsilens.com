@@ -10,6 +10,13 @@ import FloatingContactWrapper from "@/components/FloatingContactWrapper";
 export const metadata: Metadata = {
   title: "Hepsilens | Premium Kontakt Lensler",
   description: "Türkiye'nin en geniş kontakt lens kataloğu. Günlük, aylık ve renkli lensler hızlı teslimatla.",
+  icons: {
+    icon: [
+      { url: "/favicon-32x32.png",  sizes: "32x32",   type: "image/png" },
+      { url: "/favicon-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
+    shortcut: "/favicon-32x32.png",
+  },
 };
 
 export default function RootLayout({

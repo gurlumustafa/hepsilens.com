@@ -62,8 +62,8 @@ export default function Footer() {
             {/* İletişim */}
             <div className="mt-6 flex flex-col gap-3">
               {[
-                { icon: "location_on", text: "Levent Mah. Büyükdere Cad. No:127 Şişli, İstanbul" },
-                { icon: "phone", text: "+90 (212) 000 00 00" },
+                { icon: "location_on", text: "Selimiye, Selimiye Kışla Cd. No:23/A, 34668 Üsküdar/İstanbul" },
+                { icon: "phone", text: "0552 354 26 36" },
                 { icon: "mail", text: "info@hepsilens.com" }
               ].map((item) => (
                 <div key={item.icon} className="flex items-start gap-3 group">
