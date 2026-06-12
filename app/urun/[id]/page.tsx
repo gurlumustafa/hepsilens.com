@@ -53,7 +53,7 @@ function SphGrid({
   return (
     <div className="flex flex-col gap-2">
       {label && (
-        <p className="text-[#434654]" style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.06em", fontFamily: "'Inter'", textTransform: "uppercase" }}>
+        <p style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.06em", fontFamily: "'Inter'", textTransform: "uppercase", color: "var(--ds-text-2)" }}>
           {label}
         </p>
       )}
@@ -64,9 +64,9 @@ function SphGrid({
             onClick={() => onChange(i)}
             className="py-2 rounded-[0.25rem] font-bold transition-all"
             style={{
-              border: i === selected ? "2px solid #003d9b" : "1px solid #c3c6d6",
-              background: i === selected ? "rgba(0,61,155,0.08)" : "#ffffff",
-              color: i === selected ? "#003d9b" : "#191c1e",
+              border: i === selected ? "2px solid var(--ds-primary)" : "1px solid var(--ds-border)",
+              background: i === selected ? "var(--ds-primary-soft)" : "var(--ds-surface)",
+              color: i === selected ? "var(--ds-primary)" : "var(--ds-text-1)",
               fontSize: "13px",
               lineHeight: "18px",
             }}
@@ -133,7 +133,7 @@ export default function ProductDetail() {
   if (loading) {
     return (
       <div className="pt-24 min-h-screen flex items-center justify-center">
-        <div className="text-[#737685]">Yükleniyor...</div>
+        <div style={{ color: "var(--ds-text-3)" }}>Yükleniyor...</div>
       </div>
     );
   }
@@ -141,9 +141,9 @@ export default function ProductDetail() {
   if (!product) {
     return (
       <div className="pt-24 max-w-[1280px] mx-auto px-8 py-20 text-center">
-        <span className="material-symbols-outlined" style={{ fontSize: "64px", color: "#c3c6d6" }}>search_off</span>
-        <h1 className="text-2xl font-bold text-[#191c1e] mt-4">Ürün bulunamadı</h1>
-        <Link href="/" className="mt-4 inline-block text-[#003d9b] hover:underline">Anasayfaya Dön</Link>
+        <span className="material-symbols-outlined" style={{ fontSize: "64px", color: "var(--ds-border)" }}>search_off</span>
+        <h1 className="text-2xl font-bold mt-4" style={{ color: "var(--ds-text-1)" }}>Ürün bulunamadı</h1>
+        <Link href="/" className="mt-4 inline-block hover:underline" style={{ color: "var(--ds-primary)" }}>Anasayfaya Dön</Link>
       </div>
     );
   }
@@ -181,7 +181,7 @@ export default function ProductDetail() {
 
   const brandBgMap: Record<string, string> = {
     acuvue: "#003d9b", dailies: "#0052cc", biofinity: "#004e5d",
-    alcon: "#a40da4ff", airoptix: "#890b6dff", bausch: "#003d9b",
+    alcon: "#090109ff", airoptix: "#890b6dff", bausch: "#003d9b",
   };
   const bannerBg = !isAccessory ? (brandBgMap[lens.brand_id] ?? "#003d9b") : "#003d9b";
 
@@ -199,16 +199,16 @@ export default function ProductDetail() {
 
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 py-4">
-        <Link href="/" className="text-[#737685] hover:text-[#003d9b] transition-colors flex items-center gap-1" style={{ fontSize: "13px", fontWeight: 600 }}>
+        <Link href="/" className="transition-colors flex items-center gap-1" style={{ fontSize: "13px", fontWeight: 600, color: "var(--ds-text-3)" }}>
           <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>home</span>
           Anasayfa
         </Link>
-        <span className="material-symbols-outlined text-[#c3c6d6]" style={{ fontSize: "16px" }}>chevron_right</span>
-        <Link href="/urunler" className="text-[#737685] hover:text-[#003d9b] transition-colors" style={{ fontSize: "13px", fontWeight: 600 }}>
+        <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "var(--ds-border)" }}>chevron_right</span>
+        <Link href="/urunler" className="transition-colors" style={{ fontSize: "13px", fontWeight: 600, color: "var(--ds-text-3)" }}>
           Ürünler
         </Link>
-        <span className="material-symbols-outlined text-[#c3c6d6]" style={{ fontSize: "16px" }}>chevron_right</span>
-        <span className="text-[#003d9b] truncate max-w-[200px] md:max-w-xs" style={{ fontSize: "13px", fontWeight: 600 }}>{product.name}</span>
+        <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "var(--ds-border)" }}>chevron_right</span>
+        <span className="truncate max-w-[200px] md:max-w-xs" style={{ fontSize: "13px", fontWeight: 600, color: "var(--ds-primary)" }}>{product.name}</span>
       </nav>
 
       {/* ── Top grid: image + sidebar ── */}
@@ -216,7 +216,7 @@ export default function ProductDetail() {
 
         {/* Left: image + prescription */}
         <div className="lg:col-span-7 flex flex-col gap-6 h-full">
-          <div className="bg-white rounded-[0.5rem] p-10 border border-[#c3c6d6] shadow-sm flex items-center justify-center" style={{ minHeight: "480px" }}>
+          <div className="rounded-[0.5rem] p-10 shadow-sm flex items-center justify-center" style={{ minHeight: "480px", background: "var(--ds-surface-2)", border: "1px solid var(--ds-border)" }}>
             {product.image_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={product.image_url} alt={product.name} className="max-w-full h-auto object-contain" style={{ maxHeight: "420px" }} />
@@ -227,10 +227,10 @@ export default function ProductDetail() {
 
           {/* Ürün avantajları — tüm lensler */}
           {!isAccessory && (
-            <div className="rounded-xl border border-[#edeef3] bg-white p-6 flex flex-col gap-4">
-              <p className="text-[#434654] leading-relaxed line-clamp-3" style={{ fontSize: "14px", lineHeight: "22px" }}>
+            <div className="rounded-xl p-6 flex flex-col gap-4" style={{ border: "1px solid var(--ds-border-subtle)", background: "var(--ds-surface)" }}>
+              {/* <p className="text-[#434654] leading-relaxed line-clamp-3" style={{ fontSize: "14px", lineHeight: "22px" }}>
                 {product.description}
-              </p>
+              </p> */}
               <ul className="flex flex-col gap-2.5">
                 {[
                   lens.color === "colored"
@@ -253,7 +253,7 @@ export default function ProductDetail() {
                     >
                       check_circle
                     </span>
-                    <span className="text-[#434654]" style={{ fontSize: "13px", lineHeight: "20px" }}>
+                    <span style={{ fontSize: "13px", lineHeight: "20px", color: "var(--ds-text-2)" }}>
                       {point}
                     </span>
                   </li>
@@ -270,29 +270,29 @@ export default function ProductDetail() {
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               {!isAccessory && (
-                <span className="bg-[#50dcff] text-[#001f27] rounded-full uppercase px-2 py-0.5" style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.05em" }}>
+                <span className="rounded-full uppercase px-2 py-0.5" style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.05em", background: "var(--ds-teal)", color: "#001f27" }}>
                   Klinik Onaylı
                 </span>
               )}
-              <div className="flex text-[#6a3600]">
+              <div className="flex" style={{ color: "var(--ds-amber)" }}>
                 {[1, 2, 3, 4, 5].map((s) => (
                   <span key={s} style={{ fontSize: s <= Math.round(product.rating) ? "16px" : "14px", fontVariationSettings: s <= Math.round(product.rating) ? "'FILL' 1" : "'FILL' 0" }}>★</span>
                 ))}
               </div>
-              <span className="text-[#434654]" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>({product.rating})</span>
+              <span style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600, color: "var(--ds-text-2)" }}>({product.rating})</span>
             </div>
             <div className="flex items-start justify-between gap-3">
-              <h1 className="text-[#003d9b]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "32px", lineHeight: "40px", fontWeight: 600 }}>
+              <h1 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "32px", lineHeight: "40px", fontWeight: 600, color: "var(--ds-primary)" }}>
                 {product.name}
               </h1>
               <FavoriteButton productId={product.id} size="lg" className="shrink-0 mt-1" />
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-[#191c1e]" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "24px", lineHeight: "32px", fontWeight: 600 }}>
+              <span style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "24px", lineHeight: "32px", fontWeight: 600, color: "var(--ds-text-1)" }}>
                 {product.price.toLocaleString("tr-TR")} ₺
               </span>
               {product.original_price && (
-                <span className="text-[#434654] line-through" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>
+                <span className="line-through" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600, color: "var(--ds-text-2)" }}>
                   {product.original_price.toLocaleString("tr-TR")} ₺{discount > 0 && <> (%{discount} indirim)</>}
                 </span>
               )}
@@ -303,23 +303,23 @@ export default function ProductDetail() {
               onClick={openInstallments}
               className="flex items-center gap-1 self-start hover:opacity-75 transition-opacity"
             >
-              <span className="material-symbols-outlined" style={{ fontSize: "14px", color: "#00687b" }}>credit_card</span>
-              <span style={{ fontSize: "12px", color: "#00687b", fontWeight: 600, fontFamily: "'Inter'" }}>
+              <span className="material-symbols-outlined" style={{ fontSize: "14px", color: "var(--ds-teal)" }}>credit_card</span>
+              <span style={{ fontSize: "12px", color: "var(--ds-teal)", fontWeight: 600, fontFamily: "'Inter'" }}>
                 12 aya kadar taksit imkanlarıyla
               </span>
             </button>
           </div>
 
           {/* Parameters */}
-          <div className="flex flex-col gap-4 p-4 rounded-[0.5rem] border border-[#c3c6d6] bg-[#f3f4f6]">
+          <div className="flex flex-col gap-4 p-4 rounded-[0.5rem]" style={{ border: "1px solid var(--ds-border)", background: "var(--ds-surface-2)" }}>
             {!isAccessory && (
               <>
                 {/* Eye mode toggle */}
                 <div className="flex flex-col gap-2">
-                  <label className="text-[#434654]" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>
+                  <label style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600, color: "var(--ds-text-2)" }}>
                     Göz Seçimi
                   </label>
-                  <div className="flex rounded-[0.375rem] overflow-hidden border border-[#c3c6d6] bg-white">
+                  <div className="flex rounded-[0.375rem] overflow-hidden" style={{ border: "1px solid var(--ds-border)", background: "var(--ds-surface)" }}>
                     {(["same", "different"] as EyeMode[]).map((mode) => (
                       <button
                         key={mode}
@@ -329,8 +329,8 @@ export default function ProductDetail() {
                           fontSize: "12px",
                           letterSpacing: "0.04em",
                           fontFamily: "'Inter'",
-                          background: eyeMode === mode ? "#003d9b" : "transparent",
-                          color: eyeMode === mode ? "#ffffff" : "#434654",
+                          background: eyeMode === mode ? "var(--ds-primary)" : "transparent",
+                          color: eyeMode === mode ? "#ffffff" : "var(--ds-text-2)",
                         }}
                       >
                         {mode === "same" ? "İki Göz Aynı" : "İki Göz Farklı"}
@@ -342,7 +342,7 @@ export default function ProductDetail() {
                 {/* SPH selection */}
                 <div className="flex flex-col gap-2">
                   <div className="flex justify-between items-center">
-                    <label className="text-[#434654]" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>
+                    <label style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600, color: "var(--ds-text-2)" }}>
                       Sferik Güç (PWR/SPH)
                     </label>
                   </div>
@@ -362,7 +362,7 @@ export default function ProductDetail() {
                   <>
                     {/* CYL */}
                     <div className="flex flex-col gap-2">
-                      <label className="text-[#434654]" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>
+                      <label style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600, color: "var(--ds-text-2)" }}>
                         Silindirik Güç (CYL)
                       </label>
                       {eyeMode === "same" ? (
@@ -373,9 +373,9 @@ export default function ProductDetail() {
                               onClick={() => setCylSame(i)}
                               className="py-2 rounded-[0.25rem] font-bold transition-all"
                               style={{
-                                border: i === cylSame ? "2px solid #00687b" : "1px solid #c3c6d6",
-                                background: i === cylSame ? "rgba(0,104,123,0.08)" : "#ffffff",
-                                color: i === cylSame ? "#00687b" : "#191c1e",
+                                border: i === cylSame ? "2px solid var(--ds-teal)" : "1px solid var(--ds-border)",
+                                background: i === cylSame ? "rgba(0,104,123,0.08)" : "var(--ds-surface)",
+                                color: i === cylSame ? "var(--ds-teal)" : "var(--ds-text-1)",
                                 fontSize: "13px",
                               }}
                             >
@@ -390,7 +390,7 @@ export default function ProductDetail() {
                             { label: "Sol Göz (OS)", val: cylOS, set: setCylOS },
                           ].map(({ label, val, set }) => (
                             <div key={label} className="flex flex-col gap-1.5">
-                              <p className="text-[#434654] uppercase" style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em" }}>{label}</p>
+                              <p className="uppercase" style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", color: "var(--ds-text-2)" }}>{label}</p>
                               <div className="grid grid-cols-4 gap-1.5">
                                 {(lens.cyl_options ?? []).map((cyl, i) => (
                                   <button
@@ -398,9 +398,9 @@ export default function ProductDetail() {
                                     onClick={() => set(i)}
                                     className="py-2 rounded-[0.25rem] font-bold transition-all"
                                     style={{
-                                      border: i === val ? "2px solid #00687b" : "1px solid #c3c6d6",
-                                      background: i === val ? "rgba(0,104,123,0.08)" : "#ffffff",
-                                      color: i === val ? "#00687b" : "#191c1e",
+                                      border: i === val ? "2px solid var(--ds-teal)" : "1px solid var(--ds-border)",
+                                      background: i === val ? "rgba(0,104,123,0.08)" : "var(--ds-surface)",
+                                      color: i === val ? "var(--ds-teal)" : "var(--ds-text-1)",
                                       fontSize: "13px",
                                     }}
                                   >
@@ -416,15 +416,15 @@ export default function ProductDetail() {
 
                     {/* AXIS */}
                     <div className="flex flex-col gap-2">
-                      <label className="text-[#434654]" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>
+                      <label style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600, color: "var(--ds-text-2)" }}>
                         Aks (AXIS) — °
                       </label>
                       {eyeMode === "same" ? (
                         <select
                           value={axisSame}
                           onChange={(e) => setAxisSame(Number(e.target.value))}
-                          className="w-full bg-white border border-[#c3c6d6] rounded-[0.25rem] p-2"
-                          style={{ fontSize: "14px" }}
+                          className="w-full rounded-[0.25rem] p-2"
+                          style={{ fontSize: "14px", background: "var(--ds-surface)", border: "1px solid var(--ds-border)", color: "var(--ds-text-1)" }}
                         >
                           {(lens.axis_options ?? []).map((ax) => (
                             <option key={ax} value={ax}>{ax}°</option>
@@ -437,12 +437,12 @@ export default function ProductDetail() {
                             { label: "Sol Göz (OS)", val: axisOS, set: setAxisOS },
                           ].map(({ label, val, set }) => (
                             <div key={label} className="flex flex-col gap-1.5">
-                              <p className="text-[#434654] uppercase" style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em" }}>{label}</p>
+                              <p className="uppercase" style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "0.06em", color: "var(--ds-text-2)" }}>{label}</p>
                               <select
                                 value={val}
                                 onChange={(e) => set(Number(e.target.value))}
-                                className="w-full bg-white border border-[#c3c6d6] rounded-[0.25rem] p-2"
-                                style={{ fontSize: "14px" }}
+                                className="w-full rounded-[0.25rem] p-2"
+                                style={{ fontSize: "14px", background: "var(--ds-surface)", border: "1px solid var(--ds-border)", color: "var(--ds-text-1)" }}
                               >
                                 {(lens.axis_options ?? []).map((ax) => (
                                   <option key={ax} value={ax}>{ax}°</option>
@@ -459,15 +459,15 @@ export default function ProductDetail() {
                 {/* BC + DIA */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
-                    <label className="text-[#434654]" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>Taban Eğrilik (BC)</label>
-                    <select defaultValue={selectedBc} className="w-full bg-white border border-[#c3c6d6] rounded-[0.25rem] p-2" style={{ fontSize: "14px" }}>
+                    <label style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600, color: "var(--ds-text-2)" }}>Taban Eğrilik (BC)</label>
+                    <select defaultValue={selectedBc} className="w-full rounded-[0.25rem] p-2" style={{ fontSize: "14px", background: "var(--ds-surface)", border: "1px solid var(--ds-border)", color: "var(--ds-text-1)" }}>
                       <option>{lens.bc} mm</option>
                       <option>{(lens.bc + 0.2).toFixed(1)} mm</option>
                     </select>
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label className="text-[#434654]" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>Çap (DIA)</label>
-                    <select defaultValue={selectedDia} className="w-full bg-white border border-[#c3c6d6] rounded-[0.25rem] p-2" style={{ fontSize: "14px" }}>
+                    <label style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600, color: "var(--ds-text-2)" }}>Çap (DIA)</label>
+                    <select defaultValue={selectedDia} className="w-full rounded-[0.25rem] p-2" style={{ fontSize: "14px", background: "var(--ds-surface)", border: "1px solid var(--ds-border)", color: "var(--ds-text-1)" }}>
                       <option>{lens.dia} mm</option>
                     </select>
                   </div>
@@ -477,18 +477,18 @@ export default function ProductDetail() {
 
             {/* Quantity */}
             <div className="flex flex-col gap-2">
-              <label className="text-[#434654]" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>Adet (Kutu)</label>
+              <label style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600, color: "var(--ds-text-2)" }}>Adet (Kutu)</label>
               <div className="flex items-center gap-4">
-                <div className="flex items-center border border-[#c3c6d6] rounded-[0.25rem] overflow-hidden bg-white">
-                  <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="p-2 px-4 hover:bg-[#edeef0] transition-colors">
+                <div className="flex items-center rounded-[0.25rem] overflow-hidden" style={{ border: "1px solid var(--ds-border)", background: "var(--ds-surface)" }}>
+                  <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="p-2 px-4 transition-colors" style={{ color: "var(--ds-text-1)" }}>
                     <span className="material-symbols-outlined text-sm">remove</span>
                   </button>
-                  <span className="px-4 font-bold" style={{ fontSize: "16px" }}>{quantity}</span>
-                  <button onClick={() => setQuantity((q) => q + 1)} className="p-2 px-4 hover:bg-[#edeef0] transition-colors">
+                  <span className="px-4 font-bold" style={{ fontSize: "16px", color: "var(--ds-text-1)" }}>{quantity}</span>
+                  <button onClick={() => setQuantity((q) => q + 1)} className="p-2 px-4 transition-colors" style={{ color: "var(--ds-text-1)" }}>
                     <span className="material-symbols-outlined text-sm">add</span>
                   </button>
                 </div>
-                <span className="text-[#434654]" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>
+                <span style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600, color: "var(--ds-text-2)" }}>
                   {!isAccessory ? `${lens.pack_sizes?.[0]}'li Paket` : "1 Kutu"}
                 </span>
               </div>
@@ -502,7 +502,7 @@ export default function ProductDetail() {
             onMouseLeave={() => setHoverBtn(false)}
             className="w-full font-bold py-4 rounded-[0.5rem] active:scale-95 transition-all flex items-center justify-center gap-2"
             style={{
-              background: added ? "#b45309" : hoverBtn ? "#b45309" : "#d97706",
+              background: added ? "var(--ds-amber-hover)" : hoverBtn ? "var(--ds-amber-hover)" : "var(--ds-amber)",
               color: "#ffffff",
               cursor: "pointer",
               fontFamily: "'Inter'",
@@ -520,9 +520,9 @@ export default function ProductDetail() {
           </button>
 
           {/* Shipping note */}
-          <div className="flex items-center gap-4 p-4 border border-[#c3c6d6] rounded-[0.25rem] bg-white">
-            <span className="material-symbols-outlined text-[#003d9b]" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
-            <p className="text-[#434654]" style={{ fontSize: "14px", lineHeight: "20px" }}>
+          <div className="flex items-center gap-4 p-4 rounded-[0.25rem]" style={{ border: "1px solid var(--ds-border)", background: "var(--ds-surface)" }}>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1", color: "var(--ds-primary)" }}>local_shipping</span>
+            <p style={{ fontSize: "14px", lineHeight: "20px", color: "var(--ds-text-2)" }}>
               500 ₺ üzeri siparişlerde ücretsiz kargo. Tahmini teslimat 1-3 iş günü.
             </p>
           </div>
@@ -530,10 +530,10 @@ export default function ProductDetail() {
       </div>
 
       {/* ══ Full-width tabs section ══ */}
-      <div ref={tabsSectionRef} className="mt-12 border-t border-[#edeef3] pt-8">
+      <div ref={tabsSectionRef} className="mt-12 pt-8" style={{ borderTop: "1px solid var(--ds-border-subtle)" }}>
 
         {/* Tab nav */}
-        <div className="flex w-full justify-between border-b border-[#edeef3] mb-8">
+        <div className="flex w-full justify-between mb-8" style={{ borderBottom: "1px solid var(--ds-border-subtle)" }}>
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -543,12 +543,12 @@ export default function ProductDetail() {
                 fontFamily: "'Inter'",
                 fontSize: "13px",
                 fontWeight: activeTab === tab.id ? 700 : 500,
-                color: activeTab === tab.id ? "#003d9b" : "#434654",
+                color: activeTab === tab.id ? "var(--ds-primary)" : "var(--ds-text-2)",
               }}
             >
               {tab.label}
               {activeTab === tab.id && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#003d9b] rounded-t-full" />
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-t-full" style={{ background: "var(--ds-primary)" }} />
               )}
             </button>
           ))}
@@ -605,9 +605,9 @@ export default function ProductDetail() {
           {/* Ürün Hakkında */}
           {activeTab === "about" && (
             <div className="w-full">
-              <p className="text-[#434654]" style={{ fontSize: "15px", lineHeight: "26px" }}>{product.description}</p>
+              <p style={{ fontSize: "15px", lineHeight: "26px", color: "var(--ds-text-2)" }}>{product.description}</p>
               {!isAccessory && (
-                <p className="text-[#434654] mt-4" style={{ fontSize: "15px", lineHeight: "26px" }}>
+                <p className="mt-4" style={{ fontSize: "15px", lineHeight: "26px", color: "var(--ds-text-2)" }}>
                   {lens.color === "colored"
                     ? `${product.name}, doğal görünümünü koruyan ya da farklı bir göz rengine kavuşmak isteyenler için tasarlanmış ${usagePeriodLabel.toLowerCase()} renkli kontakt lenstir. Reçete gerektirmez; görme bozukluğu olmayan kullanıcılar da güvenle kullanabilir.`
                     : `${product.name}, ${lens.material} malzemesinden üretilmiş, yüksek oksijen geçirgenliğine sahip bir ${usagePeriodLabel.toLowerCase()} kontakt lenstir. Gün boyu göz sağlığını korurken maksimum görüş netliği sağlar.`
@@ -617,7 +617,7 @@ export default function ProductDetail() {
               {!isAccessory && lens.tags?.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-6">
                   {lens.tags.map((tag: string) => (
-                    <span key={tag} className="bg-[#f0f1f8] text-[#434654] px-3 py-1.5 rounded-full" style={{ fontSize: "12px", fontWeight: 600 }}>
+                    <span key={tag} className="px-3 py-1.5 rounded-full" style={{ fontSize: "12px", fontWeight: 600, background: "var(--ds-surface-3)", color: "var(--ds-text-2)" }}>
                       {tag}
                     </span>
                   ))}
@@ -643,19 +643,19 @@ export default function ProductDetail() {
                 { label: "Reçete Gereksinimi", value: lens.color === "clear" ? "Gerekli" : "Gerekmiyor" },
                 { label: "Stok Durumu", value: lens.stock > 0 ? `Mevcut (${lens.stock} adet)` : "Tükendi" },
               ].map(({ label, value }) => (
-                <div key={label} className="flex items-center justify-between py-3 border-b border-[#edeef3] last:border-0">
-                  <span className="text-[#737685]" style={{ fontSize: "13px", fontWeight: 600, fontFamily: "'Inter'" }}>{label}</span>
-                  <span className="text-[#191c1e] text-right" style={{ fontSize: "14px", fontWeight: 500, maxWidth: "55%" }}>{value}</span>
+                <div key={label} className="flex items-center justify-between py-3 last:border-0" style={{ borderBottom: "1px solid var(--ds-border-subtle)" }}>
+                  <span style={{ fontSize: "13px", fontWeight: 600, fontFamily: "'Inter'", color: "var(--ds-text-3)" }}>{label}</span>
+                  <span className="text-right" style={{ fontSize: "14px", fontWeight: 500, maxWidth: "55%", color: "var(--ds-text-1)" }}>{value}</span>
                 </div>
               ))}
             </div>
           )}
           {activeTab === "specs" && isAccessory && (
             <div className="max-w-2xl space-y-3">
-              <p style={{ fontSize: "15px", lineHeight: "24px", color: "#434654" }}>{product.description}</p>
-              <div className="flex items-center justify-between py-3 border-b border-[#edeef3]">
-                <span className="text-[#737685]" style={{ fontSize: "13px", fontWeight: 600 }}>Kategori</span>
-                <span className="text-[#191c1e]" style={{ fontSize: "14px" }}>{accessory.accessory_category === "solution" ? "Bakım Solüsyonu" : "Göz Damlası"}</span>
+              <p style={{ fontSize: "15px", lineHeight: "24px", color: "var(--ds-text-2)" }}>{product.description}</p>
+              <div className="flex items-center justify-between py-3" style={{ borderBottom: "1px solid var(--ds-border-subtle)" }}>
+                <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--ds-text-3)" }}>Kategori</span>
+                <span style={{ fontSize: "14px", color: "var(--ds-text-1)" }}>{accessory.accessory_category === "solution" ? "Bakım Solüsyonu" : "Göz Damlası"}</span>
               </div>
             </div>
           )}
@@ -665,54 +665,54 @@ export default function ProductDetail() {
             <div>
               {reviews.length === 0 ? (
                 <div className="text-center py-16">
-                  <span className="material-symbols-outlined" style={{ fontSize: "48px", color: "#c3c6d6" }}>star</span>
-                  <p className="text-[#434654] mt-3">Henüz yorum yok. İlk sen ol!</p>
+                  <span className="material-symbols-outlined" style={{ fontSize: "48px", color: "var(--ds-border)" }}>star</span>
+                  <p className="mt-3" style={{ color: "var(--ds-text-2)" }}>Henüz yorum yok. İlk sen ol!</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {reviews.map((rev) => (
-                    <div key={rev.id} className="bg-white border border-[#c3c6d6] rounded-[0.5rem] p-5">
+                    <div key={rev.id} className="rounded-[0.5rem] p-5" style={{ background: "var(--ds-surface)", border: "1px solid var(--ds-border)" }}>
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="font-semibold text-[#191c1e]" style={{ fontSize: "14px" }}>{rev.user_name}</span>
+                        <span className="font-semibold" style={{ fontSize: "14px", color: "var(--ds-text-1)" }}>{rev.user_name}</span>
                         {rev.verified && (
-                          <span className="text-[#00687b] bg-[#afecff] rounded-full px-2 py-0.5" style={{ fontSize: "10px", fontWeight: 700 }}>✓ Doğrulandı</span>
+                          <span className="rounded-full px-2 py-0.5" style={{ fontSize: "10px", fontWeight: 700, color: "var(--ds-teal)", background: "rgba(0,200,230,0.12)" }}>✓ Doğrulandı</span>
                         )}
-                        <span className="text-[#737685] ml-auto" style={{ fontSize: "12px" }}>{new Date(rev.created_at).toLocaleDateString("tr-TR")}</span>
+                        <span className="ml-auto" style={{ fontSize: "12px", color: "var(--ds-text-3)" }}>{new Date(rev.created_at).toLocaleDateString("tr-TR")}</span>
                       </div>
                       <div className="flex mb-3">
                         {[1, 2, 3, 4, 5].map((s) => (
-                          <span key={s} className={s <= rev.rating ? "text-[#6a3600]" : "text-[#c3c6d6]"}>★</span>
+                          <span key={s} style={{ color: s <= rev.rating ? "var(--ds-amber)" : "var(--ds-border)" }}>★</span>
                         ))}
                       </div>
-                      <p className="text-[#191c1e]" style={{ fontSize: "14px", lineHeight: "20px" }}>{rev.comment}</p>
-                      <p className="text-[#737685] mt-3 text-xs">{rev.helpful_count} kişi bu yorumu faydalı buldu</p>
+                      <p style={{ fontSize: "14px", lineHeight: "20px", color: "var(--ds-text-1)" }}>{rev.comment}</p>
+                      <p className="mt-3 text-xs" style={{ color: "var(--ds-text-3)" }}>{rev.helpful_count} kişi bu yorumu faydalı buldu</p>
                     </div>
                   ))}
                 </div>
               )}
-              <div className="mt-6 rounded-xl border border-[#edeef3] p-6 text-center bg-white">
+              <div className="mt-6 rounded-xl p-6 text-center" style={{ border: "1px solid var(--ds-border-subtle)", background: "var(--ds-surface)" }}>
                 {user ? (
                   <>
-                    <p className="font-bold text-[#191c1e] mb-1" style={{ fontFamily: "'Plus Jakarta Sans'" }}>Bu ürünü kullandınız mı?</p>
-                    <p className="text-[#737685] mb-4" style={{ fontSize: "14px" }}>Deneyiminizi paylaşın ve diğerlerine yardımcı olun.</p>
+                    <p className="font-bold mb-1" style={{ fontFamily: "'Plus Jakarta Sans'", color: "var(--ds-text-1)" }}>Bu ürünü kullandınız mı?</p>
+                    <p className="mb-4" style={{ fontSize: "14px", color: "var(--ds-text-3)" }}>Deneyiminizi paylaşın ve diğerlerine yardımcı olun.</p>
                     <button
-                      className="bg-[#003d9b] text-white px-6 py-2.5 rounded-xl font-semibold hover:opacity-90 transition-opacity"
-                      style={{ fontSize: "13px", letterSpacing: "0.04em" }}
+                      className="text-white px-6 py-2.5 rounded-xl font-semibold hover:opacity-90 transition-opacity"
+                      style={{ fontSize: "13px", letterSpacing: "0.04em", background: "var(--ds-primary)" }}
                     >
                       Yorum Yaz
                     </button>
                   </>
                 ) : (
                   <>
-                    <div className="w-12 h-12 rounded-full bg-[#f0f4ff] flex items-center justify-center mx-auto mb-3">
-                      <span className="material-symbols-outlined text-[#003d9b]" style={{ fontSize: "24px" }}>lock</span>
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" style={{ background: "var(--ds-primary-hover)" }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "24px", color: "var(--ds-primary)" }}>lock</span>
                     </div>
-                    <p className="font-bold text-[#191c1e] mb-1" style={{ fontFamily: "'Plus Jakarta Sans'" }}>Yorum yapmak için giriş yapın</p>
-                    <p className="text-[#737685] mb-4" style={{ fontSize: "14px" }}>Deneyiminizi paylaşmak için hesabınıza giriş yapmanız gerekmektedir.</p>
+                    <p className="font-bold mb-1" style={{ fontFamily: "'Plus Jakarta Sans'", color: "var(--ds-text-1)" }}>Yorum yapmak için giriş yapın</p>
+                    <p className="mb-4" style={{ fontSize: "14px", color: "var(--ds-text-3)" }}>Deneyiminizi paylaşmak için hesabınıza giriş yapmanız gerekmektedir.</p>
                     <button
                       onClick={() => router.push(`/hesap/giris?mode=login`)}
-                      className="bg-[#003d9b] text-white px-6 py-2.5 rounded-xl font-semibold hover:opacity-90 transition-opacity flex items-center gap-2 mx-auto"
-                      style={{ fontSize: "13px", letterSpacing: "0.04em" }}
+                      className="text-white px-6 py-2.5 rounded-xl font-semibold hover:opacity-90 transition-opacity flex items-center gap-2 mx-auto"
+                      style={{ fontSize: "13px", letterSpacing: "0.04em", background: "var(--ds-primary)" }}
                     >
                       <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>login</span>
                       Giriş Yap
@@ -726,41 +726,55 @@ export default function ProductDetail() {
           {/* Taksit Seçenekleri */}
           {activeTab === "installments" && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                <span key="advantage" style={{ color: "#f26422", fontStyle: "italic", fontWeight: 900, fontSize: "18px", letterSpacing: "-0.5px" }}>advantage</span>,
-                <span key="axess" style={{ color: "#000000", fontWeight: 900, fontSize: "20px", letterSpacing: "-0.5px" }}>axess</span>,
-                <span key="bonus" style={{ color: "#8cc63f", fontWeight: 900, fontSize: "20px", letterSpacing: "-0.5px" }}>+bonus</span>,
-                <span key="cardfinans" style={{ color: "#00509d", fontWeight: 900, fontSize: "16px", letterSpacing: "-0.5px", textTransform: "uppercase" }}>CardFinans</span>,
-                <span key="bankkart" style={{ color: "#e3000f", fontWeight: 900, fontSize: "18px", letterSpacing: "-0.5px" }}>bankkart</span>,
-                <span key="maximum" style={{ color: "#e20074", fontStyle: "italic", fontWeight: 900, fontSize: "18px", letterSpacing: "-0.5px" }}>maximum</span>,
-                <span key="paraf" style={{ color: "#00a7e1", fontStyle: "italic", fontWeight: 900, fontSize: "18px" }}>Paraf</span>,
-                <span key="saglam" style={{ color: "#008033", fontWeight: 900, fontSize: "15px", letterSpacing: "0px", textTransform: "uppercase" }}>SAĞLAM KART</span>,
-                <span key="world" style={{ color: "#5e2a84", fontWeight: 900, fontSize: "18px", letterSpacing: "1px", textTransform: "uppercase" }}>WORLD</span>,
-              ].map((logo, i) => (
-                <div key={i} className="border border-[#edeef3] rounded-[0.5rem] bg-white overflow-hidden shadow-sm flex flex-col">
-                  <div className="py-6 flex items-center justify-center min-h-[80px]">
-                    {logo}
+              {([
+                { key: "advantage",  bank: "Yapı Kredi"     },
+                { key: "axess",      bank: "Akbank"         },
+                { key: "bonus",      bank: "Garanti BBVA"   },
+                { key: "cardfinans", bank: "Finansbank QNB" },
+                { key: "bankkart",   bank: "Ziraat Bankası" },
+                { key: "maximum",    bank: "İş Bankası"     },
+                { key: "paraf",      bank: "Halkbank"       },
+                { key: "saglam",     bank: "Vakıfbank"      },
+                { key: "world",      bank: "Yapı Kredi"     },
+              ] as const).map(({ key, bank }) => (
+                <div
+                  key={key}
+                  className="rounded-2xl overflow-hidden flex flex-col"
+                  style={{ colorScheme: "only light", backgroundColor: "#ffffff", border: "1.5px solid #e8eaf0", boxShadow: "0 2px 12px rgba(15,18,35,0.07)" }}
+                >
+                  <div className="flex flex-col items-center justify-center gap-2 py-5 px-6" style={{ backgroundColor: "#ffffff", colorScheme: "only light" }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={`/images/taksit/${key}.png`}
+                      alt={bank}
+                      style={{ height: "40px", width: "100%", objectFit: "contain", objectPosition: "center" }}
+                    />
+                    <span style={{ color: "#737685", fontSize: "10px", fontWeight: 600, letterSpacing: "0.06em", fontFamily: "'Inter'", textTransform: "uppercase" }}>
+                      {bank}
+                    </span>
                   </div>
-                  <div className="flex items-center justify-between px-4 py-2 bg-[#f9f9fb] border-y border-[#edeef3]">
-                    <span className="text-[#737685]" style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.05em", fontFamily: "'Inter'" }}>TAKSİT TUTARI</span>
-                    <span className="text-[#737685]" style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.05em", fontFamily: "'Inter'" }}>TOPLAM TUTAR</span>
+                  <div className="flex items-center justify-between px-4 py-2" style={{ backgroundColor: "#f4f5f9", borderTop: "1px solid #e8eaf0", borderBottom: "1px solid #e8eaf0", colorScheme: "only light" }}>
+                    <span style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.05em", fontFamily: "'Inter'", color: "#737685" }}>TAKSİT</span>
+                    <span style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.05em", fontFamily: "'Inter'", color: "#737685" }}>AYLIK</span>
+                    <span style={{ fontSize: "10px", fontWeight: 600, letterSpacing: "0.05em", fontFamily: "'Inter'", color: "#737685" }}>TOPLAM</span>
                   </div>
-                  <div className="flex flex-col p-4 space-y-4">
+                  <div className="flex flex-col divide-y divide-[#f0f1f5]" style={{ backgroundColor: "#ffffff", colorScheme: "only light" }}>
                     {[
-                      { m: 3, multi: 1.07638 },
-                      { m: 6, multi: 1.15461 },
-                      { m: 9, multi: 1.24523 },
+                      { m: 3,  multi: 1.07638 },
+                      { m: 6,  multi: 1.15461 },
+                      { m: 9,  multi: 1.24523 },
                       { m: 12, multi: 1.35091 },
                     ].map(({ m, multi }) => {
-                      const total = product.price * multi;
-                      const monthly = total / m;
+                      const rowTotal = product.price * multi;
+                      const monthly  = rowTotal / m;
                       return (
-                        <div key={m} className="flex items-center justify-between">
-                          <span className="text-[#434654]" style={{ fontSize: "12px", fontWeight: 600, fontFamily: "'Inter'" }}>
-                            {m} x {monthly.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL
+                        <div key={m} className="flex items-center justify-between px-4 py-2.5" style={{ colorScheme: "only light" }}>
+                          <span style={{ fontSize: "12px", fontWeight: 700, fontFamily: "'Inter'", color: "#003d9b", minWidth: "28px" }}>{m}x</span>
+                          <span style={{ fontSize: "12px", fontWeight: 600, fontFamily: "'Inter'", color: "#434654" }}>
+                            {monthly.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺
                           </span>
-                          <span className="text-[#191c1e]" style={{ fontSize: "12px", fontWeight: 800, fontFamily: "'Inter'" }}>
-                            {total.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL
+                          <span style={{ fontSize: "12px", fontWeight: 800, fontFamily: "'Inter'", color: "#191c1e" }}>
+                            {rowTotal.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺
                           </span>
                         </div>
                       );
@@ -786,27 +800,27 @@ export default function ProductDetail() {
               ].map((item, i) => (
                 <div
                   key={i}
-                  className="rounded-xl overflow-hidden border transition-colors"
-                  style={{ borderColor: openFaq === i ? "#003d9b" : "#edeef3" }}
+                  className="rounded-xl overflow-hidden transition-colors"
+                  style={{ border: `1px solid ${openFaq === i ? "var(--ds-primary)" : "var(--ds-border-subtle)"}` }}
                 >
                   <button
                     className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left transition-colors"
-                    style={{ background: openFaq === i ? "#f0f4ff" : "#ffffff" }}
+                    style={{ background: openFaq === i ? "var(--ds-primary-hover)" : "var(--ds-surface)" }}
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   >
-                    <span style={{ fontSize: "14px", fontWeight: 600, fontFamily: "'Plus Jakarta Sans'", color: openFaq === i ? "#003d9b" : "#191c1e" }}>
+                    <span style={{ fontSize: "14px", fontWeight: 600, fontFamily: "'Plus Jakarta Sans'", color: openFaq === i ? "var(--ds-primary)" : "var(--ds-text-1)" }}>
                       {item.q}
                     </span>
                     <span
                       className="material-symbols-outlined shrink-0 transition-transform duration-200"
-                      style={{ fontSize: "20px", color: openFaq === i ? "#003d9b" : "#737685", transform: openFaq === i ? "rotate(180deg)" : "rotate(0deg)" }}
+                      style={{ fontSize: "20px", color: openFaq === i ? "var(--ds-primary)" : "var(--ds-text-3)", transform: openFaq === i ? "rotate(180deg)" : "rotate(0deg)" }}
                     >
                       expand_more
                     </span>
                   </button>
                   {openFaq === i && (
-                    <div className="px-5 pb-5 border-t" style={{ borderColor: "#dae2ff" }}>
-                      <p className="text-[#434654] pt-4" style={{ fontSize: "14px", lineHeight: "22px" }}>{item.a}</p>
+                    <div className="px-5 pb-5 border-t" style={{ borderColor: "var(--ds-border)" }}>
+                      <p className="pt-4" style={{ fontSize: "14px", lineHeight: "22px", color: "var(--ds-text-2)" }}>{item.a}</p>
                     </div>
                   )}
                 </div>
@@ -819,24 +833,24 @@ export default function ProductDetail() {
 
       {/* ── Customers also viewed ── */}
       {related.length > 0 && (
-        <section className="mt-20 pt-12 border-t border-[#edeef3]">
+        <section className="mt-20 pt-12" style={{ borderTop: "1px solid var(--ds-border-subtle)" }}>
           <div className="flex justify-between items-end mb-8">
             <div>
-              <h2 className="text-[#191c1e]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "24px", lineHeight: "32px", fontWeight: 600 }}>
+              <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "24px", lineHeight: "32px", fontWeight: 600, color: "var(--ds-text-1)" }}>
                 Bunları da İnceleyenler
               </h2>
-              <p className="text-[#434654]" style={{ fontSize: "14px", lineHeight: "20px" }}>
+              <p style={{ fontSize: "14px", lineHeight: "20px", color: "var(--ds-text-2)" }}>
                 Optometristler tarafından önerilen klinik olarak benzer alternatifler.
               </p>
             </div>
-            <Link href="/urunler" className="text-[#003d9b] flex items-center gap-1 hover:underline" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>
+            <Link href="/urunler" className="flex items-center gap-1 hover:underline" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600, color: "var(--ds-primary)" }}>
               Tümünü Gör <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>arrow_forward</span>
             </Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {related.map((rel) => (
               <Link key={rel.id} href={`/urun/${rel.id}`} className="group cursor-pointer">
-                <div className="bg-[#f3f4f6] rounded-[0.5rem] p-4 mb-2 relative overflow-hidden aspect-square flex items-center justify-center border border-[#c3c6d6] group-hover:border-[#003d9b] transition-all shadow-sm">
+                <div className="rounded-[0.5rem] p-4 mb-2 relative overflow-hidden aspect-square flex items-center justify-center transition-all shadow-sm" style={{ background: "var(--ds-surface-2)", border: "1px solid var(--ds-border)" }}>
                   {rel.image_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={rel.image_url} alt={rel.name} className="max-w-[80%] h-auto object-contain group-hover:scale-105 transition-transform duration-300" />
@@ -845,17 +859,17 @@ export default function ProductDetail() {
                   )}
                   {rel.badge && (
                     <div className="absolute top-2 right-2">
-                      <span className="bg-white/80 backdrop-blur-sm text-[#00687b] rounded-full font-bold shadow-sm px-2 py-1 whitespace-nowrap" style={{ fontSize: "10px", fontWeight: 700 }}>
+                      <span className="backdrop-blur-sm rounded-full font-bold shadow-sm px-2 py-1 whitespace-nowrap" style={{ fontSize: "10px", fontWeight: 700, background: "rgba(255,255,255,0.8)", color: "var(--ds-teal)" }}>
                         {rel.badge}
                       </span>
                     </div>
                   )}
                 </div>
-                <p className="text-[#434654]" style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600 }}>{rel.brand}</p>
-                <h3 className="text-[#191c1e] group-hover:text-[#003d9b] transition-colors" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "20px", lineHeight: "28px", fontWeight: 600 }}>
+                <p style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600, color: "var(--ds-text-2)" }}>{rel.brand}</p>
+                <h3 className="transition-colors group-hover:opacity-75" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "20px", lineHeight: "28px", fontWeight: 600, color: "var(--ds-text-1)" }}>
                   {rel.name}
                 </h3>
-                <p className="text-[#003d9b] mt-1" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "20px", lineHeight: "28px", fontWeight: 600 }}>
+                <p className="mt-1" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "20px", lineHeight: "28px", fontWeight: 600, color: "var(--ds-primary)" }}>
                   {rel.price.toLocaleString("tr-TR")} ₺
                 </p>
               </Link>

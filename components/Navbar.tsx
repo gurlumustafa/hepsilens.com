@@ -185,15 +185,15 @@ export default function Navbar() {
             <div className="relative hidden md:block" ref={searchRef}>
               <form onSubmit={handleSubmit}>
                 <div
-                  className="flex items-center bg-[#f3f4f6] px-3 xl:px-4 py-2 rounded-[0.75rem] border transition-all duration-200 group mr-1.5 xl:mr-6 "
+                  className="flex items-center bg-[#f3f4f6] px-3 xl:px-4 py-2 rounded-[0.75rem] border transition-all duration-200 group mr-1.5 xl:mr-6"
                   style={{
-                    borderColor: searchOpen ? "#003d9b" : "#c3c6d6",
+                    borderColor: searchOpen ? "var(--ds-primary)" : "var(--ds-border)",
                     boxShadow: searchOpen ? "0 0 0 3px rgba(0,61,155,0.12)" : "none",
                   }}
                 >
                   <span
                     className="material-symbols-outlined mr-1.5 transition-colors duration-200"
-                    style={{ fontSize: "18px", color: searchOpen ? "#003d9b" : "#737685" }}
+                    style={{ fontSize: "18px", color: searchOpen ? "var(--ds-primary)" : "var(--ds-text-3)" }}
                   >
                     search
                   </span>
@@ -381,7 +381,7 @@ export default function Navbar() {
                         href="/hesap/giris?mode=login"
                         onClick={() => setAccountOpen(false)}
                         className="flex items-center gap-3 px-4 py-3 hover:bg-[#f3f4f6] transition-colors group/item"
-                        style={{ fontSize: "13px", fontWeight: 600, color: "#003d9b" }}
+                        style={{ fontSize: "13px", fontWeight: 600, color: "var(--ds-primary)" }}
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>login</span>
                         Giriş Yap
@@ -390,7 +390,7 @@ export default function Navbar() {
                         href="/hesap/giris?mode=register"
                         onClick={() => setAccountOpen(false)}
                         className="flex items-center gap-3 px-4 py-3 hover:bg-[#f3f4f6] transition-colors group/item"
-                        style={{ fontSize: "13px", fontWeight: 600, color: "#434654" }}
+                        style={{ fontSize: "13px", fontWeight: 600, color: "var(--ds-text-2)" }}
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>person_add</span>
                         Kayıt Ol

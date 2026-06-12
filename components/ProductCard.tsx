@@ -28,7 +28,7 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto">
       <div className="absolute inset-0 bg-[#0f1223]/10" />
       <button
-        className="relative z-10 bg-white text-[#003d9b] font-bold px-4 py-2 rounded-full shadow-lg border border-[#003d9b]/15 scale-90 group-hover:scale-100 transition-transform duration-200 flex items-center gap-1.5 whitespace-nowrap hover:bg-[#003d9b] hover:text-white hover:border-[#003d9b]"
+        className="relative z-10 bg-white text-[var(--ds-primary)] font-bold px-4 py-2 rounded-full shadow-lg border border-[#003d9b]/15 scale-90 group-hover:scale-100 transition-transform duration-200 flex items-center gap-1.5 whitespace-nowrap hover:bg-[var(--ds-primary)] hover:text-white hover:border-[var(--ds-primary)]"
         style={{ fontSize: "12px", letterSpacing: "0.04em", fontFamily: "'Inter'" }}
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowModal(true); }}
       >
@@ -41,9 +41,9 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
   if (variant === "home") {
     return (
       <>
-        <Link href={`/urun/${lens.id}`} className="group bg-white rounded-[0.75rem] overflow-hidden shadow-sm border border-[#c3c6d6] hover:shadow-2xl hover:-translate-y-2 hover:border-[#003d9b]/30 transition-all duration-250 flex flex-col">
+        <Link href={`/urun/${lens.id}`} className="group bg-white rounded-[0.75rem] overflow-hidden shadow-sm border border-[var(--ds-border)] hover:shadow-2xl hover:-translate-y-2 hover:border-[#003d9b]/30 transition-all duration-250 flex flex-col">
           {/* Image */}
-          <div className="relative aspect-square bg-[#ffffff] p-4 flex items-center justify-center overflow-hidden">
+          <div className="relative aspect-square bg-[var(--ds-surface)] p-4 flex items-center justify-center overflow-hidden">
             <FavoriteButton productId={lens.id} size="sm" className="absolute top-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
             {lens.badge && (
               <div className="absolute top-0 right-0 w-20 h-20 overflow-hidden pointer-events-none z-20">
@@ -74,10 +74,10 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
           </div>
           {/* Info */}
           <div className="p-4 flex flex-col flex-grow">
-            <span className="text-[#434654]" style={{ fontFamily: "'Inter'", fontSize: "12px", lineHeight: "16px", letterSpacing: "0.05em", fontWeight: 600 }}>
+            <span className="text-[var(--ds-text-2)]" style={{ fontFamily: "'Inter'", fontSize: "12px", lineHeight: "16px", letterSpacing: "0.05em", fontWeight: 600 }}>
               {lens.brand}
             </span>
-            <h3 className="text-[#191c1e] mt-1 mb-2" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "20px", lineHeight: "28px", fontWeight: 600 }}>
+            <h3 className="text-[var(--ds-text-1)] mt-1 mb-2" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "20px", lineHeight: "28px", fontWeight: 600 }}>
               {lens.name}
             </h3>
             {/* Stars */}
@@ -85,18 +85,18 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
               {[1, 2, 3, 4, 5].map((s) => (
                 <span
                   key={s}
-                  className={s <= Math.round(lens.rating) ? "text-[#6a3600]" : "text-[#c3c6d6]"}
+                  className={s <= Math.round(lens.rating) ? "text-[#6a3600]" : "text-[var(--ds-border)]"}
                   style={{ fontSize: "19px", fontVariationSettings: s <= Math.round(lens.rating) ? "'FILL' 1" : "'FILL' 0" }}
                 >
                   ★
                 </span>
               ))}
-              <span className="text-[#434654] ml-2" style={{ fontSize: "13.5px", letterSpacing: "0.05em", fontWeight: 600 }}>
+              <span className="text-[var(--ds-text-2)] ml-2" style={{ fontSize: "13.5px", letterSpacing: "0.05em", fontWeight: 600 }}>
                 ({lens.review_count})
               </span>
             </div>
             <div className="mt-auto flex items-center justify-between">
-              <span className="text-[#003d9b]" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "20px", lineHeight: "28px", fontWeight: 600 }}>
+              <span className="text-[var(--ds-primary)]" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "20px", lineHeight: "28px", fontWeight: 600 }}>
                 {lens.price.toLocaleString("tr-TR")} ₺
               </span>
               <button
@@ -119,10 +119,10 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
     <>
       <Link
         href={`/urun/${lens.id}`}
-        className="group bg-[#ffffff] rounded-[0.75rem] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-250 border border-transparent hover:border-[#003d9b]/25 flex flex-row sm:flex-col"
+        className="group bg-[var(--ds-surface)] rounded-[0.75rem] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-250 border border-transparent hover:border-[#003d9b]/25 flex flex-row sm:flex-col"
       >
         {/* Image — square on mobile-left, full-width on sm+ */}
-        <div className="relative w-[110px] sm:w-auto flex-shrink-0 sm:flex-shrink-1 sm:aspect-square bg-white flex items-center justify-center p-2 sm:p-4 sm:border-b border-r sm:border-r-0 border-[#edeef0] overflow-hidden">
+        <div className="relative w-[110px] sm:w-auto flex-shrink-0 sm:flex-shrink-1 sm:aspect-square bg-[var(--ds-surface)] flex items-center justify-center p-2 sm:p-4 sm:border-b border-r sm:border-r-0 border-[var(--ds-border-subtle)] overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={lens.image_url || "/placeholder-lens.jpg"}
@@ -163,11 +163,11 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
         <div className="flex flex-col flex-1 p-3 sm:p-4">
           <div className="flex justify-between items-start gap-1">
             <div className="min-w-0">
-              <p className="text-[#434654] uppercase truncate" style={{ fontSize: "10px", letterSpacing: "0.1em", fontWeight: 600, fontFamily: "'Inter'" }}>
+              <p className="text-[var(--ds-text-2)] uppercase truncate" style={{ fontSize: "10px", letterSpacing: "0.1em", fontWeight: 600, fontFamily: "'Inter'" }}>
                 {lens.brand}
               </p>
               <h3
-                className="text-[#191c1e] group-hover:text-[#003d9b] transition-colors line-clamp-2"
+                className="text-[var(--ds-text-1)] group-hover:text-[var(--ds-primary)] transition-colors line-clamp-2"
                 style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "15px", lineHeight: "22px", fontWeight: 600 }}
               >
                 {lens.name}
@@ -179,18 +179,18 @@ export default function ProductCard({ lens, variant = "grid" }: Props) {
             </div>
           </div>
           {lens.description && (
-            <p className="text-[#434654] line-clamp-2 mt-1 hidden sm:block" style={{ fontSize: "13px", lineHeight: "18px" }}>
+            <p className="text-[var(--ds-text-2)] line-clamp-2 mt-1 hidden sm:block" style={{ fontSize: "13px", lineHeight: "18px" }}>
               {lens.description.length > 100 ? lens.description.slice(0, 100) + "…" : lens.description}
             </p>
           )}
           <div className="flex items-center justify-between mt-auto pt-2 sm:pt-4">
             <div className="flex flex-col">
               {lens.original_price && (
-                <span className="text-[#737685] line-through" style={{ fontSize: "10px", fontWeight: 600, fontFamily: "'Inter'" }}>
+                <span className="text-[var(--ds-text-3)] line-through" style={{ fontSize: "10px", fontWeight: 600, fontFamily: "'Inter'" }}>
                   {lens.original_price.toLocaleString("tr-TR")} ₺
                 </span>
               )}
-              <span className="text-[#003d9b]" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "18px", lineHeight: "26px", fontWeight: 600 }}>
+              <span className="text-[var(--ds-primary)]" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "18px", lineHeight: "26px", fontWeight: 600 }}>
                 {lens.price.toLocaleString("tr-TR")} ₺
               </span>
             </div>

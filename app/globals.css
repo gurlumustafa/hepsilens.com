@@ -94,9 +94,30 @@
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
+/* ── Design-system renk değişkenleri (light + dark) ── */
+:root {
+  --ds-bg:             #f8f9fb;
+  --ds-surface:        #ffffff;
+  --ds-surface-2:      #f3f4f6;
+  --ds-surface-3:      #edeef3;
+  --ds-border:         #c3c6d6;
+  --ds-border-subtle:  #edeef3;
+  --ds-text-1:         #191c1e;
+  --ds-text-2:         #434654;
+  --ds-text-3:         #737685;
+  --ds-primary:        #003d9b;
+  --ds-primary-soft:   #dae2ff;
+  --ds-primary-hover:  #f0f4ff;
+  --ds-teal:           #00687b;
+  --ds-amber:          #d97706;
+  --ds-amber-hover:    #b45309;
+  --ds-shadow:         rgba(15,18,35,0.08);
+  --ds-shadow-md:      rgba(15,18,35,0.14);
+}
+
 body {
-  background-color: #f8f9fb;
-  color: #191c1e;
+  background-color: var(--ds-bg);
+  color: var(--ds-text-1);
   font-family: "Inter", sans-serif;
 }
 
@@ -160,6 +181,7 @@ h1, h2, h3, h4, .font-display {
 .blog-content th { background: #f0f4ff; color: #003d9b; font-weight: 700; padding: 10px 14px; text-align: left; border-bottom: 2px solid #c3c6d6; }
 .blog-content td { padding: 10px 14px; border-bottom: 1px solid #edeef3; color: #434654; }
 .blog-content tr:hover td { background: #fafbff; }
+
 
 /* ── Scroll Reveal Animations ── */
 .sr {

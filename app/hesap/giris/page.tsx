@@ -87,26 +87,26 @@ function GirisContent() {
   }
 
   return (
-    <div className="min-h-screen pt-[72px] flex items-center justify-center px-4" style={{ background: "#f8f9fb" }}>
+    <div className="min-h-screen pt-[72px] flex items-center justify-center px-4" style={{ background: "var(--ds-bg)" }}>
       <div className="w-full max-w-md">
 
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/">
-            <span className="font-bold text-[#003d9b]" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "28px" }}>
+            <span className="font-bold" style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "28px", color: "var(--ds-primary)" }}>
               Hepsilens
             </span>
           </Link>
-          <p className="text-[#737685] mt-1" style={{ fontSize: "14px" }}>
+          <p className="mt-1" style={{ fontSize: "14px", color: "var(--ds-text-3)" }}>
             {mode === "register" ? "Hesap oluştur, lenslerini yönet." : "Hesabına giriş yap."}
           </p>
         </div>
 
         {/* Kart */}
-        <div className="bg-white rounded-2xl shadow-sm border border-[#edeef3] overflow-hidden">
+        <div className="rounded-2xl shadow-sm overflow-hidden border" style={{ background: "var(--ds-surface)", borderColor: "var(--ds-border-subtle)" }}>
 
           {/* Tab */}
-          <div className="flex border-b border-[#edeef3]">
+          <div className="flex border-b" style={{ borderColor: "var(--ds-border-subtle)" }}>
             {(["register", "login"] as const).map((m) => (
               <button
                 key={m}
@@ -115,12 +115,12 @@ function GirisContent() {
                 style={{
                   fontSize: "13px",
                   fontFamily: "'Inter'",
-                  color: mode === m ? "#003d9b" : "#737685",
-                  background: mode === m ? "#fafbff" : "white",
+                  color: mode === m ? "var(--ds-primary)" : "var(--ds-text-3)",
+                  background: mode === m ? "var(--ds-surface-2)" : "var(--ds-surface)",
                 }}
               >
                 {m === "register" ? "Kayıt Ol" : "Giriş Yap"}
-                {mode === m && <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-[#003d9b] rounded-t-full" />}
+                {mode === m && <span className="absolute bottom-0 left-4 right-4 h-0.5 rounded-t-full" style={{ background: "var(--ds-primary)" }} />}
               </button>
             ))}
           </div>
@@ -132,8 +132,8 @@ function GirisContent() {
               <>
                 <a
                   href="/api/auth/google"
-                  className="flex items-center justify-center gap-3 w-full py-3 rounded-xl border-2 border-[#e5e7eb] bg-white hover:bg-[#f8f9fb] hover:border-[#c3c6d6] active:scale-[0.98] transition-all font-semibold text-[#374151] mb-4"
-                  style={{ fontSize: "14px", fontFamily: "'Inter'" }}
+                  className="flex items-center justify-center gap-3 w-full py-3 rounded-xl border-2 bg-white hover:bg-[#f8f9fb] active:scale-[0.98] transition-all font-semibold text-[#374151] mb-4"
+                  style={{ fontSize: "14px", fontFamily: "'Inter'", borderColor: "#e5e7eb" }}
                 >
                   <GoogleIcon />
                   Google ile Giriş Yap
@@ -141,9 +141,9 @@ function GirisContent() {
 
                 {/* Ayraç */}
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="flex-1 h-px bg-[#edeef3]" />
-                  <span className="text-[#9ca3af] font-medium" style={{ fontSize: "11px" }}>veya e-posta ile</span>
-                  <div className="flex-1 h-px bg-[#edeef3]" />
+                  <div className="flex-1 h-px" style={{ background: "var(--ds-border-subtle)" }} />
+                  <span className="font-medium" style={{ fontSize: "11px", color: "var(--ds-text-3)" }}>veya e-posta ile</span>
+                  <div className="flex-1 h-px" style={{ background: "var(--ds-border-subtle)" }} />
                 </div>
               </>
             )}
@@ -153,10 +153,15 @@ function GirisContent() {
 
               {mode === "register" && (
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[#434654] font-semibold" style={{ fontSize: "12px" }}>Ad Soyad</label>
+                  <label className="font-semibold" style={{ fontSize: "12px", color: "var(--ds-text-2)" }}>Ad Soyad</label>
                   <input
-                    className="w-full bg-[#f8f9fb] border border-[#c3c6d6] rounded-xl px-4 py-3 outline-none focus:border-[#003d9b] focus:ring-2 focus:ring-[#003d9b]/15 transition-all"
-                    style={{ fontSize: "14px" }}
+                    className="w-full rounded-xl px-4 py-3 outline-none transition-all"
+                    style={{
+                      fontSize: "14px",
+                      background: "var(--ds-surface-2)",
+                      border: "1px solid var(--ds-border)",
+                      color: "var(--ds-text-1)",
+                    }}
                     placeholder="Adınız Soyadınız"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -165,11 +170,16 @@ function GirisContent() {
               )}
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-[#434654] font-semibold" style={{ fontSize: "12px" }}>E-posta</label>
+                <label className="font-semibold" style={{ fontSize: "12px", color: "var(--ds-text-2)" }}>E-posta</label>
                 <input
                   type="email"
-                  className="w-full bg-[#f8f9fb] border border-[#c3c6d6] rounded-xl px-4 py-3 outline-none focus:border-[#003d9b] focus:ring-2 focus:ring-[#003d9b]/15 transition-all"
-                  style={{ fontSize: "14px" }}
+                  className="w-full rounded-xl px-4 py-3 outline-none transition-all"
+                  style={{
+                    fontSize: "14px",
+                    background: "var(--ds-surface-2)",
+                    border: "1px solid var(--ds-border)",
+                    color: "var(--ds-text-1)",
+                  }}
                   placeholder="ornek@eposta.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -177,17 +187,22 @@ function GirisContent() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-[#434654] font-semibold" style={{ fontSize: "12px" }}>Şifre</label>
+                <label className="font-semibold" style={{ fontSize: "12px", color: "var(--ds-text-2)" }}>Şifre</label>
                 <div className="relative">
                   <input
                     type={showPass ? "text" : "password"}
-                    className="w-full bg-[#f8f9fb] border border-[#c3c6d6] rounded-xl px-4 py-3 pr-11 outline-none focus:border-[#003d9b] focus:ring-2 focus:ring-[#003d9b]/15 transition-all"
-                    style={{ fontSize: "14px" }}
+                    className="w-full rounded-xl px-4 py-3 pr-11 outline-none transition-all"
+                    style={{
+                      fontSize: "14px",
+                      background: "var(--ds-surface-2)",
+                      border: "1px solid var(--ds-border)",
+                      color: "var(--ds-text-1)",
+                    }}
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
-                  <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#737685] hover:text-[#191c1e] transition-colors">
+                  <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors" style={{ color: "var(--ds-text-3)" }}>
                     <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>{showPass ? "visibility_off" : "visibility"}</span>
                   </button>
                 </div>
@@ -195,11 +210,16 @@ function GirisContent() {
 
               {mode === "register" && (
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[#434654] font-semibold" style={{ fontSize: "12px" }}>Şifre Tekrar</label>
+                  <label className="font-semibold" style={{ fontSize: "12px", color: "var(--ds-text-2)" }}>Şifre Tekrar</label>
                   <input
                     type="password"
-                    className="w-full bg-[#f8f9fb] border border-[#c3c6d6] rounded-xl px-4 py-3 outline-none focus:border-[#003d9b] focus:ring-2 focus:ring-[#003d9b]/15 transition-all"
-                    style={{ fontSize: "14px" }}
+                    className="w-full rounded-xl px-4 py-3 outline-none transition-all"
+                    style={{
+                      fontSize: "14px",
+                      background: "var(--ds-surface-2)",
+                      border: "1px solid var(--ds-border)",
+                      color: "var(--ds-text-1)",
+                    }}
                     placeholder="••••••••"
                     value={confirm}
                     onChange={(e) => setConfirm(e.target.value)}
@@ -218,18 +238,18 @@ function GirisContent() {
                 type="submit"
                 disabled={loading}
                 className="w-full py-3.5 rounded-xl font-bold text-white transition-all hover:opacity-90 active:scale-95 disabled:opacity-60"
-                style={{ background: "#003d9b", fontSize: "14px", fontFamily: "'Inter'", letterSpacing: "0.03em" }}
+                style={{ background: "var(--ds-primary)", fontSize: "14px", fontFamily: "'Inter'", letterSpacing: "0.03em" }}
               >
                 {loading ? "Yükleniyor…" : (mode === "register" ? "Hesap Oluştur" : "Giriş Yap")}
               </button>
             </form>
 
             {mode === "register" && (
-              <p className="text-center text-[#737685] mt-4" style={{ fontSize: "11px", lineHeight: "16px" }}>
+              <p className="text-center mt-4" style={{ fontSize: "11px", lineHeight: "16px", color: "var(--ds-text-3)" }}>
                 Kayıt olarak{" "}
-                <Link href="/gizlilik" className="text-[#003d9b] hover:underline">Gizlilik Politikası</Link>
+                <Link href="/gizlilik" className="hover:underline" style={{ color: "var(--ds-primary)" }}>Gizlilik Politikası</Link>
                 {" "}ve{" "}
-                <Link href="/kullanim-sartlari" className="text-[#003d9b] hover:underline">Kullanım Şartları</Link>
+                <Link href="/kullanim-sartlari" className="hover:underline" style={{ color: "var(--ds-primary)" }}>Kullanım Şartları</Link>
                 &apos;nı kabul etmiş sayılırsınız.
               </p>
             )}
@@ -242,7 +262,7 @@ function GirisContent() {
 
 export default function GirisPage() {
   return (
-    <Suspense fallback={<div className="pt-[72px] min-h-screen flex items-center justify-center"><p className="text-[#737685]">Yükleniyor...</p></div>}>
+    <Suspense fallback={<div className="pt-[72px] min-h-screen flex items-center justify-center"><p style={{ color: "var(--ds-text-3)" }}>Yükleniyor...</p></div>}>
       <GirisContent />
     </Suspense>
   );

@@ -75,14 +75,14 @@ export default function QuickViewModal({ product, onClose }: Props) {
         <div className="flex flex-col flex-1 overflow-y-auto p-6 sm:p-8">
           <div className="flex justify-between items-start mb-3">
             <span
-              className="text-[#434654] uppercase"
+              className="text-[var(--ds-text-2)] uppercase"
               style={{ fontSize: "10px", letterSpacing: "0.12em", fontWeight: 700, fontFamily: "'Inter'" }}
             >
               {product.brand}
             </span>
             <button
               onClick={onClose}
-              className="text-[#737685] hover:text-[#191c1e] hover:bg-[#edeef3] rounded-full transition-colors flex items-center justify-center shrink-0"
+              className="text-[var(--ds-text-3)] hover:text-[var(--ds-text-1)] hover:bg-[var(--ds-surface-3)] rounded-full transition-colors flex items-center justify-center shrink-0"
               style={{ width: "32px", height: "32px" }}
             >
               <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>close</span>
@@ -90,7 +90,7 @@ export default function QuickViewModal({ product, onClose }: Props) {
           </div>
 
           <h2
-            className="text-[#191c1e] mb-2"
+            className="text-[var(--ds-text-1)] mb-2"
             style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "22px", lineHeight: "30px", fontWeight: 700 }}
           >
             {product.name}
@@ -101,27 +101,27 @@ export default function QuickViewModal({ product, onClose }: Props) {
               {[1, 2, 3, 4, 5].map((s) => (
                 <span
                   key={s}
-                  className={s <= Math.round(product.rating) ? "text-[#6a3600]" : "text-[#c3c6d6]"}
+                  className={s <= Math.round(product.rating) ? "text-[#6a3600]" : "text-[var(--ds-border)]"}
                   style={{ fontSize: "14px" }}
                 >
                   ★
                 </span>
               ))}
             </div>
-            <span className="text-[#737685]" style={{ fontSize: "12px", fontWeight: 600, fontFamily: "'Inter'" }}>
+            <span className="text-[var(--ds-text-3)]" style={{ fontSize: "12px", fontWeight: 600, fontFamily: "'Inter'" }}>
               ({product.review_count} değerlendirme)
             </span>
           </div>
 
           <div className="flex items-baseline gap-3 mb-4">
             <span
-              className="text-[#003d9b]"
+              className="text-[var(--ds-primary)]"
               style={{ fontFamily: "'Plus Jakarta Sans'", fontSize: "28px", lineHeight: "36px", fontWeight: 700 }}
             >
               {product.price.toLocaleString("tr-TR")} ₺
             </span>
             {product.original_price && (
-              <span className="text-[#737685] line-through" style={{ fontSize: "13px", fontWeight: 600, fontFamily: "'Inter'" }}>
+              <span className="text-[var(--ds-text-3)] line-through" style={{ fontSize: "13px", fontWeight: 600, fontFamily: "'Inter'" }}>
                 {product.original_price.toLocaleString("tr-TR")} ₺
               </span>
             )}
@@ -129,7 +129,7 @@ export default function QuickViewModal({ product, onClose }: Props) {
 
           {product.description && (
             <div className="mb-5">
-              <p className="text-[#434654] leading-relaxed" style={{ fontSize: "13px", lineHeight: "20px" }}>
+              <p className="text-[var(--ds-text-2)] leading-relaxed" style={{ fontSize: "13px", lineHeight: "20px" }}>
                 {descExpanded || product.description.length <= DESC_LIMIT
                   ? product.description
                   : product.description.slice(0, DESC_LIMIT) + "…"}
@@ -137,7 +137,7 @@ export default function QuickViewModal({ product, onClose }: Props) {
               {product.description.length > DESC_LIMIT && (
                 <button
                   onClick={() => setDescExpanded((v) => !v)}
-                  className="text-[#003d9b] font-semibold mt-1 hover:underline"
+                  className="text-[var(--ds-primary)] font-semibold mt-1 hover:underline"
                   style={{ fontSize: "12px", fontFamily: "'Inter'" }}
                 >
                   {descExpanded ? "Daha Az" : "Daha Fazla"}
@@ -158,12 +158,12 @@ export default function QuickViewModal({ product, onClose }: Props) {
               ].map(({ label, value }) => (
                 <div key={label} className="bg-[#f4f5f9] rounded-lg px-3 py-2">
                   <p
-                    className="text-[#737685] uppercase mb-0.5"
+                    className="text-[var(--ds-text-3)] uppercase mb-0.5"
                     style={{ fontSize: "9px", letterSpacing: "0.08em", fontWeight: 600 }}
                   >
                     {label}
                   </p>
-                  <p className="text-[#191c1e] font-bold" style={{ fontSize: "12px", fontFamily: "'Inter'" }}>
+                  <p className="text-[var(--ds-text-1)] font-bold" style={{ fontSize: "12px", fontFamily: "'Inter'" }}>
                     {value}
                   </p>
                 </div>
@@ -196,7 +196,7 @@ export default function QuickViewModal({ product, onClose }: Props) {
             <Link
               href={`/urun/${product.id}`}
               onClick={onClose}
-              className="flex-1 text-center font-bold py-3 rounded-xl transition-all border-2 border-[#003d9b] text-[#003d9b] hover:bg-[#003d9b] hover:text-white"
+              className="flex-1 text-center font-bold py-3 rounded-xl transition-all border-2 border-[var(--ds-primary)] text-[var(--ds-primary)] hover:bg-[var(--ds-primary)] hover:text-white"
               style={{ fontSize: "13px", fontFamily: "'Inter'", letterSpacing: "0.04em" }}
             >
               Ürün Detayı
