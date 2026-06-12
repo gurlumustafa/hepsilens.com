@@ -40,13 +40,21 @@ export async function GET(req: NextRequest) {
   try {
     const rows = await queryMany<Record<string, unknown>>(sql, params);
 
-    // JSON sütunlarını parse et
+    // JSON sütunlarını parse et, DECIMAL alanları sayıya çevir
     const products = rows.map((r) => ({
       ...r,
       pack_sizes:   safeParseJson(r.pack_sizes),
       tags:         safeParseJson(r.tags),
       cyl_options:  safeParseJson(r.cyl_options),
       axis_options: safeParseJson(r.axis_options),
+      price:             r.price != null ? Number(r.price) : r.price,
+      original_price:    r.original_price != null ? Number(r.original_price) : r.original_price,
+      rating:            r.rating != null ? Number(r.rating) : r.rating,
+      bc:                r.bc != null ? Number(r.bc) : r.bc,
+      dia:               r.dia != null ? Number(r.dia) : r.dia,
+      oxygen_permeability: r.oxygen_permeability != null ? Number(r.oxygen_permeability) : r.oxygen_permeability,
+      water_content:     r.water_content != null ? Number(r.water_content) : r.water_content,
+      stock:             r.stock != null ? Number(r.stock) : r.stock,
     }));
 
     return Response.json({ products });

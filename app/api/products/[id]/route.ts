@@ -46,6 +46,17 @@ export async function GET(
       product[f] = safeParseJson(product[f]);
     }
 
+    const numericFields = ["price", "original_price", "rating", "bc", "dia", "oxygen_permeability", "water_content", "stock"];
+    for (const f of numericFields) {
+      if (product[f] != null) product[f] = Number(product[f]);
+    }
+
+    for (const rel of related) {
+      if (rel.price != null) rel.price = Number(rel.price);
+      if (rel.original_price != null) rel.original_price = Number(rel.original_price);
+      if (rel.rating != null) rel.rating = Number(rel.rating);
+    }
+
     return Response.json({ product, reviews, related });
   } catch (err) {
     console.error("[GET /api/products/[id]]", err);

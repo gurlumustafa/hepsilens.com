@@ -16,7 +16,7 @@ const defaultFilters: Filters = {
   usage: [],
   category: [],
   priceMin: 0,
-  priceMax: 500,
+  priceMax: 9999,
   sortBy: "popular",
 };
 

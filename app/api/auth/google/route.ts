@@ -1,9 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { storeOAuthState } from "@/lib/oauth-state";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const state = crypto.randomBytes(16).toString("hex");
-  const origin = new URL(req.url).origin;
+  const origin = process.env.NODE_ENV === "production"
+    ? "https://hepsilens.com"
+    : "http://localhost:3000";
+
+  storeOAuthState(state);
 
   const params = new URLSearchParams({
     client_id:     process.env.GOOGLE_CLIENT_ID!,
@@ -15,17 +20,7 @@ export async function GET(req: NextRequest) {
     prompt:        "select_account",
   });
 
-  const response = NextResponse.redirect(
+  return NextResponse.redirect(
     `https://accounts.google.com/o/oauth2/v2/auth?${params}`
   );
-
-  // CSRF koruması için state'i HTTP-only cookie'de sakla (10 dakika)
-  response.cookies.set("google_oauth_state", state, {
-    httpOnly: true,
-    sameSite: "lax",
-    maxAge:   600,
-    path:     "/",
-  });
-
-  return response;
 }

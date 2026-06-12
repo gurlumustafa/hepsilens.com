@@ -6,11 +6,21 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const GOOGLE_ERRORS: Record<string, string> = {
   google_denied:  "Google girişi iptal edildi.",
-  state_mismatch: "Güvenlik hatası, lütfen tekrar deneyin.",
-  token_exchange: "Google ile bağlantı kurulamadı.",
+  state_mismatch: "Güvenlik doğrulaması başarısız, lütfen tekrar deneyin.",
+  token_exchange: "Google ile bağlantı kurulamadı (redirect_uri eşleşmiyor olabilir).",
   no_email:       "Google hesabınızdan e-posta alınamadı.",
   server_error:   "Sunucu hatası, lütfen tekrar deneyin.",
 };
+
+function googleErrorMessage(code: string | null): string {
+  if (!code) return "";
+  if (GOOGLE_ERRORS[code]) return GOOGLE_ERRORS[code];
+  if (code.startsWith("db_"))      return `Veritabanı hatası: ${decodeURIComponent(code.slice(3))}`;
+  if (code.startsWith("session_")) return `Oturum hatası: ${decodeURIComponent(code.slice(8))}`;
+  if (code.startsWith("token_fetch_")) return `Google bağlantı hatası: ${decodeURIComponent(code.slice(12))}`;
+  if (code.startsWith("userinfo_")) return `Kullanıcı bilgisi alınamadı: ${decodeURIComponent(code.slice(9))}`;
+  return `Hata: ${code}`;
+}
 
 function GoogleIcon() {
   return (
@@ -46,7 +56,7 @@ function GirisContent() {
   const [email, setEmail]     = useState(prefillEmail);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [error, setError]     = useState(googleError ? (GOOGLE_ERRORS[googleError] ?? "Bir hata oluştu.") : "");
+  const [error, setError]     = useState(googleErrorMessage(googleError));
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
 

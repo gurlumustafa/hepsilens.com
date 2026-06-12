@@ -180,7 +180,7 @@ export default function FilterSidebar({ filters, onChange, mode = "lens", mobile
   };
 
   const clearAll = () =>
-    onChange({ brands: [], lensTypes: [], color: "all", usage: [], category: [], priceMin: 0, priceMax: 500, sortBy: "popular" });
+    onChange({ brands: [], lensTypes: [], color: "all", usage: [], category: [], priceMin: 0, priceMax: 9999, sortBy: "popular" });
 
   const filterHeader = (withClose = false) => (
     <div
