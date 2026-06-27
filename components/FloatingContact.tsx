@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 type FormState = {
   name: string;
@@ -20,11 +21,26 @@ const subjects = [
 ];
 
 export default function FloatingContact() {
+  const { user } = useAuth();
   const [open, setOpen]       = useState(false);
   const [sent, setSent]       = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
   const [form, setForm]       = useState<FormState>({ name: "", email: "", phone: "", subject: subjects[0], message: "" });
   const [errors, setErrors]   = useState<Partial<FormState>>({});
   const panelRef              = useRef<HTMLDivElement>(null);
+
+  // Giriş yapmış kullanıcı bilgilerini otomatik doldur
+  useEffect(() => {
+    if (user && !user.is_anonymous) {
+      setForm((prev) => ({
+        ...prev,
+        name: prev.name || user.name || "",
+        email: prev.email || user.email || "",
+        phone: prev.phone || user.phone || "",
+      }));
+    }
+  }, [user]);
 
   // Dışarı tıklayınca kapat
   useEffect(() => {
@@ -62,15 +78,48 @@ export default function FloatingContact() {
     return Object.keys(e).length === 0;
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
-    setSent(true);
+    
+    setLoading(true);
+    setApiError(null);
+
+    try {
+      const res = await fetch("/api/tickets", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Destek talebi gönderilirken bir hata oluştu.");
+      }
+
+      setSent(true);
+    } catch (err: any) {
+      console.error("[handleSubmit]", err);
+      setApiError(err.message || "Bağlantı hatası oluştu. Lütfen tekrar deneyin.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleReset() {
-    setForm({ name: "", email: "", phone: "", subject: subjects[0], message: "" });
+    setForm({
+      name: user && !user.is_anonymous ? user.name || "" : "",
+      email: user && !user.is_anonymous ? user.email || "" : "",
+      phone: user && !user.is_anonymous ? user.phone || "" : "",
+      subject: subjects[0],
+      message: ""
+    });
     setErrors({});
+    setApiError(null);
+    setLoading(false);
     setSent(false);
     setOpen(false);
   }
@@ -207,17 +256,36 @@ export default function FloatingContact() {
                   {errors.message && <p className="text-red-500" style={{ fontSize: "11px" }}>{errors.message}</p>}
                 </div>
 
+                {apiError && (
+                  <p className="text-red-500 text-center font-medium" style={{ fontSize: "11px" }}>
+                    {apiError}
+                  </p>
+                )}
+
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-95 mt-1"
+                  disabled={loading}
+                  className="w-full py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-95 mt-1 disabled:opacity-50 disabled:pointer-events-none"
                   style={{ background: "#003d9b", fontSize: "13px", fontFamily: "'Inter'" }}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>send</span>
-                  Gönder
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Gönderiliyor...
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>send</span>
+                      Gönder
+                    </>
+                  )}
                 </button>
 
                 <p className="text-center text-[#737685]" style={{ fontSize: "10px" }}>
-                  Mesajınız <strong>destek@hepsilens.com</strong>'a iletilir
+                  Mesajınız <strong>destek@hepsilens.com</strong>&apos;a iletilir
                 </p>
               </form>
             )}

@@ -456,22 +456,24 @@ export default function ProductDetail() {
                   </>
                 )}
 
-                {/* BC + DIA */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-2">
-                    <label style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600, color: "var(--ds-text-2)" }}>Taban Eğrilik (BC)</label>
-                    <select defaultValue={selectedBc} className="w-full rounded-[0.25rem] p-2" style={{ fontSize: "14px", background: "var(--ds-surface)", border: "1px solid var(--ds-border)", color: "var(--ds-text-1)" }}>
-                      <option>{lens.bc} mm</option>
-                      <option>{(lens.bc + 0.2).toFixed(1)} mm</option>
-                    </select>
+                {/* BC + DIA — sadece numaralı lenslerde */}
+                {lens.color !== "colored" && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-2">
+                      <label style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600, color: "var(--ds-text-2)" }}>Taban Eğrilik (BC)</label>
+                      <select defaultValue={selectedBc} className="w-full rounded-[0.25rem] p-2" style={{ fontSize: "14px", background: "var(--ds-surface)", border: "1px solid var(--ds-border)", color: "var(--ds-text-1)" }}>
+                        <option>{lens.bc} mm</option>
+                        <option>{(lens.bc + 0.2).toFixed(1)} mm</option>
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600, color: "var(--ds-text-2)" }}>Çap (DIA)</label>
+                      <select defaultValue={selectedDia} className="w-full rounded-[0.25rem] p-2" style={{ fontSize: "14px", background: "var(--ds-surface)", border: "1px solid var(--ds-border)", color: "var(--ds-text-1)" }}>
+                        <option>{lens.dia} mm</option>
+                      </select>
+                    </div>
                   </div>
-                  <div className="flex flex-col gap-2">
-                    <label style={{ fontSize: "12px", letterSpacing: "0.05em", fontWeight: 600, color: "var(--ds-text-2)" }}>Çap (DIA)</label>
-                    <select defaultValue={selectedDia} className="w-full rounded-[0.25rem] p-2" style={{ fontSize: "14px", background: "var(--ds-surface)", border: "1px solid var(--ds-border)", color: "var(--ds-text-1)" }}>
-                      <option>{lens.dia} mm</option>
-                    </select>
-                  </div>
-                </div>
+                )}
               </>
             )}
 
@@ -533,12 +535,12 @@ export default function ProductDetail() {
       <div ref={tabsSectionRef} className="mt-12 pt-8" style={{ borderTop: "1px solid var(--ds-border-subtle)" }}>
 
         {/* Tab nav */}
-        <div className="flex w-full justify-between mb-8" style={{ borderBottom: "1px solid var(--ds-border-subtle)" }}>
+        <div className="flex mb-8 overflow-x-auto" style={{ borderBottom: "1px solid var(--ds-border-subtle)", scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}>
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className="flex-1 text-center px-2 py-4 transition-colors relative whitespace-nowrap"
+              className="shrink-0 text-center px-4 py-4 transition-colors relative whitespace-nowrap"
               style={{
                 fontFamily: "'Inter'",
                 fontSize: "13px",
